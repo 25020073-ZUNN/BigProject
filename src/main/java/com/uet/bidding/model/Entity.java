@@ -1,38 +1,56 @@
 package com.uet.bidding.model;
+import java.time.LocalDateTime;
 import java.util.UUID;
-public  abstract class Entity{
 
+/**
+ * Lớp cha (base class) cho tất cả các entity trong hệ thống
+ * Ví dụ: User, Item, Auction, BidTransaction,...
+ *
+ * Mục đích:
+ * - Tránh lặp code (id, createdAt,...)
+ * - Chuẩn hóa dữ liệu chung
+ */
+public abstract class Entity {
 
+    protected String id;                  // ID duy nhất của object
+    protected LocalDateTime createdAt;    // Thời điểm tạo
+    protected LocalDateTime updatedAt;    // Thời điểm cập nhật gần nhất
 
-    //THuoc tinh
-    private final String id;
-    private final long createAt;
-
-
-
-
-    //CONSTRUCTOR
-    protected Entity(){
-        this.id=UUID.randomUUID().toString(); //ID NGAU NHIEN O DANG STRING
-        this.createAt=System.currentTimeMillis();  //THOI GIAN THUC;
+    /**
+     * Constructor mặc định
+     * - Tự sinh id bằng UUID
+     * - Gán thời gian tạo và cập nhật
+     */
+    public Entity() {
+        this.id = UUID.randomUUID().toString(); // sinh id random
+        this.createdAt = LocalDateTime.now();   // thời điểm tạo
+        this.updatedAt = LocalDateTime.now();   // ban đầu = createdAt
     }
-
-
-
-    //GETTER
+    /**
+     * Getter lấy id
+     */
     public String getId() {
         return id;
     }
-    public long getCreateAt() {
-        return createAt;
+
+    /**
+     * Getter lấy thời gian tạo
+     */
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    /**
+     * Getter lấy thời gian cập nhật
+     */
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
-
-
-    //METHOD
-    public abstract void printInfo();
-    @Override
-    public String toString(){
-        return this.getId();
+    /**
+     * Hàm cập nhật lại thời gian modified
+     * Gọi khi object bị thay đổi
+     */
+    public void touch() {
+        this.updatedAt = LocalDateTime.now();
     }
 }
