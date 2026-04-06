@@ -42,59 +42,59 @@
    ┃
    ┗━ 🗄️ DAO / Repository (Data Access Object)
       ┗━ Tầng tương tác trực tiếp với Database để lưu trữ dữ liệu bền vững
-_________________________________________________________________________________________________________________________
-src
-└── main
-    └── java
-        └── com
-            └── uet
-                └── bidding
-                    ├── Main.java
+______________________________________________________________________________________________________________________
+src/
+└── main/
+    └── java/
+        └── com/
+            └── uet/
+                └── bidding/
+                    ├── Main.java                     // Điểm khởi chạy chương trình
                     │
-                    ├── controller
+                    ├── controller/                  // Xử lý điều hướng / nhận yêu cầu từ giao diện
                     │   ├── AuctionController.java
                     │   ├── BidController.java
                     │   └── UserController.java
                     │
-                    ├── model
-                    │   ├── Entity.java
-                    │   ├── Auction.java
-                    │   ├── BidTransaction.java
+                    ├── model/                       // Chứa các lớp dữ liệu, đối tượng nghiệp vụ chính
+                    │   ├── Entity.java              // Lớp cha chung, quản lý id hoặc thông tin cơ bản
+                    │   ├── Auction.java             // Thông tin một phiên đấu giá
+                    │   ├── BidTransaction.java      // Lưu thông tin một lần ra giá
                     │   │
-                    │   ├── item
-                    │   │   ├── Item.java
-                    │   │   ├── ItemStatus.java
-                    │   │   ├── Art.java
-                    │   │   ├── Electronics.java
-                    │   │   └── Vehicle.java
+                    │   ├── item/                    // Nhóm các loại sản phẩm được đấu giá
+                    │   │   ├── Item.java            // Lớp cha của các sản phẩm
+                    │   │   ├── ItemStatus.java      // Enum trạng thái sản phẩm
+                    │   │   ├── Art.java             // Mặt hàng nghệ thuật
+                    │   │   ├── Electronics.java     // Mặt hàng điện tử
+                    │   │   └── Vehicle.java         // Mặt hàng xe cộ
                     │   │
-                    │   └── user
-                    │       ├── User.java
-                    │       ├── Admin.java
-                    │       ├── Bidder.java
-                    │       ├── Seller.java
-                    │       └── InsufficientFundsException.java
+                    │   └── user/                    // Nhóm các loại người dùng trong hệ thống
+                    │       ├── User.java            // Lớp cha người dùng
+                    │       ├── Admin.java           // Quản trị viên
+                    │       ├── Bidder.java          // Người tham gia đấu giá
+                    │       ├── Seller.java          // Người bán
+                    │       └── InsufficientFundsException.java // Ngoại lệ không đủ tiền
                     │
-                    ├── service
+                    ├── service/                     // Xử lý logic nghiệp vụ chính
                     │   ├── AuctionService.java
                     │   ├── BidService.java
                     │   └── UserService.java
                     │
-                    ├── factory
+                    ├── factory/                     // Tạo object theo mẫu, giảm lặp code
                     │   ├── ItemFactory.java
                     │   └── UserFactory.java
                     │
-                    ├── observer
+                    ├── observer/                    // Theo dõi thay đổi và gửi thông báo
                     │   ├── AuctionObserver.java
                     │   └── NotificationObserver.java
                     │
-                    ├── network
+                    ├── network/                     // Xử lý giao tiếp client-server nếu có
                     │   ├── Client.java
                     │   ├── Server.java
                     │   ├── Request.java
                     │   └── Response.java
                     │
-                    └── util
+                    └── util/                        // Các hàm tiện ích dùng chung
                         ├── Validator.java
                         ├── PasswordUtils.java
                         └── IdGenerator.java
