@@ -42,3 +42,59 @@
    ┃
    ┗━ 🗄️ DAO / Repository (Data Access Object)
       ┗━ Tầng tương tác trực tiếp với Database để lưu trữ dữ liệu bền vững
+_________________________________________________________________________________________________________________________
+src
+└── main
+    └── java
+        └── com
+            └── uet
+                └── bidding
+                    ├── Main.java
+                    │
+                    ├── controller
+                    │   ├── AuctionController.java
+                    │   ├── BidController.java
+                    │   └── UserController.java
+                    │
+                    ├── model
+                    │   ├── Entity.java
+                    │   ├── Auction.java
+                    │   ├── BidTransaction.java
+                    │   │
+                    │   ├── item
+                    │   │   ├── Item.java
+                    │   │   ├── ItemStatus.java
+                    │   │   ├── Art.java
+                    │   │   ├── Electronics.java
+                    │   │   └── Vehicle.java
+                    │   │
+                    │   └── user
+                    │       ├── User.java
+                    │       ├── Admin.java
+                    │       ├── Bidder.java
+                    │       ├── Seller.java
+                    │       └── InsufficientFundsException.java
+                    │
+                    ├── service
+                    │   ├── AuctionService.java
+                    │   ├── BidService.java
+                    │   └── UserService.java
+                    │
+                    ├── factory
+                    │   ├── ItemFactory.java
+                    │   └── UserFactory.java
+                    │
+                    ├── observer
+                    │   ├── AuctionObserver.java
+                    │   └── NotificationObserver.java
+                    │
+                    ├── network
+                    │   ├── Client.java
+                    │   ├── Server.java
+                    │   ├── Request.java
+                    │   └── Response.java
+                    │
+                    └── util
+                        ├── Validator.java
+                        ├── PasswordUtils.java
+                        └── IdGenerator.java
