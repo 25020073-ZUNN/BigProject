@@ -53,4 +53,5 @@ public abstract class Entity {
     public void touch() {
         this.updatedAt = LocalDateTime.now();
     }
+    public abstract void printInfo();
 }
