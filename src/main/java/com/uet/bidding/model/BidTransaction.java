@@ -2,6 +2,7 @@ package com.uet.bidding.model;
 
 import com.uet.bidding.model.user.Bidder;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class BidTransaction extends Entity {
@@ -13,23 +14,22 @@ public class BidTransaction extends Entity {
     private Bidder bidder;
 
     // Số tiền được bid
-    private long bidAmount;
+    private BigDecimal bidAmount;
 
     // Thời điểm thực hiện bid
     private LocalDateTime bidTime;
 
     // Constructor
-    public BidTransaction(Auction auction, Bidder bidder, long bidAmount) {
+    public BidTransaction(Auction auction, Bidder bidder, BigDecimal bidAmount) {
         super();
 
-        // Kiểm tra dữ liệu đầu vào để tránh tạo object lỗi
         if (auction == null) {
             throw new IllegalArgumentException("AUCTION MUST NOT BE NULL");
         }
         if (bidder == null) {
             throw new IllegalArgumentException("BIDDER MUST NOT BE NULL");
         }
-        if (bidAmount <= 0) {
+        if (bidAmount == null || bidAmount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("BID AMOUNT MUST BE POSITIVE");
         }
 
@@ -48,7 +48,7 @@ public class BidTransaction extends Entity {
         return bidder;
     }
 
-    public long getBidAmount() {
+    public BigDecimal getBidAmount() {
         return bidAmount;
     }
 
@@ -57,16 +57,15 @@ public class BidTransaction extends Entity {
     }
 
     // Setter
-    // Thường BidTransaction là dữ liệu lịch sử nên ít khi cho sửa.
-    // Nếu muốn "read-only" hoàn toàn thì có thể xóa hết setter.
-    public void setBidAmount(long bidAmount) {
-        if (bidAmount <= 0) {
+    public void setBidAmount(BigDecimal bidAmount) {
+        if (bidAmount == null || bidAmount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("BID AMOUNT MUST BE POSITIVE");
         }
         this.bidAmount = bidAmount;
     }
 
     // In thông tin giao dịch bid
+    @Override
     public void printInfo() {
         System.out.println("=== BID TRANSACTION INFO ===");
         System.out.println("Transaction ID : " + getId());

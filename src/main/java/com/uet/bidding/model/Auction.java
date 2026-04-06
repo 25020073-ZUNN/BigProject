@@ -4,6 +4,7 @@ import com.uet.bidding.model.item.Item;
 import com.uet.bidding.model.user.Bidder;
 import com.uet.bidding.model.user.Seller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,8 +16,8 @@ public class Auction extends Entity {
     private Seller seller;
 
     // Giá khởi điểm và giá hiện tại
-    private long startingPrice;
-    private long currentPrice;
+    private BigDecimal startingPrice;
+    private BigDecimal currentPrice;
 
     // Người đang trả giá cao nhất
     private Bidder highestBidder;
@@ -29,7 +30,7 @@ public class Auction extends Entity {
     private final List<BidTransaction> bidHistory;
 
     // Constructor
-    public Auction(Item item, Seller seller, long startingPrice) {
+    public Auction(Item item, Seller seller, BigDecimal startingPrice) {
         super();
 
         if (item == null) {
@@ -38,7 +39,7 @@ public class Auction extends Entity {
         if (seller == null) {
             throw new IllegalArgumentException("SELLER MUST NOT BE NULL");
         }
-        if (startingPrice <= 0) {
+        if (startingPrice == null || startingPrice.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("STARTING PRICE MUST BE POSITIVE");
         }
 
@@ -61,11 +62,11 @@ public class Auction extends Entity {
         return seller;
     }
 
-    public long getStartingPrice() {
+    public BigDecimal getStartingPrice() {
         return startingPrice;
     }
 
-    public long getCurrentPrice() {
+    public BigDecimal getCurrentPrice() {
         return currentPrice;
     }
 
@@ -91,7 +92,7 @@ public class Auction extends Entity {
     }
 
     // Phương thức đặt giá
-    public void placeBid(Bidder bidder, long bidAmount) {
+    public void placeBid(Bidder bidder, BigDecimal bidAmount) {
         // Không cho bid nếu phiên đã đóng
         if (!active || finished) {
             throw new IllegalStateException("AUCTION IS NOT AVAILABLE");
@@ -101,13 +102,13 @@ public class Auction extends Entity {
             throw new IllegalArgumentException("BIDDER MUST NOT BE NULL");
         }
 
-        if (bidAmount <= currentPrice) {
+        if (bidAmount == null || bidAmount.compareTo(currentPrice) <= 0) {
             throw new IllegalArgumentException(
                     "BID AMOUNT MUST BE GREATER THAN CURRENT PRICE"
             );
         }
 
-        // Có thể thêm kiểm tra bidder có phải seller không
+        // Không cho seller tự bid phiên của mình
         if (bidder.getId().equals(seller.getId())) {
             throw new IllegalArgumentException("SELLER CANNOT BID ON OWN AUCTION");
         }
@@ -130,6 +131,7 @@ public class Auction extends Entity {
         this.active = false;
         this.finished = true;
     }
+
     // Kiểm tra có người thắng chưa
     public boolean hasWinner() {
         return highestBidder != null;
@@ -144,6 +146,7 @@ public class Auction extends Entity {
     }
 
     // In thông tin phiên đấu giá
+    @Override
     public void printInfo() {
         System.out.println("=== AUCTION INFO ===");
         System.out.println("Auction ID     : " + getId());
