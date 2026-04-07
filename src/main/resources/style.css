@@ -1,0 +1,36 @@
+/* Hiệu ứng cái hộp sản phẩm */
+.product-card {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 0; /* Để ảnh sát mép trên */
+    -fx-pref-width: 250;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);
+}
+
+.product-card:hover {
+    -fx-border-color: #ed1c24; /* Màu đỏ đặc trưng của daugiavietnam */
+    -fx-cursor: hand;
+}
+
+.card-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+    -fx-padding: 10 10 5 10;
+}
+
+.card-price-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #666;
+    -fx-padding: 0 10 0 10;
+}
+
+.card-price-value {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ed1c24;
+    -fx-padding: 0 10 10 10;
+}

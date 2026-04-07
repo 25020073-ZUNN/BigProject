@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox stylesheets="@style.css" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.uet.bidding.AuctionListController" style="-fx-padding: 25; -fx-background-color: #f0f2f5;">
+
+    <HBox alignment="CENTER_LEFT" spacing="20.0">
+        <Label text="SÀN ĐẤU GIÁ TRỰC TUYẾN" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+        <Region HBox.hgrow="ALWAYS" /> <HBox spacing="10.0" alignment="CENTER">
+        <TextField fx:id="txtSearch" promptText="Nhập tên sản phẩm..." prefWidth="300" id="txtSearch"/>
+        <Button text="Tìm kiếm" onAction="#handleSearch" id="btnSearch"/>
+    </HBox>
+    </HBox>
+
+    <TableView fx:id="tableProducts" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colId" text="Mã SP" prefWidth="80" />
+            <TableColumn fx:id="colName" text="Tên sản phẩm" prefWidth="300" />
+            <TableColumn fx:id="colPrice" text="Giá hiện tại" prefWidth="150" />
+            <TableColumn fx:id="colSeller" text="Người bán" prefWidth="150" />
+            <TableColumn fx:id="colTime" text="Thời gian còn lại" prefWidth="180" />
+        </columns>
+    </TableView>
+</VBox>

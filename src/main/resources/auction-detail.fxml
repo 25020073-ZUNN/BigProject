@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox stylesheets="@style.css" alignment="CENTER" style="-fx-background-color: transparent; -fx-padding: 20;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.uet.bidding.AuctionDetailController">
+
+    <VBox alignment="TOP_CENTER" spacing="20.0" styleClass="detail-container">
+        <Label text="THÔNG TIN CHI TIẾT" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+
+        <HBox spacing="30.0" alignment="TOP_LEFT">
+            <ImageView fx:id="imgProduct" fitHeight="180.0" fitWidth="180.0" pickOnBounds="true" preserveRatio="true">
+                <image>
+                    <Image url="https://via.placeholder.com/180x180.png?text=No+Image"/>
+                </image>
+            </ImageView>
+
+            <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                <Label fx:id="lblName" text="Tên sản phẩm" styleClass="product-name" wrapText="true"/>
+                <Label fx:id="lblPrice" text="Giá: " styleClass="product-price"/>
+                <Label fx:id="lblSeller" text="Đăng bởi: " styleClass="product-info"/>
+                <Label fx:id="lblTime" text="Thời gian còn lại: " styleClass="product-info" style="-fx-font-weight: bold;"/>
+            </VBox>
+        </HBox>
+
+        <Separator /> <VBox spacing="15.0" alignment="CENTER" style="-fx-padding: 20 0 0 0;">
+        <Label text="💰 RA GIÁ CỦA BẠN" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        <HBox spacing="15.0" alignment="CENTER">
+            <TextField fx:id="txtBidAmount" promptText="Nhập số tiền VNĐ..." prefWidth="250" id="txtBidAmount"/>
+            <Button text="🔥 RA GIÁ NGAY 🔥" onAction="#handleBid" id="btnBid"/>
+        </HBox>
+        <Label fx:id="lblMessage" text="" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+    </VBox>
+    </VBox>
+</VBox>
