@@ -11,7 +11,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         // Tìm và nạp file giao diện FXML
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApp.class.getResource("/auction-list.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApp.class.getResource("/auctions.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 800, 600);
 
         stage.setTitle("Hệ thống Đấu giá - Danh sách sản phẩm");
