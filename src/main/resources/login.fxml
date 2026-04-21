@@ -41,13 +41,7 @@
             <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
         </HBox>
     </top>
-    <TextField fx:id="txtUsername"
-               promptText="Nhập email hoặc username"
-               styleClass="mail-field"/>
 
-    <PasswordField fx:id="txtPassword"
-                   promptText="Nhập mật khẩu"
-                   styleClass="mail-field"/>
     <center>
         <HBox spacing="0" alignment="CENTER">
             <VBox prefWidth="700" spacing="20" styleClass="auth-left">
@@ -104,13 +98,13 @@
                 <Label text="Nhập thông tin để tiếp tục." styleClass="login-panel-text"/>
 
                 <VBox spacing="8">
-                    <Label text="Email hoặc tên đăng nhập" styleClass="field-label"/>
-                    <TextField promptText="Nhập email hoặc username" styleClass="mail-field"/>
+                    <Label text="Tên đăng nhập/Email" styleClass="field-label"/>
+                    <TextField fx:id="usernameField" promptText="Nhập tên đăng nhập hoặc email" styleClass="mail-field"/>
                 </VBox>
 
                 <VBox spacing="8">
                     <Label text="Mật khẩu" styleClass="field-label"/>
-                    <PasswordField promptText="Nhập mật khẩu" styleClass="mail-field"/>
+                    <PasswordField fx:id="passwordField" promptText="Nhập mật khẩu" styleClass="mail-field"/>
                 </VBox>
 
                 <HBox alignment="CENTER_LEFT">

@@ -35,7 +35,7 @@
             <Button text="Phiên đấu giá" onAction="#goToSessions" styleClass="nav-btn"/>
             <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn"/>
             <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
-            <Button text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
+            <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
         </HBox>
     </top>
 

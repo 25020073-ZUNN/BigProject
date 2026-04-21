@@ -29,15 +29,15 @@ public class UserService {
      * Khởi tạo dữ liệu mẫu (dùng raw password, User sẽ tự hash)
      */
     private void initializeMockData() {
-        String commonPassword = "password";
+        String commonPasswordHash = String.valueOf("password".hashCode());
 
-        users.add(new Bidder("bidder1", "bidder1@example.com", commonPassword));
-        users.add(new Bidder("bidder2", "bidder2@example.com", commonPassword));
+        users.add(new Bidder("bidder1", "bidder1@example.com", commonPasswordHash));
+        users.add(new Bidder("bidder2", "bidder2@example.com", commonPasswordHash));
 
-        users.add(new Seller("seller1", "seller1@example.com", commonPassword));
-        users.add(new Seller("seller2", "seller2@example.com", commonPassword));
+        users.add(new Seller("seller1", "seller1@example.com", commonPasswordHash));
+        users.add(new Seller("seller2", "seller2@example.com", commonPasswordHash));
 
-        users.add(new Admin("admin", "admin@auction.com", commonPassword, "SUPER_ADMIN"));
+        users.add(new Admin("admin", "admin@auction.com", commonPasswordHash, "SUPER_ADMIN"));
     }
 
     /**

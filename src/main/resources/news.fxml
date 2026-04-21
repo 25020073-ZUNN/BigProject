@@ -42,7 +42,7 @@
 
                 <Label fx:id="clockLabel" text="08:30:12&#10;07/04/2026" styleClass="clock-label"/>
 
-                <Button text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
+                <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
             </HBox>
         </VBox>
     </top>

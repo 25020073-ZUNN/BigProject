@@ -42,7 +42,7 @@
 
                 <Label fx:id="clockLabel" text="08:30:12&#10;07/04/2026" styleClass="clock-label"/>
 
-                <Button text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
+                <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
             </HBox>
         </VBox>
     </top>
@@ -126,7 +126,7 @@
                             </children>
                         </AnchorPane>
 
-                        <VBox prefWidth="250" spacing="14" styleClass="login-panel">
+                        <VBox fx:id="loginPanel" prefWidth="250" spacing="14" styleClass="login-panel">
                             <padding>
                                 <Insets top="18" right="18" bottom="18" left="18"/>
                             </padding>
@@ -138,13 +138,41 @@
                             <TextField promptText="Email hoặc tên đăng nhập" styleClass="mail-field"/>
                             <TextField promptText="Mật khẩu" styleClass="mail-field"/>
 
-                            <Button text="Đăng nhập hệ thống" maxWidth="1.7976931348623157E308" onAction="#goToLogin" styleClass="primary-btn"/>
-                            <Button text="Tạo tài khoản mới" maxWidth="1.7976931348623157E308" onAction="#goToRegister" styleClass="secondary-btn"/>
+                            <Button fx:id="mainLoginButton" text="Đăng nhập hệ thống" maxWidth="1.7976931348623157E308" onAction="#goToLogin" styleClass="primary-btn"/>                            <Button text="Tạo tài khoản mới" maxWidth="1.7976931348623157E308" onAction="#goToRegister" styleClass="secondary-btn"/>
 
                             <Separator/>
 
                             <Label text="• Theo dõi tài sản yêu thích&#10;• Nhận thông báo phiên mới&#10;• Quản lý hồ sơ tham gia"
                                    wrapText="true" styleClass="login-panel-note"/>
+                        </VBox>
+
+                        <VBox fx:id="userPanel" managed="false" visible="false" prefWidth="250" spacing="14" styleClass="login-panel">
+                            <padding>
+                                <Insets top="18" right="18" bottom="18" left="18"/>
+                            </padding>
+
+                            <Label text="Thông tin tài khoản" styleClass="login-panel-title"/>
+                            
+                            <VBox spacing="8" styleClass="user-info-box">
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="Người dùng:" styleClass="login-panel-note" minWidth="80"/>
+                                    <Label fx:id="userNameLabel" text="---" styleClass="login-panel-text" style="-fx-font-weight: bold;"/>
+                                </HBox>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="Vai trò:" styleClass="login-panel-note" minWidth="80"/>
+                                    <Label fx:id="userRoleLabel" text="---" styleClass="login-panel-text"/>
+                                </HBox>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="Số dư:" styleClass="login-panel-note" minWidth="80"/>
+                                    <Label fx:id="userBalanceLabel" text="0 VND" styleClass="login-panel-text" style="-fx-text-fill: #2ecc71; -fx-font-weight: bold;"/>
+                                </HBox>
+                            </VBox>
+
+                            <Separator/>
+
+                            <Button text="Quản lý hồ sơ" maxWidth="1.7976931348623157E308" onAction="#handleComingSoon" styleClass="primary-btn"/>
+                            <Button text="Lịch sử đấu giá" maxWidth="1.7976931348623157E308" onAction="#handleComingSoon" styleClass="secondary-btn"/>
+                            <Button text="Đăng xuất" maxWidth="1.7976931348623157E308" onAction="#handleLogout" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" styleClass="secondary-btn"/>
                         </VBox>
                     </HBox>
 
