@@ -1,6 +1,9 @@
 package com.uet.bidding;
 
+import com.uet.bidding.model.Auction;
+import com.uet.bidding.model.item.Art;
 import com.uet.bidding.model.user.Bidder;
+import com.uet.bidding.model.user.Seller;
 import com.uet.service.AuctionService;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -15,6 +18,7 @@ import javafx.util.Duration;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,8 +27,9 @@ public class AuctionDetailController {
     private static final DecimalFormat PRICE_FORMAT = createPriceFormat();
     private static final Pattern TIME_PATTERN = Pattern.compile("(\\d+).*?(\\d{1,2}):(\\d{2}):(\\d{2})");
 
-    private AuctionService auctionService = new AuctionService();
+    private final AuctionService auctionService = new AuctionService();
     private final Bidder currentUser = new Bidder("guest_bidder", "guest@example.com", "guest");
+    private Auction currentAuction;
     private Timeline countdownTimeline;
     private long remainingSeconds;
 
@@ -53,8 +58,22 @@ public class AuctionDetailController {
         lblName.setText(product.getName());
         lblPrice.setText(product.getPrice());
         lblSeller.setText(product.getSeller());
-        initializeCurrentPrice(product.getPrice());
+
+        // Tìm hoặc tạo Auction cho sản phẩm này
+        currentAuction = auctionService.getAllAuctions().stream()
+                .filter(a -> a.getItem().getName().equals(product.getName()))
+                .findFirst()
+                .orElseGet(() -> createMockAuction(product));
+
         startCountdown(product.getTime());
+    }
+
+    private Auction createMockAuction(AuctionListController.Product product) {
+        BigDecimal initialPrice = parseAmount(product.getPrice());
+        Seller seller = new Seller(product.getSeller(), "seller@example.com", "pass");
+        Art item = new Art(product.getName(), "Mô tả sản phẩm", initialPrice,
+                LocalDateTime.now(), LocalDateTime.now().plusDays(1), seller.getId(), "Unknown Artist", 2024);
+        return new Auction(item, seller, initialPrice);
     }
 
     @FXML
@@ -75,23 +94,18 @@ public class AuctionDetailController {
                 return;
             }
 
-            boolean success = auctionService.placeBid(currentUser, bidAmount);
+            boolean success = auctionService.placeBid(currentAuction, currentUser, bidAmount);
             if (!success) {
                 showError("Bid amount must be greater than the current price.");
                 return;
             }
 
-            lblPrice.setText(formatPrice(auctionService.getCurrentPrice()));
+            lblPrice.setText(formatPrice(currentAuction.getCurrentPrice()));
             txtBidAmount.clear();
             showSuccess("Bid placed successfully.");
         } catch (Exception exception) {
-            showError("Unable to place bid. Please try again.");
+            showError("Unable to place bid. Please try again: " + exception.getMessage());
         }
-    }
-
-    private void initializeCurrentPrice(String priceText) {
-        BigDecimal currentPrice = parseAmount(priceText);
-        auctionService = new AuctionService(currentPrice);
     }
 
     private void startCountdown(String timeText) {
@@ -152,9 +166,14 @@ public class AuctionDetailController {
     }
 
     private BigDecimal parseAmount(String amountText) {
-        String normalizedAmount = amountText.trim().replace(".", "").replace(",", "");
+        String normalizedAmount = amountText.trim()
+                .replace(".", "")
+                .replace(",", "")
+                .replace(" đ", "")
+                .replace(" VND", "");
+
         if (normalizedAmount.isBlank() || !normalizedAmount.matches("\\d+")) {
-            throw new NumberFormatException("Amount is empty");
+            throw new NumberFormatException("Invalid amount format: " + amountText);
         }
         return new BigDecimal(normalizedAmount);
     }

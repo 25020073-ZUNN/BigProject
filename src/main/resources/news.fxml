@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.auction.HomeController"
+            prefWidth="1380"
+            prefHeight="920"
+            stylesheets="@style.css"
+            styleClass="root">
+
+    <top>
+        <VBox>
+            <HBox alignment="CENTER_LEFT" spacing="18" styleClass="topbar">
+                <padding>
+                    <Insets top="14" right="28" bottom="14" left="28"/>
+                </padding>
+
+                <VBox spacing="0">
+                    <Label text="AUREX" styleClass="logo-main"/>
+                    <Label text="AUCTION PLATFORM" styleClass="logo-sub"/>
+                </VBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="Trang chủ" onAction="#goToHome" styleClass="nav-btn"/>
+                <Button text="Tài sản đấu giá" onAction="#goToAuctionList" styleClass="nav-btn"/>
+                <Button text="Phiên đấu giá" onAction="#goToSessions" styleClass="nav-btn"/>
+                <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn-active"/>
+                <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
+
+                <Label fx:id="clockLabel" text="08:30:12&#10;07/04/2026" styleClass="clock-label"/>
+
+                <Button text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
+            <content>
+                <VBox spacing="30">
+                    <!-- HERO SECTION FOR NEWS -->
+                    <VBox spacing="10" styleClass="page-hero-small">
+                        <padding>
+                            <Insets top="40" right="42" bottom="40" left="42"/>
+                        </padding>
+                        <Label text="TIN TỨC &amp; THÔNG BÁO" styleClass="hero-small"/>
+                        <Label text="Cập nhật những thông tin mới nhất từ Aurex" styleClass="hero-title"/>
+                        <Label text="Thông tin về thị trường đấu giá, quy định mới và các tin tức nội bộ." styleClass="hero-desc"/>
+                    </VBox>
+
+                    <!-- MAIN NEWS CONTENT -->
+                    <HBox spacing="30">
+                        <padding>
+                            <Insets top="0" right="42" bottom="30" left="42"/>
+                        </padding>
+
+                        <!-- NEWS LIST -->
+                        <VBox spacing="25" HBox.hgrow="ALWAYS">
+                            <!-- Featured News -->
+                            <VBox spacing="15" styleClass="content-card">
+                                <padding>
+                                    <Insets top="20" right="20" bottom="20" left="20"/>
+                                </padding>
+                                <AnchorPane prefHeight="350" styleClass="news-thumb news-thumb-1"/>
+                                <VBox spacing="10">
+                                    <Label text="Nổi bật • 07/04/2026" styleClass="hero-small"/>
+                                    <Label text="Cập nhật quy trình tham gia đấu giá trực tuyến năm 2026: Nâng cao bảo mật và trải nghiệm"
+                                           wrapText="true" styleClass="hero-title-small"/>
+                                    <Label text="Nhằm mang lại trải nghiệm tốt nhất và đảm bảo tính minh bạch tối đa, Aurex chính thức cập nhật quy trình đấu giá mới. Người dùng cần lưu ý về các bước xác thực sinh trắc học và hệ thống ký quỹ tự động qua ngân hàng đối tác..."
+                                           wrapText="true" styleClass="news-text"/>
+                                    <Button text="Đọc tiếp" styleClass="secondary-btn-small"/>
+                                </VBox>
+                            </VBox>
+
+                            <!-- Regular News List -->
+                            <HBox spacing="20">
+                                <VBox prefWidth="400" spacing="12" styleClass="news-card" HBox.hgrow="ALWAYS">
+                                    <AnchorPane prefHeight="180" styleClass="news-thumb news-thumb-2"/>
+                                    <VBox spacing="8" styleClass="news-info">
+                                        <padding>
+                                            <Insets top="15" right="15" bottom="15" left="15"/>
+                                        </padding>
+                                        <Label text="Thông báo • 06/04/2026" styleClass="muted-text"/>
+                                        <Label text="Mở thêm danh mục tài sản thanh lý cho doanh nghiệp"
+                                               wrapText="true" styleClass="news-title"/>
+                                        <Label text="Hệ thống bổ sung nhóm tài sản mới, tăng số lượng phiên đấu giá trong quý II, mở ra nhiều cơ hội đầu tư cho khách hàng doanh nghiệp."
+                                               wrapText="true" styleClass="news-text"/>
+                                        <Button text="Xem thêm" styleClass="auth-link"/>
+                                    </VBox>
+                                </VBox>
+
+                                <VBox prefWidth="400" spacing="12" styleClass="news-card" HBox.hgrow="ALWAYS">
+                                    <AnchorPane prefHeight="180" styleClass="news-thumb news-thumb-3"/>
+                                    <VBox spacing="8" styleClass="news-info">
+                                        <padding>
+                                            <Insets top="15" right="15" bottom="15" left="15"/>
+                                        </padding>
+                                        <Label text="Công nghệ • 05/04/2026" styleClass="muted-text"/>
+                                        <Label text="Ra mắt giao diện theo dõi phiên đấu giá trên thiết bị di động"
+                                               wrapText="true" styleClass="news-title"/>
+                                        <Label text="Bản demo tập trung trải nghiệm theo dõi trạng thái, mức giá và thời gian còn lại một cách trực quan và nhanh chóng hơn bao giờ hết."
+                                               wrapText="true" styleClass="news-text"/>
+                                        <Button text="Xem thêm" styleClass="auth-link"/>
+                                    </VBox>
+                                </VBox>
+                            </HBox>
+
+                            <HBox spacing="20">
+                                <VBox prefWidth="400" spacing="12" styleClass="news-card" HBox.hgrow="ALWAYS">
+                                    <AnchorPane prefHeight="180" styleClass="thumb-1"/>
+                                    <VBox spacing="8" styleClass="news-info">
+                                        <padding>
+                                            <Insets top="15" right="15" bottom="15" left="15"/>
+                                        </padding>
+                                        <Label text="Thị trường • 04/04/2026" styleClass="muted-text"/>
+                                        <Label text="Xu hướng đấu giá bất động sản trực tuyến cuối năm 2026"
+                                               wrapText="true" styleClass="news-title"/>
+                                        <Label text="Chuyên gia nhận định về sự dịch chuyển từ đấu giá truyền thống sang nền tảng số đối với các tài sản có giá trị lớn như quyền sử dụng đất."
+                                               wrapText="true" styleClass="news-text"/>
+                                        <Button text="Xem thêm" styleClass="auth-link"/>
+                                    </VBox>
+                                </VBox>
+
+                                <VBox prefWidth="400" spacing="12" styleClass="news-card" HBox.hgrow="ALWAYS">
+                                    <AnchorPane prefHeight="180" styleClass="thumb-3"/>
+                                    <VBox spacing="8" styleClass="news-info">
+                                        <padding>
+                                            <Insets top="15" right="15" bottom="15" left="15"/>
+                                        </padding>
+                                        <Label text="Hướng dẫn • 03/04/2026" styleClass="muted-text"/>
+                                        <Label text="Cách thức thẩm định giá tài sản xe ô tô trước khi đấu giá"
+                                               wrapText="true" styleClass="news-title"/>
+                                        <Label text="Hướng dẫn chi tiết giúp người tham gia hiểu rõ về quy trình kiểm tra chất lượng và định giá khởi điểm cho các dòng xe thanh lý."
+                                               wrapText="true" styleClass="news-text"/>
+                                        <Button text="Xem thêm" styleClass="auth-link"/>
+                                    </VBox>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <!-- SIDEBAR -->
+                        <VBox spacing="25" prefWidth="350">
+                            <!-- Categories -->
+                            <VBox spacing="15" styleClass="detail-side-card">
+                                <padding>
+                                    <Insets top="20" right="20" bottom="20" left="20"/>
+                                </padding>
+                                <Label text="DANH MỤC TIN TỨC" styleClass="section-title-dark"/>
+                                <Separator/>
+                                <VBox spacing="10">
+                                    <Button text="• Thông báo mới (12)" styleClass="auth-link"/>
+                                    <Button text="• Thị trường đấu giá (08)" styleClass="auth-link"/>
+                                    <Button text="• Hướng dẫn sử dụng (15)" styleClass="auth-link"/>
+                                    <Button text="• Sự kiện &amp; Tin tức (05)" styleClass="auth-link"/>
+                                    <Button text="• Quy định pháp luật (03)" styleClass="auth-link"/>
+                                </VBox>
+                            </VBox>
+
+                            <!-- Popular News -->
+                            <VBox spacing="15" styleClass="detail-side-card">
+                                <padding>
+                                    <Insets top="20" right="20" bottom="20" left="20"/>
+                                </padding>
+                                <Label text="TIN XEM NHIỀU NHẤT" styleClass="section-title-dark"/>
+                                <Separator/>
+                                <VBox spacing="15">
+                                    <VBox spacing="5">
+                                        <Label text="01/04/2026" styleClass="muted-text" style="-fx-font-size: 11px;"/>
+                                        <Label text="Top 10 tài sản có giá trị đấu giá cao nhất quý I" wrapText="true" styleClass="field-label"/>
+                                    </VBox>
+                                    <VBox spacing="5">
+                                        <Label text="28/03/2026" styleClass="muted-text" style="-fx-font-size: 11px;"/>
+                                        <Label text="Chính sách bảo mật thông tin người tham gia đấu giá" wrapText="true" styleClass="field-label"/>
+                                    </VBox>
+                                    <VBox spacing="5">
+                                        <Label text="25/03/2026" styleClass="muted-text" style="-fx-font-size: 11px;"/>
+                                        <Label text="Lịch nghỉ lễ và hoạt động của hệ thống Aurex" wrapText="true" styleClass="field-label"/>
+                                    </VBox>
+                                </VBox>
+                            </VBox>
+
+                            <!-- Subscription box -->
+                            <VBox spacing="15" styleClass="side-info-card-dark">
+                                <padding>
+                                    <Insets top="25" right="25" bottom="25" left="25"/>
+                                </padding>
+                                <Label text="ĐĂNG KÝ BẢN TIN" styleClass="banner-title"/>
+                                <Label text="Nhận những tin tức mới nhất trực tiếp vào hộp thư của bạn."
+                                       wrapText="true" styleClass="banner-desc"/>
+                                <TextField promptText="Email của bạn" styleClass="mail-field"/>
+                                <Button text="Gửi đăng ký" maxWidth="1.7976931348623157E308" onAction="#handleSubscribe" styleClass="primary-btn"/>
+                            </VBox>
+                        </VBox>
+                    </HBox>
+
+                    <!-- FOOTER REUSED -->
+                    <VBox spacing="18" styleClass="footer">
+                        <padding>
+                            <Insets top="32" right="42" bottom="26" left="42"/>
+                        </padding>
+                        <HBox spacing="60">
+                            <VBox spacing="10" prefWidth="280">
+                                <Label text="Công ty đấu giá hợp danh Aurex" styleClass="footer-title"/>
+                                <Label text="Mã số doanh nghiệp: 08058420&#10;Hotline: 1900 9999&#10;Email: info@aurexauction.vn"
+                                       wrapText="true" styleClass="footer-text"/>
+                            </VBox>
+                            <VBox spacing="10" prefWidth="220">
+                                <Label text="Về chúng tôi" styleClass="footer-title"/>
+                                <Label text="Giới thiệu&#10;Quy chế hoạt động&#10;Hướng dẫn sử dụng"
+                                       wrapText="true" styleClass="footer-text"/>
+                            </VBox>
+                            <VBox spacing="10" prefWidth="220">
+                                <Label text="Chính sách" styleClass="footer-title"/>
+                                <Label text="Bảo mật&#10;Điều khoản sử dụng&#10;Quy định đấu giá"
+                                       wrapText="true" styleClass="footer-text"/>
+                            </VBox>
+                            <VBox spacing="10" prefWidth="260">
+                                <Label text="Liên hệ nhanh" styleClass="footer-title"/>
+                                <Label text="Địa chỉ: Hà Nội&#10;Giờ làm việc: 08:00 - 17:30"
+                                       wrapText="true" styleClass="footer-text"/>
+                            </VBox>
+                        </HBox>
+                        <Separator styleClass="footer-separator"/>
+                        <Label text="Copyright 2026 © Aurex Auction" styleClass="copyright"/>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

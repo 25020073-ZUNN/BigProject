@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.auction.HomeController"
+            prefWidth="1380"
+            prefHeight="860"
+            stylesheets="@style.css"
+            styleClass="root">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="18" styleClass="topbar">
+            <padding>
+                <Insets top="14" right="28" bottom="14" left="28"/>
+            </padding>
+
+            <VBox spacing="0">
+                <Label text="AUREX" styleClass="logo-main"/>
+                <Label text="AUCTION PLATFORM" styleClass="logo-sub"/>
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Button text="Trang chủ" onAction="#goToHome" styleClass="nav-btn"/>
+            <Button text="Tài sản đấu giá" onAction="#goToAuctionList" styleClass="nav-btn"/>
+            <Button text="Phiên đấu giá" onAction="#goToSessions" styleClass="nav-btn"/>
+            <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn"/>
+            <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
+        </HBox>
+    </top>
+    <TextField fx:id="txtUsername"
+               promptText="Nhập email hoặc username"
+               styleClass="mail-field"/>
+
+    <PasswordField fx:id="txtPassword"
+                   promptText="Nhập mật khẩu"
+                   styleClass="mail-field"/>
+    <center>
+        <HBox spacing="0" alignment="CENTER">
+            <VBox prefWidth="700" spacing="20" styleClass="auth-left">
+                <padding>
+                    <Insets top="60" right="60" bottom="60" left="60"/>
+                </padding>
+
+                <Label text="Đăng nhập hệ thống đấu giá" styleClass="auth-title"/>
+                <Label text="Truy cập tài khoản để theo dõi phiên đấu giá, tài sản quan tâm, lịch sử tham gia và trạng thái hồ sơ."
+                       wrapText="true" styleClass="auth-desc"/>
+
+                <AnchorPane prefHeight="330" styleClass="auth-visual">
+                    <children>
+                        <Label layoutX="30" layoutY="32" text="AUREX SECURE ACCESS" styleClass="banner-chip"/>
+                        <Label layoutX="30" layoutY="78" text="XÁC THỰC NHANH&#10;BẢO MẬT HƠN&#10;THEO DÕI DỄ HƠN"
+                               styleClass="banner-title"/>
+                        <Label layoutX="30" layoutY="200" text="Fake UI đăng nhập phong cách hiện đại cho hệ thống đấu giá."
+                               styleClass="banner-desc"/>
+
+                        <AnchorPane layoutX="470" layoutY="42"
+                                    prefWidth="140" prefHeight="235"
+                                    styleClass="phone-mock"/>
+                        <AnchorPane layoutX="482" layoutY="58"
+                                    prefWidth="116" prefHeight="205"
+                                    styleClass="phone-screen"/>
+                    </children>
+                </AnchorPane>
+
+                <HBox spacing="18">
+                    <VBox prefWidth="180" styleClass="mini-info-card">
+                        <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+                        <Label text="24/7" styleClass="mini-info-number"/>
+                        <Label text="Truy cập mọi lúc" styleClass="mini-info-text"/>
+                    </VBox>
+                    <VBox prefWidth="180" styleClass="mini-info-card">
+                        <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+                        <Label text="2FA" styleClass="mini-info-number"/>
+                        <Label text="Tăng cường bảo mật" styleClass="mini-info-text"/>
+                    </VBox>
+                    <VBox prefWidth="180" styleClass="mini-info-card">
+                        <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+                        <Label text="1 chạm" styleClass="mini-info-number"/>
+                        <Label text="Theo dõi phiên nhanh" styleClass="mini-info-text"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <VBox prefWidth="520" spacing="16" styleClass="auth-panel">
+                <padding>
+                    <Insets top="42" right="38" bottom="42" left="38"/>
+                </padding>
+
+                <Label text="Đăng nhập" styleClass="login-panel-title"/>
+                <Label text="Nhập thông tin để tiếp tục." styleClass="login-panel-text"/>
+
+                <VBox spacing="8">
+                    <Label text="Email hoặc tên đăng nhập" styleClass="field-label"/>
+                    <TextField promptText="Nhập email hoặc username" styleClass="mail-field"/>
+                </VBox>
+
+                <VBox spacing="8">
+                    <Label text="Mật khẩu" styleClass="field-label"/>
+                    <PasswordField promptText="Nhập mật khẩu" styleClass="mail-field"/>
+                </VBox>
+
+                <HBox alignment="CENTER_LEFT">
+                    <CheckBox text="Ghi nhớ đăng nhập" styleClass="check-auth"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Hyperlink text="Quên mật khẩu?" styleClass="auth-link"/>
+                </HBox>
+
+                <Button text="Đăng nhập hệ thống"
+                        maxWidth="1.7976931348623157E308"
+                        onAction="#handleLogin"
+                        styleClass="primary-btn"/>
+                <Button text="Đăng nhập bằng CCCD/Định danh"
+                        maxWidth="1.7976931348623157E308"
+                        styleClass="secondary-btn"/>
+
+                <HBox alignment="CENTER">
+                    <Label text="Chưa có tài khoản? " styleClass="muted-text"/>
+                    <Hyperlink text="Đăng ký ngay" onAction="#goToRegister" styleClass="auth-link"/>
+                </HBox>
+
+                <VBox spacing="10" styleClass="auth-note-box">
+                    <padding>
+                        <Insets top="14" right="14" bottom="14" left="14"/>
+                    </padding>
+                    <Label text="Lưu ý" styleClass="note-title"/>
+                    <Label text="• Tài khoản đã xác thực có thể tham gia đấu giá ngay&#10;• Hồ sơ chưa hoàn tất sẽ bị giới hạn một số chức năng&#10;• Đây là giao diện mô phỏng, chưa kết nối backend"
+                           wrapText="true" styleClass="login-panel-note"/>
+                </VBox>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>
