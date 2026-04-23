@@ -9,11 +9,9 @@ public class AuthService {
     private static final AuthService instance = new AuthService();
 
     private final UserDao userDao;
-    private final UserService userService;
 
     private AuthService() {
         this.userDao = new UserDao();
-        this.userService = UserService.getInstance();
     }
 
     public static AuthService getInstance() {
@@ -25,14 +23,14 @@ public class AuthService {
             return Optional.empty();
         }
 
-        if (userDao.isDatabaseAvailable()) {
-            User user = userDao.login(username, password);
-            if (user != null) {
-                return Optional.of(user);
-            }
+        ensureDatabaseAvailable();
+
+        User user = userDao.login(username, password);
+        if (user != null) {
+            return Optional.of(user);
         }
 
-        return userService.login(username, password);
+        return Optional.empty();
     }
 
     public boolean register(User user) {
@@ -40,10 +38,17 @@ public class AuthService {
             return false;
         }
 
-        if (userDao.isDatabaseAvailable()) {
-            return userDao.register(user);
-        }
+        ensureDatabaseAvailable();
+        return userDao.register(user);
+    }
 
-        return userService.register(user);
+    public boolean isDatabaseAvailable() {
+        return userDao.isDatabaseAvailable();
+    }
+
+    private void ensureDatabaseAvailable() {
+        if (!userDao.isDatabaseAvailable()) {
+            throw new IllegalStateException("Database is unavailable. Please check DB_URL, DB_USER, DB_PASSWORD.");
+        }
     }
 }

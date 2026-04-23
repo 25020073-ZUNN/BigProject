@@ -86,6 +86,8 @@ public class HomeController {
     private TextField bidAmountField;
     @FXML
     private Label detailItemNameLabel;
+    @FXML
+    private Label dbStatusLabel;
 
     private final NetworkService networkService = NetworkService.getInstance();
 
@@ -99,6 +101,7 @@ public class HomeController {
             accountTypeComboBox.getItems().addAll("Người mua (Bidder)", "Người bán (Seller)");
             accountTypeComboBox.getSelectionModel().selectFirst();
         }
+        refreshDatabaseStatus();
     }
 
     private void updateLoginState() {
@@ -301,6 +304,31 @@ public class HomeController {
     @FXML
     public void handleSubscribe(ActionEvent event) {
         showInformation("Đăng ký thành công", "Chúng tôi sẽ gửi các bản tin đấu giá mới nhất qua email của bạn.");
+    }
+
+    private void refreshDatabaseStatus() {
+        if (dbStatusLabel == null) {
+            return;
+        }
+
+        try {
+            Map<String, Object> status = networkService.getDatabaseStatus();
+            boolean available = Boolean.parseBoolean(String.valueOf(status.getOrDefault("available", false)));
+            String dbUser = String.valueOf(status.getOrDefault("dbUser", "unknown"));
+            String dbUrl = String.valueOf(status.getOrDefault("dbUrl", ""));
+            String shortUrl = dbUrl.replaceFirst("^jdbc:mysql://", "");
+
+            if (available) {
+                dbStatusLabel.setText("DB: Connected | " + dbUser + "@" + shortUrl);
+                dbStatusLabel.setStyle("-fx-text-fill: #2ecc71; -fx-font-weight: bold;");
+            } else {
+                dbStatusLabel.setText("DB: Unavailable | " + dbUser + "@" + shortUrl);
+                dbStatusLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
+            }
+        } catch (Exception e) {
+            dbStatusLabel.setText("DB: Server unavailable");
+            dbStatusLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
+        }
     }
 
     private Map<String, Object> resolveTargetAuction(List<Map<String, Object>> auctions) {

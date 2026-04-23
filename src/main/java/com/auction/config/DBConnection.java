@@ -17,6 +17,14 @@ public final class DBConnection {
         return DriverManager.getConnection(getUrl(), getUser(), getPassword());
     }
 
+    public static String getConfiguredUrl() {
+        return getUrl();
+    }
+
+    public static String getConfiguredUser() {
+        return getUser();
+    }
+
     private static String getUrl() {
         return getConfig("DB_URL", "db.url", DEFAULT_URL);
     }

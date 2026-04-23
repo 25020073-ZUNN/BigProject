@@ -1,5 +1,6 @@
 package com.auction.network;
 
+import com.auction.config.DBConnection;
 import com.auction.model.Auction;
 import com.auction.model.item.Item;
 import com.auction.model.user.Bidder;
@@ -102,6 +103,7 @@ public class Server {
                 case REGISTER -> handleRegister(request);
                 case GET_AUCTIONS -> handleGetAuctions(request);
                 case PLACE_BID -> handlePlaceBid(request);
+                case DB_STATUS -> handleDatabaseStatus(request);
                 case ERROR -> Message.failure(request, "Client sent error message");
             };
         } catch (Exception e) {
@@ -127,6 +129,12 @@ public class Server {
         String password = stringValue(payload.get("password"));
         String role = stringValue(payload.get("role"));
 
+        if (username == null || username.isBlank()
+                || email == null || email.isBlank()
+                || password == null || password.isBlank()) {
+            return Message.failure(request, "Missing required registration fields");
+        }
+
         User user = "SELLER".equalsIgnoreCase(role)
                 ? new com.auction.model.user.Seller(username, email, String.valueOf(password.hashCode()))
                 : new Bidder(username, email, String.valueOf(password.hashCode()));
@@ -134,7 +142,7 @@ public class Server {
 
         boolean created = authService.register(user);
         if (!created) {
-            return Message.failure(request, "Register failed");
+            return Message.failure(request, "Register failed: username or email already exists");
         }
 
         return Message.success(request, userPayload(user));
@@ -173,6 +181,15 @@ public class Server {
         }
 
         return Message.success(request, auctionPayload(auction));
+    }
+
+    private Message handleDatabaseStatus(Message request) {
+        boolean available = authService.isDatabaseAvailable();
+        return Message.success(request, Map.of(
+                "available", available,
+                "dbUrl", DBConnection.getConfiguredUrl(),
+                "dbUser", DBConnection.getConfiguredUser()
+        ));
     }
 
     private Map<String, Object> userPayload(User user) {

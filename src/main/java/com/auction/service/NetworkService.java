@@ -32,6 +32,12 @@ public class NetworkService {
         }
     }
 
+    public Map<String, Object> getDatabaseStatus() throws IOException, ClassNotFoundException {
+        Message response = send(Message.Type.DB_STATUS, Map.of());
+        ensureSuccess(response);
+        return response.getPayload();
+    }
+
     public User login(String username, String password) throws IOException, ClassNotFoundException {
         Message response = send(Message.Type.LOGIN, Map.of(
                 "username", username,
