@@ -1,4 +1,4 @@
-package com.uet.service;
+package com.uet.bidding.service;
 
 public class AuctionManager {
 }

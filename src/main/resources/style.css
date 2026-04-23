@@ -375,25 +375,25 @@
 }
 
 .thumb-1 {
-    -fx-background-image: url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=80");
+    -fx-background-image: url("images/thumb1.png");
     -fx-background-size: cover;
     -fx-background-position: center;
 }
 
 .thumb-2 {
-    -fx-background-image: url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&q=80");
+    -fx-background-image: url("images/thumb2.png");
     -fx-background-size: cover;
     -fx-background-position: center;
 }
 
 .thumb-3 {
-    -fx-background-image: url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&q=80");
+    -fx-background-image: url("images/thumb1.png");
     -fx-background-size: cover;
     -fx-background-position: center;
 }
 
 .thumb-4 {
-    -fx-background-image: url("https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&q=80");
+    -fx-background-image: url("images/thumb2.png");
     -fx-background-size: cover;
     -fx-background-position: center;
 }

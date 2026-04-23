@@ -33,6 +33,10 @@ public abstract class Entity {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     /**
      * Getter lấy thời gian tạo
      */

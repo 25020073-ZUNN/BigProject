@@ -7,6 +7,7 @@ public abstract class User extends Entity {
     // Để private để đảm bảo tính đóng gói (encapsulation),
     // tránh cho code bên ngoài sửa trực tiếp dữ liệu.
     private String username;
+    private String fullname;
 
     // Email để private và chỉ cho đổi qua setter
     // để có thể kiểm tra dữ liệu hợp lệ trước khi gán.
@@ -27,8 +28,13 @@ public abstract class User extends Entity {
 
     // CONSTRUCTOR
     protected User(String username, String email, String passwordHash) {
+        this(username, username, email, passwordHash);
+    }
+
+    protected User(String username,String fullname, String email, String passwordHash) {
         super();
         this.username = username;
+        this.fullname=fullname;
         this.email = email;
         this.passwordHash = passwordHash;
         this.balance = 0L;
@@ -38,6 +44,14 @@ public abstract class User extends Entity {
     // GETTER
     public String getUsername() {
         return username;
+    }
+
+    public String getFullname() {
+        return fullname;
+    }
+
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
     }
 
     public String getEmail() {

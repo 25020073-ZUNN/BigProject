@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter;
 
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ComboBox;
-import com.uet.service.UserService;
+import com.uet.bidding.service.UserService;
 import com.uet.bidding.model.user.Bidder;
 import com.uet.bidding.model.user.Seller;
 import com.uet.bidding.model.user.User;

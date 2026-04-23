@@ -1,4 +1,4 @@
-package com.uet.service;
+package com.uet.bidding.service;
 
 import com.uet.bidding.model.user.Admin;
 import com.uet.bidding.model.user.Bidder;
