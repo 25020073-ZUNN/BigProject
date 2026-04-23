@@ -1,10 +1,11 @@
 package com.uet.bidding.service;
 
 import com.uet.bidding.model.Auction;
-import com.uet.bidding.model.item.Electronics;
 import com.uet.bidding.model.item.Item;
 import com.uet.bidding.model.user.Bidder;
 import com.uet.bidding.model.user.Seller;
+import com.uet.factory.ItemFactory;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class AuctionService {
         Seller seller1 = new Seller("seller_001", "seller1@example.com", "pass");
         Seller seller2 = new Seller("seller_002", "seller2@example.com", "pass");
 
-        Item item1 = new Electronics(
+        Item item1 = ItemFactory.createElectronics(
                 "iPhone 15 Pro Max", 
                 "Máy mới 99%, đầy đủ phụ kiện", 
                 new BigDecimal("25000000"),
@@ -46,7 +47,7 @@ public class AuctionService {
                 12
         );
 
-        Item item2 = new Electronics(
+        Item item2 = ItemFactory.createElectronics(
                 "ASUS ROG Strix G15", 
                 "Laptop gaming cấu hình cao", 
                 new BigDecimal("30500000"),
