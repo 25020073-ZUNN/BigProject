@@ -1,6 +1,6 @@
 package com.auction;
 
-import com.uet.bidding.model.user.User;
+import com.auction.model.user.User;
 
 public class UserSession {
     private static User loggedInUser;

@@ -22,10 +22,14 @@ import java.time.format.DateTimeFormatter;
 
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ComboBox;
-import com.uet.bidding.service.UserService;
-import com.uet.bidding.model.user.Bidder;
-import com.uet.bidding.model.user.Seller;
-import com.uet.bidding.model.user.User;
+import com.auction.service.NetworkService;
+import com.auction.model.user.User;
+
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class HomeController {
 
@@ -78,7 +82,12 @@ public class HomeController {
     @FXML
     private PasswordField confirmPasswordField;
 
-    private final UserService userService = UserService.getInstance();
+    @FXML
+    private TextField bidAmountField;
+    @FXML
+    private Label detailItemNameLabel;
+
+    private final NetworkService networkService = NetworkService.getInstance();
 
     @FXML
     public void initialize() {
@@ -176,16 +185,14 @@ public class HomeController {
             return;
         }
 
-        userService.login(username, password).ifPresentOrElse(
-            user -> {
-                UserSession.login(user);
-                showInformation("Đăng nhập thành công", "Chào mừng " + user.getUsername() + " quay trở lại!");
-                goToHome(event);
-            },
-            () -> {
-                showError("Lỗi đăng nhập", "Tên đăng nhập hoặc mật khẩu không chính xác.");
-            }
-        );
+        try {
+            User user = networkService.login(username, password);
+            UserSession.login(user);
+            showInformation("Đăng nhập thành công", "Chào mừng " + user.getUsername() + " quay trở lại!");
+            goToHome(event);
+        } catch (Exception e) {
+            showError("Lỗi đăng nhập", "Không thể đăng nhập qua server: " + e.getMessage());
+        }
     }
 
     @FXML
@@ -210,32 +217,75 @@ public class HomeController {
             return;
         }
 
-        // Hash password (User.verifyPassword expects String.valueOf(password.hashCode()))
-        String passwordHash = String.valueOf(password.hashCode());
-
-        User newUser;
-        if (accountType != null && accountType.contains("Seller")) {
-            newUser = new Seller(username, email, passwordHash);
-        } else {
-            newUser = new Bidder(username, email, passwordHash);
-        }
-
-        if (userService.register(newUser)) {
+        try {
+            String role = accountType != null && accountType.contains("Seller") ? "SELLER" : "BIDDER";
+            networkService.register(username, fullName, email, password, role);
             showInformation("Đăng ký thành công", "Tài khoản của bạn đã được tạo. Vui lòng đăng nhập.");
             goToLogin(event);
-        } else {
-            showError("Lỗi đăng ký", "Tên đăng nhập hoặc email đã tồn tại.");
+        } catch (Exception e) {
+            showError("Lỗi đăng ký", "Không thể đăng ký qua server: " + e.getMessage());
         }
     }
+
     @FXML
     public void handleBid(ActionEvent event) {
-        showInformation("Đặt giá thành công", "Bạn đã đặt giá thành công cho tài sản này!\nChúng tôi sẽ thông báo cho bạn nếu có người đặt giá cao hơn.");
+        if (!UserSession.isLoggedIn()) {
+            showError("Chưa đăng nhập", "Bạn cần đăng nhập trước khi đặt giá.");
+            return;
+        }
+
+        try {
+            List<Map<String, Object>> auctions = networkService.getAuctions();
+            Map<String, Object> targetAuction = resolveTargetAuction(auctions);
+            if (targetAuction == null) {
+                showError("Không tìm thấy phiên", "Không xác định được tài sản để đặt giá.");
+                return;
+            }
+
+            String amount = resolveBidAmount(targetAuction);
+            Map<String, Object> result = networkService.placeBid(
+                    String.valueOf(targetAuction.get("itemId")),
+                    UserSession.getLoggedInUser().getUsername(),
+                    amount
+            );
+
+            showInformation(
+                    "Đặt giá thành công",
+                    "Bạn đã đặt giá cho " + result.get("itemName")
+                            + "\nGiá hiện tại mới: " + formatCurrency(String.valueOf(result.get("currentPrice"))) + " VND"
+            );
+        } catch (Exception e) {
+            showError("Đặt giá thất bại", e.getMessage());
+        }
     }
 
     @FXML
     public void handleSearch(ActionEvent event) {
-        String query = (searchField != null) ? searchField.getText() : "";
-        showInformation("Tìm kiếm tài sản", "Đang lọc danh sách tài sản với từ khóa: " + (query.isEmpty() ? "Tất cả" : query));
+        String query = searchField != null ? searchField.getText().trim().toLowerCase() : "";
+
+        try {
+            List<Map<String, Object>> auctions = networkService.getAuctions();
+            List<Map<String, Object>> filtered = auctions.stream()
+                    .filter(auction -> query.isBlank()
+                            || String.valueOf(auction.getOrDefault("itemName", "")).toLowerCase().contains(query)
+                            || String.valueOf(auction.getOrDefault("category", "")).toLowerCase().contains(query))
+                    .toList();
+
+            String summary = filtered.isEmpty()
+                    ? "Không có tài sản nào khớp."
+                    : filtered.stream()
+                    .limit(5)
+                    .map(auction -> "- " + auction.get("itemName") + " | " + formatCurrency(String.valueOf(auction.get("currentPrice"))) + " VND")
+                    .reduce((a, b) -> a + "\n" + b)
+                    .orElse("");
+
+            showInformation(
+                    "Kết quả tìm kiếm",
+                    "Tìm thấy " + filtered.size() + " tài sản.\n" + summary
+            );
+        } catch (Exception e) {
+            showError("Lỗi tìm kiếm", "Không thể lấy dữ liệu từ server: " + e.getMessage());
+        }
     }
 
     @FXML
@@ -251,6 +301,60 @@ public class HomeController {
     @FXML
     public void handleSubscribe(ActionEvent event) {
         showInformation("Đăng ký thành công", "Chúng tôi sẽ gửi các bản tin đấu giá mới nhất qua email của bạn.");
+    }
+
+    private Map<String, Object> resolveTargetAuction(List<Map<String, Object>> auctions) {
+        if (auctions.isEmpty()) {
+            return null;
+        }
+
+        if (detailItemNameLabel != null && detailItemNameLabel.getText() != null && !detailItemNameLabel.getText().isBlank()) {
+            String detailName = detailItemNameLabel.getText().trim().toLowerCase();
+            Map<String, Object> matched = auctions.stream()
+                    .filter(auction -> String.valueOf(auction.getOrDefault("itemName", "")).trim().toLowerCase().contains(detailName)
+                            || detailName.contains(String.valueOf(auction.getOrDefault("itemName", "")).trim().toLowerCase()))
+                    .findFirst()
+                    .orElse(null);
+            if (matched != null) {
+                return matched;
+            }
+        }
+
+        if (searchField != null && searchField.getText() != null && !searchField.getText().isBlank()) {
+            String query = searchField.getText().trim().toLowerCase();
+            Map<String, Object> matched = auctions.stream()
+                    .filter(auction -> String.valueOf(auction.getOrDefault("itemName", "")).toLowerCase().contains(query))
+                    .findFirst()
+                    .orElse(null);
+            if (matched != null) {
+                return matched;
+            }
+        }
+
+        return auctions.get(0);
+    }
+
+    private String resolveBidAmount(Map<String, Object> auction) {
+        if (bidAmountField != null && bidAmountField.getText() != null && !bidAmountField.getText().isBlank()) {
+            return normalizeAmount(bidAmountField.getText());
+        }
+
+        BigDecimal currentPrice = new BigDecimal(String.valueOf(auction.get("currentPrice")));
+        BigDecimal nextPrice = currentPrice.add(new BigDecimal("50000000"));
+        return nextPrice.toPlainString();
+    }
+
+    private String normalizeAmount(String text) {
+        String normalized = text.replaceAll("[^\\d]", "");
+        if (normalized.isBlank()) {
+            throw new IllegalArgumentException("Số tiền đặt giá không hợp lệ.");
+        }
+        return normalized;
+    }
+
+    private String formatCurrency(String amount) {
+        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+        return formatter.format(new BigDecimal(amount));
     }
 
     private void initClock() {

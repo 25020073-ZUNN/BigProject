@@ -99,7 +99,7 @@
                             <VBox spacing="18" styleClass="detail-side-card">
                                 <padding><Insets top="28" right="24" bottom="28" left="24"/></padding>
 
-                                <Label text="Quyền sử dụng đất tại Hà Nội" styleClass="hero-title-small" wrapText="true"/>
+                                <Label fx:id="detailItemNameLabel" text="Quyền sử dụng đất tại Hà Nội" styleClass="hero-title-small" wrapText="true"/>
 
                                 <VBox spacing="6" styleClass="price-row">
                                     <Label text="Giá hiện tại" styleClass="field-label"/>
@@ -128,7 +128,7 @@
                                 <VBox spacing="12">
                                     <Label text="Đặt giá của bạn" styleClass="field-label"/>
                                     <HBox spacing="10">
-                                        <TextField text="18,500,000,000" styleClass="mail-field" HBox.hgrow="ALWAYS" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+                                        <TextField fx:id="bidAmountField" text="18,500,000,000" styleClass="mail-field" HBox.hgrow="ALWAYS" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
                                         <Label text="VNĐ" alignment="CENTER" prefHeight="45" styleClass="partner-text-strong"/>
                                     </HBox>
                                     <Label text="Bước giá tối thiểu: 50,000,000 VNĐ" styleClass="muted-text" style="-fx-font-size: 11;"/>
