@@ -16,6 +16,7 @@ public class Message implements Serializable {
         REGISTER,
         GET_AUCTIONS,
         PLACE_BID,
+        DB_STATUS,
         PING,
         ERROR
     }
