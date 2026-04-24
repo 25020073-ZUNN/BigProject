@@ -7,8 +7,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class DBConnection {
     private static final String DEFAULT_URL = "jdbc:mysql://localhost:3307/auctions_db";
@@ -64,11 +66,15 @@ public final class DBConnection {
     }
 
     private static Map<String, String> loadLocalEnv() {
-        Path envFile = Path.of(".env.local");
-        if (!Files.exists(envFile)) {
-            return Map.of();
+        for (Path envFile : getLocalEnvCandidates()) {
+            if (Files.isRegularFile(envFile)) {
+                return readLocalEnv(envFile);
+            }
         }
+        return Map.of();
+    }
 
+    private static Map<String, String> readLocalEnv(Path envFile) {
         Map<String, String> values = new HashMap<>();
         try {
             List<String> lines = Files.readAllLines(envFile);
@@ -90,10 +96,40 @@ public final class DBConnection {
                 }
             }
         } catch (IOException e) {
-            System.err.println("[DB] Failed to read .env.local: " + e.getMessage());
+            System.err.println("[DB] Failed to read " + envFile + ": " + e.getMessage());
         }
 
         return Map.copyOf(values);
+    }
+
+    private static Set<Path> getLocalEnvCandidates() {
+        Set<Path> candidates = new LinkedHashSet<>();
+        addLocalEnvCandidates(candidates, Path.of(System.getProperty("user.dir", ".")));
+        addLocalEnvCandidates(candidates, Path.of("").toAbsolutePath());
+
+        try {
+            Path codeSource = Path.of(DBConnection.class.getProtectionDomain()
+                    .getCodeSource()
+                    .getLocation()
+                    .toURI());
+            addLocalEnvCandidates(candidates, codeSource);
+        } catch (Exception ignored) {
+            // Fall back to user.dir candidates.
+        }
+
+        return candidates;
+    }
+
+    private static void addLocalEnvCandidates(Set<Path> candidates, Path start) {
+        Path current = start.toAbsolutePath().normalize();
+        if (Files.isRegularFile(current)) {
+            current = current.getParent();
+        }
+
+        while (current != null) {
+            candidates.add(current.resolve(".env.local"));
+            current = current.getParent();
+        }
     }
 
     private static String stripQuotes(String value) {
