@@ -487,9 +487,16 @@ public class HomeController {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/" + fxmlFile));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
+            Scene currentScene = stage.getScene();
+
+            if (currentScene == null) {
+                stage.setScene(new Scene(root, 1380, 920));
+            } else {
+                currentScene.setRoot(root);
+            }
+
+            stage.setMinWidth(1280);
+            stage.setMinHeight(820);
         } catch (IOException e) {
             e.printStackTrace();
             showError("Lỗi chuyển trang", "Không thể tải giao diện: " + fxmlFile);
