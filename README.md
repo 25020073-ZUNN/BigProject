@@ -1,5 +1,7 @@
 # BigProject
 
+![Verified](https://img.shields.io/badge/verified-yes-28a745)
+
 ## Run with database
 
 The app will try to connect to the database as soon as `mvn javafx:run` starts.

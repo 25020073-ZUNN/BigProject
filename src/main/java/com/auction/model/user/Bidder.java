@@ -2,6 +2,7 @@ package com.auction.model.user;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Lớp Bidder đại diện cho người tham gia đấu giá trong hệ thống.
@@ -18,6 +19,7 @@ import java.util.List;
  * việc tham gia đấu giá như lịch sử bid và các auction đã thắng.
  */
 public class Bidder extends User {
+    private static final Logger LOGGER = Logger.getLogger(Bidder.class.getName());
 
     // Danh sách id các phiên đấu giá mà bidder đã tham gia ra giá
     private List<String> joinedAuctionIds;
@@ -152,14 +154,25 @@ public class Bidder extends User {
      */
     @Override
     public void printInfo() {
-        System.out.println("=== BIDDER INFO ===");
-        System.out.println("ID              : " + getId());
-        System.out.println("Username        : " + getUsername());
-        System.out.println("Email           : " + getEmail());
-        System.out.println("Balance         : " + getBalance() + " VND");
-        System.out.println("Active          : " + isActive());
-        System.out.println("Joined Auctions : " + joinedAuctionIds.size());
-        System.out.println("Won Auctions    : " + wonAuctionIds.size());
-        System.out.println("Total Bids      : " + totalBids);
+        LOGGER.info(() -> """
+                === BIDDER INFO ===
+                ID              : %s
+                Username        : %s
+                Email           : %s
+                Balance         : %s VND
+                Active          : %s
+                Joined Auctions : %s
+                Won Auctions    : %s
+                Total Bids      : %s
+                """.formatted(
+                getId(),
+                getUsername(),
+                getEmail(),
+                getBalance(),
+                isActive(),
+                joinedAuctionIds.size(),
+                wonAuctionIds.size(),
+                totalBids
+        ));
     }
 }

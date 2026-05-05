@@ -10,12 +10,15 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
  * Service quản lý các phiên đấu giá (Singleton)
  */
 public class AuctionService {
+    private static final Logger LOGGER = Logger.getLogger(AuctionService.class.getName());
 
     private static AuctionService instance;
     private List<Auction> auctions;
@@ -83,7 +86,7 @@ public class AuctionService {
             auction.placeBid(bidder, amount);
             return true;
         } catch (Exception e) {
-            System.err.println("Bid failed: " + e.getMessage());
+            LOGGER.log(Level.WARNING, "Bid failed", e);
             return false;
         }
     }

@@ -1,6 +1,10 @@
 package com.auction.model.user;
 import com.auction.model.Entity;
+
+import java.util.logging.Logger;
+
 public abstract class User extends Entity {
+    private static final Logger LOGGER = Logger.getLogger(User.class.getName());
 
     // ATTRIBUTES
 
@@ -126,11 +130,13 @@ public abstract class User extends Entity {
 
     // Chỉ giữ @Override nếu Entity có method printInfo()
     public void printInfo() {
-        System.out.println("=== " + getRole() + " ===");
-        System.out.println("ID       : " + getId());
-        System.out.println("Username : " + username);
-        System.out.println("Email    : " + email);
-        System.out.println("Balance  : " + balance + " VND");
-        System.out.println("Active   : " + active);
+        LOGGER.info(() -> """
+                === %s ===
+                ID       : %s
+                Username : %s
+                Email    : %s
+                Balance  : %s VND
+                Active   : %s
+                """.formatted(getRole(), getId(), username, email, balance, active));
     }
 }

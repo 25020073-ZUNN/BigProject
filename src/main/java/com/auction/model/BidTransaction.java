@@ -4,8 +4,10 @@ import com.auction.model.user.Bidder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.logging.Logger;
 
 public class BidTransaction extends Entity {
+    private static final Logger LOGGER = Logger.getLogger(BidTransaction.class.getName());
 
     // Phiên đấu giá mà lần bid này thuộc về
     private Auction auction;
@@ -67,11 +69,13 @@ public class BidTransaction extends Entity {
     // In thông tin giao dịch bid
     @Override
     public void printInfo() {
-        System.out.println("=== BID TRANSACTION INFO ===");
-        System.out.println("Transaction ID : " + getId());
-        System.out.println("Auction ID     : " + auction.getId());
-        System.out.println("Bidder         : " + bidder.getUsername());
-        System.out.println("Bid Amount     : " + bidAmount + " VND");
-        System.out.println("Bid Time       : " + bidTime);
+        LOGGER.info(() -> """
+                === BID TRANSACTION INFO ===
+                Transaction ID : %s
+                Auction ID     : %s
+                Bidder         : %s
+                Bid Amount     : %s VND
+                Bid Time       : %s
+                """.formatted(getId(), auction.getId(), bidder.getUsername(), bidAmount, bidTime));
     }
 }

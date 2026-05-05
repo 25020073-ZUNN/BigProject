@@ -8,8 +8,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class Auction extends Entity {
+    private static final Logger LOGGER = Logger.getLogger(Auction.class.getName());
 
     // Thông tin cơ bản của phiên đấu giá
     private Item item;
@@ -148,15 +150,27 @@ public class Auction extends Entity {
     // In thông tin phiên đấu giá
     @Override
     public void printInfo() {
-        System.out.println("=== AUCTION INFO ===");
-        System.out.println("Auction ID     : " + getId());
-        System.out.println("Item           : " + item.getName());
-        System.out.println("Seller         : " + seller.getUsername());
-        System.out.println("Starting Price : " + startingPrice + " VND");
-        System.out.println("Current Price  : " + currentPrice + " VND");
-        System.out.println("Highest Bidder : " + (highestBidder == null ? "None" : highestBidder.getUsername()));
-        System.out.println("Active         : " + active);
-        System.out.println("Finished       : " + finished);
-        System.out.println("Total Bids     : " + bidHistory.size());
+        LOGGER.info(() -> """
+                === AUCTION INFO ===
+                Auction ID     : %s
+                Item           : %s
+                Seller         : %s
+                Starting Price : %s VND
+                Current Price  : %s VND
+                Highest Bidder : %s
+                Active         : %s
+                Finished       : %s
+                Total Bids     : %s
+                """.formatted(
+                getId(),
+                item.getName(),
+                seller.getUsername(),
+                startingPrice,
+                currentPrice,
+                highestBidder == null ? "None" : highestBidder.getUsername(),
+                active,
+                finished,
+                bidHistory.size()
+        ));
     }
 }

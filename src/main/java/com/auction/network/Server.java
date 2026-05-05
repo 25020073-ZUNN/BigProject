@@ -7,6 +7,7 @@ import com.auction.model.user.Bidder;
 import com.auction.model.user.User;
 import com.auction.service.AuctionService;
 import com.auction.service.AuthService;
+import com.auction.util.LoggingConfig;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -22,9 +23,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class Server {
+    private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
 
     public static final int DEFAULT_PORT = 5050;
 
@@ -56,7 +60,7 @@ public class Server {
 
         serverSocket = new ServerSocket(port);
         running = true;
-        System.out.println("Auction server started on port " + port);
+        LOGGER.info(() -> "Auction server started on port " + port);
 
         while (running) {
             Socket clientSocket = serverSocket.accept();
@@ -91,7 +95,7 @@ public class Server {
             }
         } catch (EOFException ignored) {
         } catch (Exception e) {
-            System.err.println("Client handling failed: " + e.getMessage());
+            LOGGER.log(Level.WARNING, "Client handling failed", e);
         }
     }
 
@@ -226,6 +230,7 @@ public class Server {
     }
 
     public static void main(String[] args) throws IOException {
+        LoggingConfig.configure();
         int serverPort = args.length > 0 ? Integer.parseInt(args[0]) : DEFAULT_PORT;
         new Server(serverPort).start();
     }
