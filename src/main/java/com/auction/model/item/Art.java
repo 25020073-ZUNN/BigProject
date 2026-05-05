@@ -2,11 +2,13 @@ package com.auction.model.item;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.logging.Logger;
 
 /**
  * Item loại nghệ thuật
  */
 public class Art extends Item {
+    private static final Logger LOGGER = Logger.getLogger(Art.class.getName());
 
     private String artist;     // Tác giả
     private int yearCreated;   // Năm sáng tác
@@ -27,7 +29,7 @@ public class Art extends Item {
 
     @Override
     public void printInfo() {
-        System.out.println("🎨 Art: " + name
+        LOGGER.info(() -> "Art: " + name
                 + " | Artist: " + artist
                 + " | Price: " + currentPrice);
     }

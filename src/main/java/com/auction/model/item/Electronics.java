@@ -1,11 +1,13 @@
 package com.auction.model.item;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.logging.Logger;
 
 /**
  * Item loại điện tử
  */
 public class Electronics extends Item {
+    private static final Logger LOGGER = Logger.getLogger(Electronics.class.getName());
 
     private String brand;          // Hãng sản xuất
     private int warrantyMonths;    // Thời gian bảo hành
@@ -26,7 +28,7 @@ public class Electronics extends Item {
 
     @Override
     public void printInfo() {
-        System.out.println("📱 Electronics: " + name
+        LOGGER.info(() -> "Electronics: " + name
                 + " | Brand: " + brand
                 + " | Price: " + currentPrice);
     }

@@ -9,8 +9,11 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class DBConnection {
+    private static final Logger LOGGER = Logger.getLogger(DBConnection.class.getName());
     private static final String DEFAULT_URL = "jdbc:mysql://localhost:3307/auctions_db";
     private static final String DEFAULT_USER = "root";
     private static final String DEFAULT_PASSWORD = "123456";
@@ -90,7 +93,7 @@ public final class DBConnection {
                 }
             }
         } catch (IOException e) {
-            System.err.println("[DB] Failed to read .env.local: " + e.getMessage());
+            LOGGER.log(Level.WARNING, "[DB] Failed to read .env.local", e);
         }
 
         return Map.copyOf(values);

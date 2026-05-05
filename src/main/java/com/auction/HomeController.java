@@ -30,8 +30,11 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class HomeController {
+    private static final Logger LOGGER = Logger.getLogger(HomeController.class.getName());
 
     @FXML
     private Label clockLabel;
@@ -158,7 +161,7 @@ public class HomeController {
             // For simplicity and to avoid crash, go to Home.
             goToHome(event);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Failed to refresh UI after logout", e);
         }
     }
 
@@ -405,7 +408,7 @@ public class HomeController {
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to switch scene to " + fxmlFile, e);
         }
     }
 

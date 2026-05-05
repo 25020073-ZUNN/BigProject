@@ -2,12 +2,16 @@ package com.auction.dao;
 
 import com.auction.config.DBConnection;
 import com.auction.model.user.*;
+import com.auction.util.LoggingConfig;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UserDao {
+    private static final Logger LOGGER = Logger.getLogger(UserDao.class.getName());
 
     /**
      * Lấy danh sách tất cả người dùng từ database
@@ -24,8 +28,7 @@ public class UserDao {
                 users.add(mapResultSetToUser(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error getting all users: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting all users", e);
         }
         return users;
     }
@@ -50,8 +53,7 @@ public class UserDao {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error during login: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error during login", e);
         }
         return null;
     }
@@ -83,8 +85,7 @@ public class UserDao {
                 return stmt.executeUpdate() == 1;
             }
         } catch (SQLException e) {
-            System.err.println("Error during register: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error during register", e);
             return false;
         }
     }
@@ -150,26 +151,27 @@ public class UserDao {
      * Hàm main để chạy thử nghiệm (Test)
      */
     public static void main(String[] args) {
+        LoggingConfig.configure();
         UserDao dao = new UserDao();
 
-        System.out.println("=== TEST: GET ALL USERS ===");
+        LOGGER.info("=== TEST: GET ALL USERS ===");
         List<User> users = dao.getAllUsers();
         if (users.isEmpty()) {
-            System.out.println("No users found (Database might be empty or connection failed).");
+            LOGGER.warning("No users found (Database might be empty or connection failed).");
         } else {
             for (User u : users) {
-                System.out.println("ID: " + u.getId() + " | " + u.getUsername() + " - " + u.getRole() + " (" + u.getFullname() + ")");
+                LOGGER.info(() -> "ID: " + u.getId() + " | " + u.getUsername() + " - " + u.getRole() + " (" + u.getFullname() + ")");
             }
         }
 
-        System.out.println("\n=== TEST: LOGIN ===");
+        LOGGER.info("=== TEST: LOGIN ===");
         // Thử login với tài khoản admin (giả sử đã có trong DB)
         User user = dao.login("admin", "password");
         if (user != null) {
-            System.out.println("Login success!");
+            LOGGER.info("Login success!");
             user.printInfo();
         } else {
-            System.out.println("Login failed: Username or password incorrect.");
+            LOGGER.warning("Login failed: Username or password incorrect.");
         }
     }
 }

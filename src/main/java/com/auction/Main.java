@@ -3,17 +3,23 @@ package com.auction;
 import com.auction.config.DBConnection;
 import com.auction.service.AuthService;
 import com.auction.network.Server;
+import com.auction.util.LoggingConfig;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class Main extends Application {
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     private Server embeddedServer;
 
     @Override
     public void start(Stage stage) throws Exception {
+        LoggingConfig.configure();
         startEmbeddedServer();
         logDatabaseConfiguration();
 
@@ -43,7 +49,7 @@ public class Main extends Application {
             } catch (java.net.BindException ignored) {
                 // Another server is already listening on this port.
             } catch (Exception e) {
-                System.err.println("Embedded server failed: " + e.getMessage());
+                LOGGER.log(Level.SEVERE, "Embedded server failed", e);
             }
         }, "auction-embedded-server");
         serverThread.setDaemon(true);
@@ -51,12 +57,12 @@ public class Main extends Application {
     }
 
     private void logDatabaseConfiguration() {
-        System.out.println("[DB] Configured URL: " + DBConnection.getConfiguredUrl());
-        System.out.println("[DB] Configured user: " + DBConnection.getConfiguredUser());
+        LOGGER.info(() -> "[DB] Configured URL: " + DBConnection.getConfiguredUrl());
+        LOGGER.info(() -> "[DB] Configured user: " + DBConnection.getConfiguredUser());
         if (AuthService.getInstance().isDatabaseAvailable()) {
-            System.out.println("[DB] Connection status: CONNECTED");
+            LOGGER.info("[DB] Connection status: CONNECTED");
         } else {
-            System.out.println("[DB] Connection status: UNAVAILABLE");
+            LOGGER.warning("[DB] Connection status: UNAVAILABLE");
         }
     }
 

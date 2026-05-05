@@ -2,6 +2,7 @@ package com.auction.model.user;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Lớp Admin đại diện cho quản trị viên trong hệ thống đấu giá.
@@ -17,6 +18,7 @@ import java.util.List;
  * Ngoài ra Admin có thêm quyền quản lý người dùng và phiên đấu giá.
  */
 public class Admin extends User {
+    private static final Logger LOGGER = Logger.getLogger(Admin.class.getName());
 
     // Danh sách id các user mà admin đã xử lý / quản lý
     private List<String> managedUserIds;
@@ -184,14 +186,25 @@ public class Admin extends User {
      */
     @Override
     public void printInfo() {
-        System.out.println("=== ADMIN INFO ===");
-        System.out.println("ID               : " + getId());
-        System.out.println("Username         : " + getUsername());
-        System.out.println("Email            : " + getEmail());
-        System.out.println("Balance          : " + getBalance() + " VND");
-        System.out.println("Active           : " + isActive());
-        System.out.println("Admin Level      : " + adminLevel);
-        System.out.println("Managed Users    : " + managedUserIds.size());
-        System.out.println("Managed Auctions : " + managedAuctionIds.size());
+        LOGGER.info(() -> """
+                === ADMIN INFO ===
+                ID               : %s
+                Username         : %s
+                Email            : %s
+                Balance          : %s VND
+                Active           : %s
+                Admin Level      : %s
+                Managed Users    : %s
+                Managed Auctions : %s
+                """.formatted(
+                getId(),
+                getUsername(),
+                getEmail(),
+                getBalance(),
+                isActive(),
+                adminLevel,
+                managedUserIds.size(),
+                managedAuctionIds.size()
+        ));
     }
 }

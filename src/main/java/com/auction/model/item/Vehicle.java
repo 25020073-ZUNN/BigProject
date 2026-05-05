@@ -2,11 +2,13 @@ package com.auction.model.item;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.logging.Logger;
 
 /**
  * Item loại phương tiện
  */
 public class Vehicle extends Item {
+    private static final Logger LOGGER = Logger.getLogger(Vehicle.class.getName());
 
     private String manufacturer;  // Hãng xe
     private int year;             // Năm sản xuất
@@ -29,7 +31,7 @@ public class Vehicle extends Item {
 
     @Override
     public void printInfo() {
-        System.out.println("🚗 Vehicle: " + name
+        LOGGER.info(() -> "Vehicle: " + name
                 + " | Maker: " + manufacturer
                 + " | Price: " + currentPrice);
     }
