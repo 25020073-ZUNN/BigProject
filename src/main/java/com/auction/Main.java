@@ -19,7 +19,7 @@ public class Main extends Application {
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/giaodien.fxml"));
         Scene scene = new Scene(loader.load());
-        stage.setTitle("Aurex Auction Platform");
+        stage.setTitle("TEAM 6 - UET");
         stage.setScene(scene);
         stage.setMinWidth(1280);
         stage.setMinHeight(820);
