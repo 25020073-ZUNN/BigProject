@@ -1,136 +1,125 @@
 package com.auction.model.user;
+
 import com.auction.model.Entity;
-public abstract class User extends Entity {
+import java.util.ArrayList;
+import java.util.List;
 
-    // ATTRIBUTES
+/**
+ * Lớp User đại diện cho người dùng bình thường trong hệ thống.
+ * Một User hiện tại có thể đóng cả hai vai trò: Người mua (Bidder) và Người bán (Seller).
+ */
+public class User extends Entity {
 
-    // Để private để đảm bảo tính đóng gói (encapsulation),
-    // tránh cho code bên ngoài sửa trực tiếp dữ liệu.
+    // --- Thuộc tính cơ bản ---
     private String username;
     private String fullname;
-
-    // Email để private và chỉ cho đổi qua setter
-    // để có thể kiểm tra dữ liệu hợp lệ trước khi gán.
     private String email;
-
-    // Lưu hash thay vì mật khẩu gốc để tăng bảo mật.
     private String passwordHash;
-
-    // balance để private để không ai có thể sửa trực tiếp kiểu:
-    // user.balance = 999999;
-    // Muốn thay đổi số dư phải đi qua deposit() / withdraw()
-    // để đảm bảo có kiểm tra logic.
     private long balance;
-
-    // Trạng thái hoạt động của tài khoản.
     private boolean active;
 
+    // --- Thuộc tính của Người đấu giá (Bidder) ---
+    private List<String> joinedAuctionIds = new ArrayList<>();
+    private List<String> wonAuctionIds = new ArrayList<>();
+    private int totalBids = 0;
+
+    // --- Thuộc tính của Người bán (Seller) ---
+    private List<String> listedItemIds = new ArrayList<>();
+    private double rating = 0.0;
+    private int totalRatings = 0;
 
     // CONSTRUCTOR
-    protected User(String username, String email, String passwordHash) {
+    public User(String username, String email, String passwordHash) {
         this(username, username, email, passwordHash);
     }
 
-    protected User(String username,String fullname, String email, String passwordHash) {
+    public User(String username, String fullname, String email, String passwordHash) {
         super();
         this.username = username;
-        this.fullname=fullname;
+        this.fullname = fullname;
         this.email = email;
         this.passwordHash = passwordHash;
         this.balance = 0L;
         this.active = true;
     }
 
-    // GETTER
-    public String getUsername() {
-        return username;
+    // GETTER & SETTER
+    public String getUsername() { return username; }
+    public String getFullname() { return fullname; }
+    public void setFullname(String fullname) { this.fullname = fullname; }
+    public String getEmail() { return email; }
+    public long getBalance() { return balance; }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
+    public String getPasswordHash() { return passwordHash; }
+
+    /**
+     * Trả về vai trò. Với lớp này mặc định là USER.
+     */
+    public String getRole() {
+        return "USER";
     }
 
-    public String getFullname() {
-        return fullname;
-    }
-
-    public void setFullname(String fullname) {
-        this.fullname = fullname;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public long getBalance() {
-        return balance;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    // SETTER
     public void setEmail(String email) {
-        // Chỉ cho phép email hợp lệ mới được gán.
         if (email == null || !email.contains("@")) {
-            throw new IllegalArgumentException("INVALID EMAIL: " + email);
-        } else {
-            this.email = email;
+            throw new IllegalArgumentException("EMAIL KHÔNG HỢP LỆ: " + email);
         }
+        this.email = email;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    // METHOD
+    // --- Quản lý tài chính ---
     public void deposit(long amount) {
-        // Nạp tiền thì số tiền phải dương.
-        if (amount <= 0) {
-            throw new IllegalArgumentException("AMOUNT MUST BE POSITIVE");
-        } else {
-            this.balance += amount;
-        }
+        if (amount <= 0) throw new IllegalArgumentException("SỐ TIỀN NẠP PHẢI DƯƠNG");
+        this.balance += amount;
     }
 
     public void withdraw(long amount) {
-        // Hàm này để public vì đây là hành vi mà đối tượng User
-        // cho phép bên ngoài gọi tới.
-        // Nhưng dù public, code ngoài vẫn không thể sửa balance trực tiếp,
-        // mà chỉ có thể "yêu cầu" User tự rút tiền thông qua method này.
-
-        // Kiểm tra số tiền rút phải hợp lệ.
-        if (amount <= 0) {
-            throw new IllegalArgumentException("AMOUNT MUST BE POSITIVE");
-        }
-
-        // Không được rút quá số dư hiện có.
-        else if (amount > this.getBalance()) {
-            throw new InsufficientFundsException(
-                    "Need " + amount + " but only have " + this.getBalance()
-            );
-        }
-
-        // Hợp lệ thì mới trừ tiền.
-        else {
-            this.balance -= amount;
-        }
+        if (amount <= 0) throw new IllegalArgumentException("SỐ TIỀN RÚT PHẢI DƯƠNG");
+        if (amount > this.balance) throw new InsufficientFundsException("Số dư không đủ");
+        this.balance -= amount;
     }
 
     public boolean verifyPassword(String rawPassword) {
         return this.passwordHash.equals(String.valueOf(rawPassword.hashCode()));
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    // --- Tính năng của Người đấu giá ---
+    public void joinAuction(String auctionId) {
+        if (auctionId != null && !joinedAuctionIds.contains(auctionId)) {
+            joinedAuctionIds.add(auctionId);
+        }
     }
 
-    public abstract String getRole();
+    public void addWonAuction(String auctionId) {
+        if (auctionId != null && !wonAuctionIds.contains(auctionId)) {
+            wonAuctionIds.add(auctionId);
+        }
+    }
 
-    // Chỉ giữ @Override nếu Entity có method printInfo()
+    public void increaseTotalBids() { this.totalBids++; }
+    public List<String> getJoinedAuctionIds() { return new ArrayList<>(joinedAuctionIds); }
+    public List<String> getWonAuctionIds() { return new ArrayList<>(wonAuctionIds); }
+
+    // --- Tính năng của Người bán ---
+    public void addListedItem(String itemId) {
+        if (itemId != null) listedItemIds.add(itemId);
+    }
+
+    public List<String> getListedItemIds() { return new ArrayList<>(listedItemIds); }
+
+    public void addRating(double newRating) {
+        if (newRating < 0.0 || newRating > 5.0) throw new IllegalArgumentException("Rating từ 0-5");
+        this.rating = (this.rating * totalRatings + newRating) / (totalRatings + 1);
+        this.totalRatings++;
+    }
+
+    public double getRating() { return rating; }
+
     public void printInfo() {
-        System.out.println("=== " + getRole() + " ===");
+        System.out.println("=== THÔNG TIN NGƯỜI DÙNG (" + getRole() + ") ===");
         System.out.println("ID       : " + getId());
         System.out.println("Username : " + username);
         System.out.println("Email    : " + email);
-        System.out.println("Balance  : " + balance + " VND");
-        System.out.println("Active   : " + active);
+        System.out.println("Số dư    : " + balance + " VND");
     }
 }

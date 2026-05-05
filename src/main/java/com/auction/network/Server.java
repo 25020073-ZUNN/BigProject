@@ -3,7 +3,6 @@ package com.auction.network;
 import com.auction.config.DBConnection;
 import com.auction.model.Auction;
 import com.auction.model.item.Item;
-import com.auction.model.user.Bidder;
 import com.auction.model.user.User;
 import com.auction.service.AuctionService;
 import com.auction.service.AuthService;
@@ -27,7 +26,6 @@ import java.util.stream.Collectors;
 public class Server {
 
     public static final int DEFAULT_PORT = 5050;
-
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     private final int port;
@@ -50,10 +48,7 @@ public class Server {
     }
 
     public void start() throws IOException {
-        if (running) {
-            return;
-        }
-
+        if (running) return;
         serverSocket = new ServerSocket(port);
         running = true;
         System.out.println("Auction server started on port " + port);
@@ -66,9 +61,7 @@ public class Server {
 
     public void stop() throws IOException {
         running = false;
-        if (serverSocket != null && !serverSocket.isClosed()) {
-            serverSocket.close();
-        }
+        if (serverSocket != null && !serverSocket.isClosed()) serverSocket.close();
         executor.shutdownNow();
     }
 
@@ -127,17 +120,12 @@ public class Server {
         String fullName = stringValue(payload.get("fullName"));
         String email = stringValue(payload.get("email"));
         String password = stringValue(payload.get("password"));
-        String role = stringValue(payload.get("role"));
 
-        if (username == null || username.isBlank()
-                || email == null || email.isBlank()
-                || password == null || password.isBlank()) {
+        if (username == null || username.isBlank() || email == null || email.isBlank() || password == null || password.isBlank()) {
             return Message.failure(request, "Missing required registration fields");
         }
 
-        User user = "SELLER".equalsIgnoreCase(role)
-                ? new com.auction.model.user.Seller(username, email, String.valueOf(password.hashCode()))
-                : new Bidder(username, email, String.valueOf(password.hashCode()));
+        User user = new User(username, email, String.valueOf(password.hashCode()));
         user.setFullname(fullName == null || fullName.isBlank() ? username : fullName);
 
         boolean created = authService.register(user);
@@ -166,19 +154,13 @@ public class Server {
                 .findFirst()
                 .orElse(null);
 
-        if (auction == null) {
-            return Message.failure(request, "Auction not found");
-        }
+        if (auction == null) return Message.failure(request, "Auction not found");
+        if (bidderName == null || bidderName.isBlank()) return Message.failure(request, "Bidder username is required");
 
-        if (bidderName == null || bidderName.isBlank()) {
-            return Message.failure(request, "Bidder username is required");
-        }
-
-        Bidder bidder = new Bidder(bidderName, bidderName + "@example.com", String.valueOf("password".hashCode()));
+        // Trong thực tế sẽ lấy user từ DB, ở đây tạo tạm để demo
+        User bidder = new User(bidderName, bidderName + "@example.com", "");
         boolean success = auctionService.placeBid(auction, bidder, new BigDecimal(amountText));
-        if (!success) {
-            return Message.failure(request, "Bid failed");
-        }
+        if (!success) return Message.failure(request, "Bid failed");
 
         return Message.success(request, auctionPayload(auction));
     }

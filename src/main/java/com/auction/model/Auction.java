@@ -1,36 +1,33 @@
 package com.auction.model;
 
 import com.auction.model.item.Item;
-import com.auction.model.user.Bidder;
-import com.auction.model.user.Seller;
+import com.auction.model.user.User;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Lớp Auction đại diện cho một phiên đấu giá.
+ * Đã được cập nhật để sử dụng lớp User chung thay vì Bidder/Seller.
+ */
 public class Auction extends Entity {
 
-    // Thông tin cơ bản của phiên đấu giá
     private Item item;
-    private Seller seller;
+    private User seller;
 
-    // Giá khởi điểm và giá hiện tại
     private BigDecimal startingPrice;
     private BigDecimal currentPrice;
 
-    // Người đang trả giá cao nhất
-    private Bidder highestBidder;
+    private User highestBidder;
 
-    // Trạng thái phiên đấu giá
     private boolean active;
     private boolean finished;
 
-    // Lưu lịch sử các lần bid
     private final List<BidTransaction> bidHistory;
 
-    // Constructor
-    public Auction(Item item, Seller seller, BigDecimal startingPrice) {
+    public Auction(Item item, User seller, BigDecimal startingPrice) {
         super();
 
         if (item == null) {
@@ -53,47 +50,18 @@ public class Auction extends Entity {
         this.bidHistory = new ArrayList<>();
     }
 
-    // Getter
-    public Item getItem() {
-        return item;
-    }
+    public Item getItem() { return item; }
+    public User getSeller() { return seller; }
+    public BigDecimal getStartingPrice() { return startingPrice; }
+    public BigDecimal getCurrentPrice() { return currentPrice; }
+    public User getHighestBidder() { return highestBidder; }
+    public boolean isActive() { return active; }
+    public boolean isFinished() { return finished; }
+    public List<BidTransaction> getBidHistory() { return Collections.unmodifiableList(bidHistory); }
 
-    public Seller getSeller() {
-        return seller;
-    }
+    public void setActive(boolean active) { this.active = active; }
 
-    public BigDecimal getStartingPrice() {
-        return startingPrice;
-    }
-
-    public BigDecimal getCurrentPrice() {
-        return currentPrice;
-    }
-
-    public Bidder getHighestBidder() {
-        return highestBidder;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public boolean isFinished() {
-        return finished;
-    }
-
-    public List<BidTransaction> getBidHistory() {
-        return Collections.unmodifiableList(bidHistory);
-    }
-
-    // Setter
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    // Phương thức đặt giá
-    public void placeBid(Bidder bidder, BigDecimal bidAmount) {
-        // Không cho bid nếu phiên đã đóng
+    public void placeBid(User bidder, BigDecimal bidAmount) {
         if (!active || finished) {
             throw new IllegalStateException("AUCTION IS NOT AVAILABLE");
         }
@@ -103,60 +71,54 @@ public class Auction extends Entity {
         }
 
         if (bidAmount == null || bidAmount.compareTo(currentPrice) <= 0) {
-            throw new IllegalArgumentException(
-                    "BID AMOUNT MUST BE GREATER THAN CURRENT PRICE"
-            );
+            throw new IllegalArgumentException("BID AMOUNT MUST BE GREATER THAN CURRENT PRICE");
         }
 
-        // Không cho seller tự bid phiên của mình
         if (bidder.getId().equals(seller.getId())) {
             throw new IllegalArgumentException("SELLER CANNOT BID ON OWN AUCTION");
         }
 
-        // Cập nhật giá hiện tại và người dẫn đầu
         this.currentPrice = bidAmount;
         this.highestBidder = bidder;
 
-        // Lưu lịch sử giao dịch bid
         BidTransaction transaction = new BidTransaction(this, bidder, bidAmount);
         bidHistory.add(transaction);
+        
+        // Cập nhật thông tin cho người dùng
+        bidder.joinAuction(this.getId());
+        bidder.increaseTotalBids();
     }
 
-    // Kết thúc phiên đấu giá
     public void closeAuction() {
         if (finished) {
             throw new IllegalStateException("AUCTION HAS ALREADY BEEN CLOSED");
         }
-
         this.active = false;
         this.finished = true;
+        
+        if (highestBidder != null) {
+            highestBidder.addWonAuction(this.getId());
+        }
     }
 
-    // Kiểm tra có người thắng chưa
-    public boolean hasWinner() {
-        return highestBidder != null;
-    }
+    public boolean hasWinner() { return highestBidder != null; }
 
-    // Lấy người thắng
-    public Bidder getWinner() {
+    public User getWinner() {
         if (!finished) {
             throw new IllegalStateException("AUCTION HAS NOT FINISHED YET");
         }
         return highestBidder;
     }
 
-    // In thông tin phiên đấu giá
     @Override
     public void printInfo() {
         System.out.println("=== AUCTION INFO ===");
         System.out.println("Auction ID     : " + getId());
         System.out.println("Item           : " + item.getName());
         System.out.println("Seller         : " + seller.getUsername());
-        System.out.println("Starting Price : " + startingPrice + " VND");
         System.out.println("Current Price  : " + currentPrice + " VND");
         System.out.println("Highest Bidder : " + (highestBidder == null ? "None" : highestBidder.getUsername()));
         System.out.println("Active         : " + active);
         System.out.println("Finished       : " + finished);
-        System.out.println("Total Bids     : " + bidHistory.size());
     }
 }

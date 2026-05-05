@@ -77,20 +77,17 @@
                         <Label text="Email" GridPane.columnIndex="1" GridPane.rowIndex="2" styleClass="field-label"/>
                         <TextField fx:id="emailField" promptText="example@gmail.com" GridPane.columnIndex="1" GridPane.rowIndex="3" styleClass="mail-field"/>
 
-                        <Label text="Loại tài khoản" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="field-label"/>
-                        <ComboBox fx:id="accountTypeComboBox" promptText="Chọn loại tài khoản" GridPane.columnIndex="0" GridPane.rowIndex="5" styleClass="mail-field"/>
+                        <Label text="CMND/CCCD" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="field-label"/>
+                        <TextField fx:id="idCardField" promptText="Nhập số giấy tờ" GridPane.columnIndex="0" GridPane.rowIndex="5" styleClass="mail-field"/>
 
-                        <Label text="CMND/CCCD" GridPane.columnIndex="1" GridPane.rowIndex="4" styleClass="field-label"/>
-                        <TextField fx:id="idCardField" promptText="Nhập số giấy tờ" GridPane.columnIndex="1" GridPane.rowIndex="5" styleClass="mail-field"/>
+                        <Label text="Địa chỉ" GridPane.columnIndex="1" GridPane.rowIndex="4" styleClass="field-label"/>
+                        <TextField fx:id="addressField" promptText="Nhập địa chỉ liên hệ" GridPane.columnIndex="1" GridPane.rowIndex="5" styleClass="mail-field"/>
 
-                        <Label text="Địa chỉ" GridPane.columnIndex="0" GridPane.rowIndex="6" styleClass="field-label"/>
-                        <TextField fx:id="addressField" promptText="Nhập địa chỉ liên hệ" GridPane.columnIndex="0" GridPane.rowIndex="7" styleClass="mail-field"/>
+                        <Label text="Mật khẩu" GridPane.columnIndex="0" GridPane.rowIndex="6" styleClass="field-label"/>
+                        <PasswordField fx:id="regPasswordField" promptText="Nhập mật khẩu" GridPane.columnIndex="0" GridPane.rowIndex="7" styleClass="mail-field"/>
 
-                        <Label text="Mật khẩu" GridPane.columnIndex="1" GridPane.rowIndex="6" styleClass="field-label"/>
-                        <PasswordField fx:id="regPasswordField" promptText="Nhập mật khẩu" GridPane.columnIndex="1" GridPane.rowIndex="7" styleClass="mail-field"/>
-
-                        <Label text="Xác nhận mật khẩu" GridPane.columnIndex="0" GridPane.rowIndex="8" styleClass="field-label"/>
-                        <PasswordField fx:id="confirmPasswordField" promptText="Nhập lại mật khẩu" GridPane.columnIndex="0" GridPane.rowIndex="9" styleClass="mail-field"/>
+                        <Label text="Xác nhận mật khẩu" GridPane.columnIndex="1" GridPane.rowIndex="6" styleClass="field-label"/>
+                        <PasswordField fx:id="confirmPasswordField" promptText="Nhập lại mật khẩu" GridPane.columnIndex="1" GridPane.rowIndex="7" styleClass="mail-field"/>
                     </GridPane>
 
                     <VBox spacing="10">

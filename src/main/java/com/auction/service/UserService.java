@@ -1,15 +1,14 @@
 package com.auction.service;
 
 import com.auction.model.user.Admin;
-import com.auction.model.user.Bidder;
-import com.auction.model.user.Seller;
 import com.auction.model.user.User;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Service xử lý toàn bộ logic liên quan đến User
+ * Service xử lý toàn bộ logic liên quan đến User.
+ * Đã được cập nhật để sử dụng lớp User chung.
  */
 public class UserService {
 
@@ -25,72 +24,48 @@ public class UserService {
         initializeMockData();
     }
 
-    /**
-     * Khởi tạo dữ liệu mẫu (dùng raw password, User sẽ tự hash)
-     */
     private void initializeMockData() {
         String commonPasswordHash = String.valueOf("password".hashCode());
 
-        users.add(new Bidder("bidder1", "bidder1@example.com", commonPasswordHash));
-        users.add(new Bidder("bidder2", "bidder2@example.com", commonPasswordHash));
-
-        users.add(new Seller("seller1", "seller1@example.com", commonPasswordHash));
-        users.add(new Seller("seller2", "seller2@example.com", commonPasswordHash));
+        // Sử dụng User cho tất cả người dùng bình thường
+        users.add(new User("user1", "user1@example.com", commonPasswordHash));
+        users.add(new User("user2", "user2@example.com", commonPasswordHash));
+        users.add(new User("user3", "user3@example.com", commonPasswordHash));
 
         users.add(new Admin("admin", "admin@auction.com", commonPasswordHash, "SUPER_ADMIN"));
     }
 
-    /**
-     * Đăng nhập
-     */
     public Optional<User> login(String username, String password) {
-
-        if (username == null || password == null) {
-            return Optional.empty();
-        }
+        if (username == null || password == null) return Optional.empty();
 
         return users.stream()
                 .filter(u -> u.getUsername().equalsIgnoreCase(username))
-                .filter(u -> u.verifyPassword(password)) // ✅ KHÔNG hash ở đây
+                .filter(u -> u.verifyPassword(password))
                 .filter(User::isActive)
                 .findFirst();
     }
 
-    /**
-     * Đăng ký
-     */
     public boolean register(User user) {
-
         if (user == null) return false;
-
-        if (isBlank(user.getUsername()) || isBlank(user.getEmail())) {
-            return false;
-        }
+        if (isBlank(user.getUsername()) || isBlank(user.getEmail())) return false;
 
         boolean exists = users.stream().anyMatch(u ->
                 u.getUsername().equalsIgnoreCase(user.getUsername()) ||
-                        u.getEmail().equalsIgnoreCase(user.getEmail())
+                u.getEmail().equalsIgnoreCase(user.getEmail())
         );
 
         if (exists) return false;
-
-        return users.add(user); // password đã được hash trong User
+        return users.add(user);
     }
 
     public Optional<User> getUserById(String id) {
         if (id == null) return Optional.empty();
-
-        return users.stream()
-                .filter(u -> u.getId().equals(id))
-                .findFirst();
+        return users.stream().filter(u -> u.getId().equals(id)).findFirst();
     }
 
     public Optional<User> getUserByUsername(String username) {
         if (username == null) return Optional.empty();
-
-        return users.stream()
-                .filter(u -> u.getUsername().equalsIgnoreCase(username))
-                .findFirst();
+        return users.stream().filter(u -> u.getUsername().equalsIgnoreCase(username)).findFirst();
     }
 
     public List<User> getAllUsers() {

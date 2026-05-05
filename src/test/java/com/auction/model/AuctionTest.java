@@ -1,8 +1,7 @@
 package com.auction.model;
 
 import com.auction.model.item.Item;
-import com.auction.model.user.Bidder;
-import com.auction.model.user.Seller;
+import com.auction.model.user.User;
 import com.auction.factory.ItemFactory;
 import org.junit.jupiter.api.Test;
 
@@ -17,8 +16,8 @@ class AuctionTest {
 
     @Test
     void placeBidUpdatesCurrentPriceAndHighestBidder() {
-        Seller seller = new Seller("seller", "seller@example.com", String.valueOf("password".hashCode()));
-        Bidder bidder = new Bidder("bidder", "bidder@example.com", String.valueOf("password".hashCode()));
+        User seller = new User("seller", "seller@example.com", "pass");
+        User bidder = new User("bidder", "bidder@example.com", "pass");
         Item item = ItemFactory.createElectronics(
                 "Phone",
                 "New phone",
@@ -40,8 +39,8 @@ class AuctionTest {
 
     @Test
     void placeBidRejectsAmountNotHigherThanCurrentPrice() {
-        Seller seller = new Seller("seller", "seller@example.com", String.valueOf("password".hashCode()));
-        Bidder bidder = new Bidder("bidder", "bidder@example.com", String.valueOf("password".hashCode()));
+        User seller = new User("seller", "seller@example.com", "pass");
+        User bidder = new User("bidder", "bidder@example.com", "pass");
         Item item = ItemFactory.createElectronics(
                 "Phone",
                 "New phone",
@@ -60,7 +59,7 @@ class AuctionTest {
 
     @Test
     void closeAuctionMarksAuctionFinished() {
-        Seller seller = new Seller("seller", "seller@example.com", String.valueOf("password".hashCode()));
+        User seller = new User("seller", "seller@example.com", "pass");
         Item item = ItemFactory.createElectronics(
                 "Phone",
                 "New phone",

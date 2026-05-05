@@ -2,8 +2,7 @@ package com.auction.service;
 
 import com.auction.model.Auction;
 import com.auction.model.item.Item;
-import com.auction.model.user.Bidder;
-import com.auction.model.user.Seller;
+import com.auction.model.user.User;
 import com.auction.factory.ItemFactory;
 
 import java.math.BigDecimal;
@@ -13,7 +12,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Service quản lý các phiên đấu giá (Singleton)
+ * Service quản lý các phiên đấu giá (Singleton).
+ * Đã được cập nhật để sử dụng lớp User chung.
  */
 public class AuctionService {
 
@@ -33,8 +33,8 @@ public class AuctionService {
     }
 
     private void loadSampleData() {
-        Seller seller1 = new Seller("seller_001", "seller1@example.com", "pass");
-        Seller seller2 = new Seller("seller_002", "seller2@example.com", "pass");
+        User user1 = new User("user_001", "user1@example.com", "pass");
+        User user2 = new User("user_002", "user2@example.com", "pass");
 
         Item item1 = ItemFactory.createElectronics(
                 "iPhone 15 Pro Max", 
@@ -42,7 +42,7 @@ public class AuctionService {
                 new BigDecimal("25000000"),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(2),
-                seller1.getId(),
+                user1.getId(),
                 "Apple",
                 12
         );
@@ -53,13 +53,13 @@ public class AuctionService {
                 new BigDecimal("30500000"),
                 LocalDateTime.now().minusHours(5),
                 LocalDateTime.now().plusHours(12),
-                seller2.getId(),
+                user2.getId(),
                 "ASUS",
                 24
         );
 
-        auctions.add(new Auction(item1, seller1, item1.getCurrentPrice()));
-        auctions.add(new Auction(item2, seller2, item2.getCurrentPrice()));
+        auctions.add(new Auction(item1, user1, item1.getCurrentPrice()));
+        auctions.add(new Auction(item2, user2, item2.getCurrentPrice()));
     }
 
     public List<Auction> getAllAuctions() {
@@ -77,7 +77,7 @@ public class AuctionService {
                 .orElse(null);
     }
 
-    public boolean placeBid(Auction auction, Bidder bidder, BigDecimal amount) {
+    public boolean placeBid(Auction auction, User bidder, BigDecimal amount) {
         if (auction == null || bidder == null) return false;
         try {
             auction.placeBid(bidder, amount);

@@ -2,7 +2,7 @@ package com.auction;
 
 import com.auction.model.Auction;
 import com.auction.model.item.Item;
-import com.auction.model.user.Bidder;
+import com.auction.model.user.User;
 import com.auction.service.AuctionService;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -25,7 +25,7 @@ public class AuctionDetailController {
     private static final DecimalFormat PRICE_FORMAT = createPriceFormat();
 
     private final AuctionService auctionService = AuctionService.getInstance();
-    private final Bidder currentUser = new Bidder("guest_bidder", "guest@example.com", "guest");
+    private final User currentUser = new User("guest_user", "guest@example.com", "guest");
     private Auction currentAuction;
     private Timeline countdownTimeline;
 
@@ -64,7 +64,10 @@ public class AuctionDetailController {
             }
 
             BigDecimal bidAmount = parseAmount(bidText);
-            boolean success = auctionService.placeBid(currentAuction, currentUser, bidAmount);
+            
+            // Sử dụng user đã đăng nhập nếu có
+            User bidder = UserSession.isLoggedIn() ? UserSession.getLoggedInUser() : currentUser;
+            boolean success = auctionService.placeBid(currentAuction, bidder, bidAmount);
             
             if (success) {
                 lblPrice.setText(formatPrice(currentAuction.getCurrentPrice()));

@@ -1,175 +1,188 @@
 package com.auction.dao;
 
 import com.auction.config.DBConnection;
-import com.auction.model.user.*;
+import com.auction.model.user.Admin;
+import com.auction.model.user.User;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Locale;
+import java.util.UUID;
 
+/**
+ * Lớp UserDao: Thực hiện các lệnh SQL (CRUD) trên bảng 'users'.
+ * Đây là nơi Java giao tiếp trực tiếp với MySQL.
+ */
 public class UserDao {
 
     /**
-     * Lấy danh sách tất cả người dùng từ database
+     * Kiểm tra sự tồn tại của username bằng câu lệnh SELECT.
      */
-    public List<User> getAllUsers() {
-        List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                users.add(mapResultSetToUser(rs));
-            }
-        } catch (SQLException e) {
-            System.err.println("Error getting all users: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return users;
-    }
-
-    /**
-     * Kiểm tra đăng nhập
-     */
-    public User login(String username, String password) {
-        String passwordHash = String.valueOf(password.hashCode());
-        String sql = "SELECT * FROM users WHERE (username = ? OR email = ?) AND password = ?";
-
+    public boolean usernameExists(String username) {
+        String sql = "SELECT 1 FROM users WHERE username = ?";
+        
+        // Sử dụng try-with-resources để tự động đóng Connection và PreparedStatement
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+            
+            // Truyền tham số vào dấu ? để chống SQL Injection
             stmt.setString(1, username);
-            stmt.setString(2, username);
-            stmt.setString(3, passwordHash);
-
+            
+            // Thực thi truy vấn và nhận về tập kết quả ResultSet
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToUser(rs);
-                }
+                return rs.next(); // Nếu rs.next() là true nghĩa là có ít nhất 1 dòng kết quả
             }
         } catch (SQLException e) {
-            System.err.println("Error during login: " + e.getMessage());
             e.printStackTrace();
-        }
-        return null;
-    }
-
-    public boolean register(User user) {
-        if (user == null) {
-            return false;
-        }
-
-        String sql = """
-                INSERT INTO users (id, username, full_name, email, password, role, balance, active)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """;
-
-        try (Connection conn = DBConnection.getConnection()) {
-            if (existsByUsernameOrEmail(conn, user.getUsername(), user.getEmail())) {
-                return false;
-            }
-
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, user.getId());
-                stmt.setString(2, user.getUsername());
-                stmt.setString(3, user.getFullname());
-                stmt.setString(4, user.getEmail());
-                stmt.setString(5, getPasswordHash(user));
-                stmt.setString(6, user.getRole());
-                stmt.setLong(7, user.getBalance());
-                stmt.setBoolean(8, user.isActive());
-                return stmt.executeUpdate() == 1;
-            }
-        } catch (SQLException e) {
-            System.err.println("Error during register: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean isDatabaseAvailable() {
-        try (Connection ignored = DBConnection.getConnection()) {
-            return true;
-        } catch (SQLException e) {
             return false;
         }
     }
 
     /**
-     * Chuyển đổi ResultSet thành đối tượng User (Admin, Bidder, hoặc Seller)
+     * Kiểm tra sự tồn tại của email.
      */
-    private User mapResultSetToUser(ResultSet rs) throws SQLException {
+    public boolean emailExists(String email) {
+        String sql = "SELECT 1 FROM users WHERE email = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Đăng ký người dùng mới bằng lệnh INSERT.
+     */
+    public boolean register(String username, String password, String fullName, String email) {
+        return insertUser(
+                UUID.randomUUID().toString(),
+                username,
+                fullName,
+                email,
+                hashPassword(password),
+                "USER",
+                0L,
+                true
+        );
+    }
+
+    /**
+     * Đăng ký từ đối tượng User.
+     */
+    public boolean register(User user) {
+        if (user == null) return false;
+        return insertUser(
+                user.getId(),
+                user.getUsername(),
+                user.getFullname(),
+                user.getEmail(),
+                user.getPasswordHash(),
+                user.getRole(),
+                user.getBalance(),
+                user.isActive()
+        );
+    }
+
+    /**
+     * Xác thực đăng nhập bằng lệnh SELECT với cả username và password.
+     */
+    public User login(String username, String password) {
+        String sql = "SELECT * FROM users WHERE username = ? AND password = ? AND active = TRUE";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, username);
+            stmt.setString(2, hashPassword(password));
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) return null; // Không tìm thấy hoặc sai thông tin
+                return mapUser(rs); // Chuyển dòng dữ liệu hiện tại thành đối tượng User
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Kiểm tra xem Database có đang "sống" hay không.
+     */
+    public boolean isDatabaseAvailable() {
+        try (Connection ignored = DBConnection.getConnection()) {
+            return true; // Kết nối thành công
+        } catch (SQLException e) {
+            return false; // Không thể kết nối (DB tắt, sai pass, v.v.)
+        }
+    }
+
+    /**
+     * Thực thi lệnh INSERT để thêm mới một dòng vào bảng users.
+     */
+    private boolean insertUser(String id, String username, String fullName, String email, 
+                               String passwordHash, String role, long balance, boolean active) {
+        if (isBlank(username) || isBlank(passwordHash) || isBlank(fullName) || isBlank(email)) return false;
+        
+        String sql = "INSERT INTO users(id, username, full_name, email, password, role, balance, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            // Gán các giá trị tương ứng cho từng dấu ?
+            stmt.setString(1, isBlank(id) ? UUID.randomUUID().toString() : id);
+            stmt.setString(2, username);
+            stmt.setString(3, fullName);
+            stmt.setString(4, email);
+            stmt.setString(5, passwordHash);
+            stmt.setString(6, role.toUpperCase(Locale.ROOT));
+            stmt.setLong(7, balance);
+            stmt.setBoolean(8, active);
+            
+            // executeUpdate() dùng cho các lệnh INSERT, UPDATE, DELETE. Trả về số dòng bị ảnh hưởng.
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Hàm ánh xạ (Mapping) từ dữ liệu dòng trong SQL sang đối tượng Java.
+     */
+    private User mapUser(ResultSet rs) throws SQLException {
+        String role = rs.getString("role").toUpperCase(Locale.ROOT);
         String username = rs.getString("username");
-        String fullname = rs.getString("full_name");
+        String fullName = rs.getString("full_name");
         String email = rs.getString("email");
         String passwordHash = rs.getString("password");
-        String role = rs.getString("role");
-        long balance = rs.getLong("balance");
-        String id = String.valueOf(rs.getObject("id")); // Lấy ID từ DB
-        boolean active = rs.getBoolean("active");
 
         User user;
-        // Khởi tạo subclass tương ứng với Role
-        if ("ADMIN".equalsIgnoreCase(role)) {
-            user = new Admin(username, email, passwordHash, "STANDARD");
-        } else if ("SELLER".equalsIgnoreCase(role)) {
-            user = new Seller(username, email, passwordHash);
+        if ("ADMIN".equals(role)) {
+            user = new Admin(username, email, passwordHash, "SYSTEM_ADMIN");
         } else {
-            user = new Bidder(username, email, passwordHash);
+            user = new User(username, email, passwordHash);
         }
 
-        // Gán các thông tin bổ sung
-        user.setId(id);
-        user.setFullname(fullname);
-        if (balance > 0) {
-            user.deposit(balance);
-        }
-        user.setActive(active);
+        // Lấy dữ liệu từ các cột theo tên hoặc chỉ số dòng
+        user.setId(rs.getString("id"));
+        user.setFullname(fullName);
+        user.setActive(rs.getBoolean("active"));
+        long balance = rs.getLong("balance");
+        if (balance > 0) user.deposit(balance);
 
         return user;
     }
 
-    private boolean existsByUsernameOrEmail(Connection conn, String username, String email) throws SQLException {
-        String sql = "SELECT 1 FROM users WHERE username = ? OR email = ? LIMIT 1";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, username);
-            stmt.setString(2, email);
-            try (ResultSet rs = stmt.executeQuery()) {
-                return rs.next();
-            }
-        }
+    private String hashPassword(String password) {
+        return (password == null) ? null : String.valueOf(password.hashCode());
     }
 
-    private String getPasswordHash(User user) {
-        return user.getPasswordHash();
-    }
-
-    /**
-     * Hàm main để chạy thử nghiệm (Test)
-     */
-    public static void main(String[] args) {
-        UserDao dao = new UserDao();
-
-        System.out.println("=== TEST: GET ALL USERS ===");
-        List<User> users = dao.getAllUsers();
-        if (users.isEmpty()) {
-            System.out.println("No users found (Database might be empty or connection failed).");
-        } else {
-            for (User u : users) {
-                System.out.println("ID: " + u.getId() + " | " + u.getUsername() + " - " + u.getRole() + " (" + u.getFullname() + ")");
-            }
-        }
-
-        System.out.println("\n=== TEST: LOGIN ===");
-        // Thử login với tài khoản admin (giả sử đã có trong DB)
-        User user = dao.login("admin", "password");
-        if (user != null) {
-            System.out.println("Login success!");
-            user.printInfo();
-        } else {
-            System.out.println("Login failed: Username or password incorrect.");
-        }
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 }

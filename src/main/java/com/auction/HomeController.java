@@ -72,8 +72,6 @@ public class HomeController {
     @FXML
     private TextField emailField;
     @FXML
-    private ComboBox<String> accountTypeComboBox;
-    @FXML
     private TextField idCardField;
     @FXML
     private TextField addressField;
@@ -96,10 +94,6 @@ public class HomeController {
         updateLoginState();
         if (clockLabel != null) {
             initClock();
-        }
-        if (accountTypeComboBox != null) {
-            accountTypeComboBox.getItems().addAll("Người mua (Bidder)", "Người bán (Seller)");
-            accountTypeComboBox.getSelectionModel().selectFirst();
         }
         refreshDatabaseStatus();
     }
@@ -204,7 +198,6 @@ public class HomeController {
         String username = regUsernameField.getText();
         String phone = phoneField.getText();
         String email = emailField.getText();
-        String accountType = accountTypeComboBox.getValue();
         String idCard = idCardField.getText();
         String address = addressField.getText();
         String password = regPasswordField.getText();
@@ -221,8 +214,7 @@ public class HomeController {
         }
 
         try {
-            String role = accountType != null && accountType.contains("Seller") ? "SELLER" : "BIDDER";
-            networkService.register(username, fullName, email, password, role);
+            networkService.register(username, fullName, email, password, "USER");
             showInformation("Đăng ký thành công", "Tài khoản của bạn đã được tạo. Vui lòng đăng nhập.");
             goToLogin(event);
         } catch (Exception e) {
@@ -319,14 +311,14 @@ public class HomeController {
             String shortUrl = dbUrl.replaceFirst("^jdbc:mysql://", "");
 
             if (available) {
-                dbStatusLabel.setText("DB: Connected | " + dbUser + "@" + shortUrl);
+                dbStatusLabel.setText("Database: OK");
                 dbStatusLabel.setStyle("-fx-text-fill: #2ecc71; -fx-font-weight: bold;");
             } else {
-                dbStatusLabel.setText("DB: Unavailable | " + dbUser + "@" + shortUrl);
+                dbStatusLabel.setText("Database: Error");
                 dbStatusLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
             }
         } catch (Exception e) {
-            dbStatusLabel.setText("DB: Server unavailable");
+            dbStatusLabel.setText("DB: Offline");
             dbStatusLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
         }
     }

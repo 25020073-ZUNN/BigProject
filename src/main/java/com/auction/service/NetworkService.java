@@ -2,8 +2,6 @@ package com.auction.service;
 
 import com.auction.client.network.ServerConnection;
 import com.auction.model.user.Admin;
-import com.auction.model.user.Bidder;
-import com.auction.model.user.Seller;
 import com.auction.model.user.User;
 import com.auction.network.Message;
 
@@ -108,13 +106,14 @@ public class NetworkService {
     private User toUser(Map<String, Object> payload) {
         String username = String.valueOf(payload.getOrDefault("username", ""));
         String email = String.valueOf(payload.getOrDefault("email", username + "@example.com"));
-        String role = String.valueOf(payload.getOrDefault("role", "BIDDER"));
+        String role = String.valueOf(payload.getOrDefault("role", "USER"));
 
-        User user = switch (role.toUpperCase()) {
-            case "ADMIN" -> new Admin(username, email, "", "STANDARD");
-            case "SELLER" -> new Seller(username, email, "");
-            default -> new Bidder(username, email, "");
-        };
+        User user;
+        if ("ADMIN".equalsIgnoreCase(role)) {
+            user = new Admin(username, email, "", "STANDARD");
+        } else {
+            user = new User(username, email, "");
+        }
 
         user.setId(String.valueOf(payload.getOrDefault("id", user.getId())));
         user.setFullname(String.valueOf(payload.getOrDefault("fullName", username)));
