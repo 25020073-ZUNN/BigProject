@@ -3,6 +3,8 @@ package com.auction.network;
 import com.auction.config.DBConnection;
 import com.auction.model.Auction;
 import com.auction.model.item.Item;
+import com.auction.model.user.Bidder;
+import com.auction.model.user.Seller;
 import com.auction.model.user.User;
 import com.auction.service.AuctionService;
 import com.auction.service.AuthService;
@@ -155,13 +157,22 @@ public class Server {
         String fullName = stringValue(payload.get("fullName"));
         String email = stringValue(payload.get("email"));
         String password = stringValue(payload.get("password"));
+        String role = stringValue(payload.get("role"));
 
         if (username == null || username.isBlank() || email == null || email.isBlank() || password == null || password.isBlank()) {
             return Message.failure(request, "Thiếu thông tin đăng ký bắt buộc");
         }
 
-        User user = new User(username, email, String.valueOf(password.hashCode()));
-        user.setFullname(fullName == null || fullName.isBlank() ? username : fullName);
+        if (role == null || role.isBlank()) {
+            role = "BIDDER";
+        }
+
+        User user;
+        if ("SELLER".equalsIgnoreCase(role)) {
+            user = new Seller(username, fullName == null || fullName.isBlank() ? username : fullName, email, String.valueOf(password.hashCode()));
+        } else {
+            user = new Bidder(username, fullName == null || fullName.isBlank() ? username : fullName, email, String.valueOf(password.hashCode()));
+        }
 
         boolean created = authService.register(user);
         if (!created) {
@@ -200,7 +211,7 @@ public class Server {
         if (bidderName == null || bidderName.isBlank()) return Message.failure(request, "Tên người đặt giá là bắt buộc");
 
         // Tạo đối tượng người đặt giá (Trong thực tế nên lấy từ DB)
-        User bidder = new User(bidderName, bidderName + "@example.com", "");
+        User bidder = new Bidder(bidderName, bidderName + "@example.com", "");
         boolean success = auctionService.placeBid(auction, bidder, new BigDecimal(amountText));
         
         if (!success) return Message.failure(request, "Đặt giá thất bại (có thể giá của bạn thấp hơn giá hiện tại)");

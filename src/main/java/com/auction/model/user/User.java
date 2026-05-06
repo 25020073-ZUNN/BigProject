@@ -8,7 +8,7 @@ import java.util.List;
  * Lớp User đại diện cho người dùng bình thường trong hệ thống.
  * Một User hiện tại có thể đóng cả hai vai trò: Người mua (Bidder) và Người bán (Seller).
  */
-public class User extends Entity {
+public abstract class User extends Entity {
 
     // --- Thuộc tính cơ bản ---
     private String username;
@@ -56,9 +56,7 @@ public class User extends Entity {
     /**
      * Trả về vai trò. Với lớp này mặc định là USER.
      */
-    public String getRole() {
-        return "USER";
-    }
+    public abstract String getRole();
 
     public void setEmail(String email) {
         if (email == null || !email.contains("@")) {

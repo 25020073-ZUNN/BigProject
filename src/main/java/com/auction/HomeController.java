@@ -82,9 +82,9 @@ public class HomeController {
     @FXML
     private TextField emailField;
     @FXML
-    private TextField idCardField;
-    @FXML
     private TextField addressField;
+    @FXML
+    private ComboBox<String> accountTypeComboBox;
     @FXML
     private PasswordField regPasswordField;
     @FXML
@@ -116,6 +116,11 @@ public class HomeController {
         
         // Kiểm tra và hiển thị trạng thái kết nối cơ sở dữ liệu
         refreshDatabaseStatus();
+
+        if (accountTypeComboBox != null) {
+            accountTypeComboBox.getItems().setAll("BIDDER", "SELLER");
+            accountTypeComboBox.setValue("BIDDER");
+        }
     }
 
     /**
@@ -241,14 +246,19 @@ public class HomeController {
         String username = regUsernameField.getText();
         String phone = phoneField.getText();
         String email = emailField.getText();
-        String idCard = idCardField.getText();
         String address = addressField.getText();
+        String role = accountTypeComboBox != null ? accountTypeComboBox.getValue() : "BIDDER";
         String password = regPasswordField.getText();
         String confirmPassword = confirmPasswordField.getText();
 
         // Kiểm tra dữ liệu đầu vào
         if (fullName.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty()) {
             showError("Lỗi đăng ký", "Vui lòng điền đầy đủ các thông tin bắt buộc (Họ tên, Tên đăng nhập, Email, Mật khẩu).");
+            return;
+        }
+
+        if (role == null || role.isBlank()) {
+            showError("Lỗi đăng ký", "Vui lòng chọn loại tài khoản.");
             return;
         }
 
@@ -259,7 +269,7 @@ public class HomeController {
 
         try {
             // Gửi yêu cầu đăng ký lên server qua NetworkService
-            networkService.register(username, fullName, email, password, "USER");
+            networkService.register(username, fullName, email, password, role);
             showInformation("Đăng ký thành công", "Tài khoản của bạn đã được tạo. Vui lòng đăng nhập.");
             // Chuyển sang màn hình đăng nhập
             goToLogin(event);

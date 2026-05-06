@@ -1,6 +1,7 @@
 package com.auction.service;
 
 import com.auction.model.user.Admin;
+import com.auction.model.user.Bidder;
 import com.auction.model.user.User;
 
 import java.util.*;
@@ -28,9 +29,9 @@ public class UserService {
         String commonPasswordHash = String.valueOf("password".hashCode());
 
         // Sử dụng User cho tất cả người dùng bình thường
-        users.add(new User("user1", "user1@example.com", commonPasswordHash));
-        users.add(new User("user2", "user2@example.com", commonPasswordHash));
-        users.add(new User("user3", "user3@example.com", commonPasswordHash));
+        users.add(new Bidder("user1", "user1@example.com", commonPasswordHash));
+        users.add(new Bidder("user2", "user2@example.com", commonPasswordHash));
+        users.add(new Bidder("user3", "user3@example.com", commonPasswordHash));
 
         users.add(new Admin("admin", "admin@auction.com", commonPasswordHash, "SUPER_ADMIN"));
     }

@@ -2,6 +2,8 @@ package com.auction.service;
 
 import com.auction.client.network.ServerConnection;
 import com.auction.model.user.Admin;
+import com.auction.model.user.Bidder;
+import com.auction.model.user.Seller;
 import com.auction.model.user.User;
 import com.auction.network.Message;
 
@@ -111,8 +113,10 @@ public class NetworkService {
         User user;
         if ("ADMIN".equalsIgnoreCase(role)) {
             user = new Admin(username, email, "", "STANDARD");
+        } else if ("SELLER".equalsIgnoreCase(role)) {
+            user = new Seller(username, email, "");
         } else {
-            user = new User(username, email, "");
+            user = new Bidder(username, email, "");
         }
 
         user.setId(String.valueOf(payload.getOrDefault("id", user.getId())));

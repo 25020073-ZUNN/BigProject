@@ -1,6 +1,8 @@
 package com.auction.model;
 
 import com.auction.model.item.Item;
+import com.auction.model.user.Bidder;
+import com.auction.model.user.Seller;
 import com.auction.model.user.User;
 import com.auction.factory.ItemFactory;
 import org.junit.jupiter.api.Test;
@@ -16,8 +18,8 @@ class AuctionTest {
 
     @Test
     void placeBidUpdatesCurrentPriceAndHighestBidder() {
-        User seller = new User("seller", "seller@example.com", "pass");
-        User bidder = new User("bidder", "bidder@example.com", "pass");
+        User seller = new Seller("seller", "seller@example.com", "pass");
+        User bidder = new Bidder("bidder", "bidder@example.com", "pass");
         Item item = ItemFactory.createElectronics(
                 "Phone",
                 "New phone",
@@ -39,8 +41,8 @@ class AuctionTest {
 
     @Test
     void placeBidRejectsAmountNotHigherThanCurrentPrice() {
-        User seller = new User("seller", "seller@example.com", "pass");
-        User bidder = new User("bidder", "bidder@example.com", "pass");
+        User seller = new Seller("seller", "seller@example.com", "pass");
+        User bidder = new Bidder("bidder", "bidder@example.com", "pass");
         Item item = ItemFactory.createElectronics(
                 "Phone",
                 "New phone",
@@ -59,7 +61,7 @@ class AuctionTest {
 
     @Test
     void closeAuctionMarksAuctionFinished() {
-        User seller = new User("seller", "seller@example.com", "pass");
+        User seller = new Seller("seller", "seller@example.com", "pass");
         Item item = ItemFactory.createElectronics(
                 "Phone",
                 "New phone",

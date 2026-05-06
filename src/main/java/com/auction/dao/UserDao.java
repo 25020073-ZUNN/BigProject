@@ -2,6 +2,8 @@ package com.auction.dao;
 
 import com.auction.config.DBConnection;
 import com.auction.model.user.Admin;
+import com.auction.model.user.Bidder;
+import com.auction.model.user.Seller;
 import com.auction.model.user.User;
 
 import java.sql.Connection;
@@ -164,8 +166,10 @@ public class UserDao {
         User user;
         if ("ADMIN".equals(role)) {
             user = new Admin(username, email, passwordHash, "SYSTEM_ADMIN");
+        } else if ("SELLER".equals(role)) {
+            user = new Seller(username, email, passwordHash);
         } else {
-            user = new User(username, email, passwordHash);
+            user = new Bidder(username, email, passwordHash);
         }
 
         // Lấy dữ liệu từ các cột theo tên hoặc chỉ số dòng

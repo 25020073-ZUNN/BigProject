@@ -2,6 +2,7 @@ package com.auction;
 
 import com.auction.model.Auction;
 import com.auction.model.item.Item;
+import com.auction.model.user.Bidder;
 import com.auction.model.user.User;
 import com.auction.service.AuctionService;
 import javafx.animation.KeyFrame;
@@ -25,7 +26,7 @@ public class AuctionDetailController {
     private static final DecimalFormat PRICE_FORMAT = createPriceFormat();
 
     private final AuctionService auctionService = AuctionService.getInstance();
-    private final User currentUser = new User("guest_user", "guest@example.com", "guest");
+    private final User currentUser = new Bidder("guest_user", "guest@example.com", "guest");
     private Auction currentAuction;
     private Timeline countdownTimeline;
 

@@ -2,6 +2,8 @@ package com.auction.service;
 
 import com.auction.model.Auction;
 import com.auction.model.item.Item;
+import com.auction.model.user.Bidder;
+import com.auction.model.user.Seller;
 import com.auction.model.user.User;
 import com.auction.factory.ItemFactory;
 
@@ -45,8 +47,8 @@ public class AuctionService {
      */
     private void loadSampleData() {
         // Tạo người dùng mẫu (Người bán)
-        User user1 = new User("user_001", "user1@example.com", "pass");
-        User user2 = new User("user_002", "user2@example.com", "pass");
+        User user1 = new Seller("user_001", "user1@example.com", "pass");
+        User user2 = new Seller("user_002", "user2@example.com", "pass");
 
         // Sử dụng ItemFactory để tạo các mặt hàng điện tử mẫu
         Item item1 = ItemFactory.createElectronics(
