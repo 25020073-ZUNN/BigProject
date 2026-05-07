@@ -28,8 +28,8 @@
                 </padding>
 
                 <VBox spacing="0">
-                    <Label text="AUREX" styleClass="logo-main"/>
-                    <Label text="AUCTION PLATFORM" styleClass="logo-sub"/>
+                    <Label text="DUREX" styleClass="logo-main"/>
+                    <Label text="UET online auction" styleClass="logo-sub"/>
                 </VBox>
 
                 <Region HBox.hgrow="ALWAYS"/>
@@ -67,7 +67,7 @@
                                    wrapText="true"
                                    styleClass="hero-title"/>
 
-                            <Label text="WEB ĐƯỢC BUILD BỞI  - NTD."
+                            <Label text="WEB ĐƯỢC BUILD BỞI  - TEAM6."
                                    wrapText="true"
                                    styleClass="hero-desc"/>
 
