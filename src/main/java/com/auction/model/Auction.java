@@ -9,35 +9,39 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Lớp Auction đại diện cho một phiên đấu giá.
- * Đã được cập nhật để sử dụng lớp User chung thay vì Bidder/Seller.
+ * Lớp Auction đại diện cho một phiên đấu giá cụ thể.
+ * Quản lý thông tin về sản phẩm, người bán, lịch sử đặt giá và trạng thái của phiên đấu giá.
  */
 public class Auction extends Entity {
 
-    private Item item;
-    private User seller;
+    private Item item; // Sản phẩm đang được đấu giá
+    private User seller; // Người đăng bán sản phẩm
 
-    private BigDecimal startingPrice;
-    private BigDecimal currentPrice;
+    private BigDecimal startingPrice; // Giá khởi điểm
+    private BigDecimal currentPrice; // Giá hiện tại (giá cao nhất đã đặt)
 
-    private User highestBidder;
+    private User highestBidder; // Người đang giữ mức giá cao nhất
 
-    private boolean active;
-    private boolean finished;
+    private boolean active; // Trạng thái đang hoạt động (có thể đặt giá)
+    private boolean finished; // Trạng thái đã kết thúc
 
-    private final List<BidTransaction> bidHistory;
+    private final List<BidTransaction> bidHistory; // Lịch sử các lượt đặt giá
 
+    /**
+     * Khởi tạo một phiên đấu giá mới.
+     */
     public Auction(Item item, User seller, BigDecimal startingPrice) {
         super();
 
+        // Kiểm tra tính hợp lệ của dữ liệu đầu vào
         if (item == null) {
-            throw new IllegalArgumentException("ITEM MUST NOT BE NULL");
+            throw new IllegalArgumentException("Sản phẩm không được để trống");
         }
         if (seller == null) {
-            throw new IllegalArgumentException("SELLER MUST NOT BE NULL");
+            throw new IllegalArgumentException("Người bán không được để trống");
         }
         if (startingPrice == null || startingPrice.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("STARTING PRICE MUST BE POSITIVE");
+            throw new IllegalArgumentException("Giá khởi điểm phải là số dương");
         }
 
         this.item = item;
@@ -50,6 +54,7 @@ public class Auction extends Entity {
         this.bidHistory = new ArrayList<>();
     }
 
+    // Các hàm Getter/Setter
     public Item getItem() { return item; }
     public User getSeller() { return seller; }
     public BigDecimal getStartingPrice() { return startingPrice; }
@@ -61,26 +66,36 @@ public class Auction extends Entity {
 
     public void setActive(boolean active) { this.active = active; }
 
+    /**
+     * Thực hiện đặt giá mới cho phiên đấu giá.
+     * @param bidder Người đặt giá
+     * @param bidAmount Số tiền đặt giá mới
+     */
     public void placeBid(User bidder, BigDecimal bidAmount) {
+        // 1. Kiểm tra trạng thái phiên đấu giá
         if (!active || finished) {
-            throw new IllegalStateException("AUCTION IS NOT AVAILABLE");
+            throw new IllegalStateException("Phiên đấu giá đã đóng hoặc không khả dụng");
         }
 
         if (bidder == null) {
-            throw new IllegalArgumentException("BIDDER MUST NOT BE NULL");
+            throw new IllegalArgumentException("Người đặt giá không hợp lệ");
         }
 
+        // 2. Kiểm tra giá đặt mới có cao hơn giá hiện tại không
         if (bidAmount == null || bidAmount.compareTo(currentPrice) <= 0) {
-            throw new IllegalArgumentException("BID AMOUNT MUST BE GREATER THAN CURRENT PRICE");
+            throw new IllegalArgumentException("Giá đặt phải cao hơn giá hiện tại");
         }
 
+        // 3. Người bán không được phép tự đấu giá sản phẩm của chính mình
         if (bidder.getId().equals(seller.getId())) {
-            throw new IllegalArgumentException("SELLER CANNOT BID ON OWN AUCTION");
+            throw new IllegalArgumentException("Người bán không thể đặt giá cho sản phẩm của mình");
         }
 
+        // Cập nhật thông tin giá cao nhất và người thắng hiện tại
         this.currentPrice = bidAmount;
         this.highestBidder = bidder;
 
+        // Lưu vào lịch sử giao dịch
         BidTransaction transaction = new BidTransaction(this, bidder, bidAmount);
         bidHistory.add(transaction);
         
@@ -89,13 +104,17 @@ public class Auction extends Entity {
         bidder.increaseTotalBids();
     }
 
+    /**
+     * Đóng phiên đấu giá khi hết thời gian hoặc được yêu cầu dừng.
+     */
     public void closeAuction() {
         if (finished) {
-            throw new IllegalStateException("AUCTION HAS ALREADY BEEN CLOSED");
+            throw new IllegalStateException("Phiên đấu giá này đã được đóng trước đó");
         }
         this.active = false;
         this.finished = true;
         
+        // Nếu có người đặt giá, ghi nhận phiên đấu giá này vào danh sách đã thắng của họ
         if (highestBidder != null) {
             highestBidder.addWonAuction(this.getId());
         }
@@ -103,22 +122,24 @@ public class Auction extends Entity {
 
     public boolean hasWinner() { return highestBidder != null; }
 
+    /**
+     * Lấy người thắng cuộc sau khi kết thúc.
+     */
     public User getWinner() {
         if (!finished) {
-            throw new IllegalStateException("AUCTION HAS NOT FINISHED YET");
+            throw new IllegalStateException("Phiên đấu giá chưa kết thúc");
         }
         return highestBidder;
     }
 
     @Override
     public void printInfo() {
-        System.out.println("=== AUCTION INFO ===");
-        System.out.println("Auction ID     : " + getId());
-        System.out.println("Item           : " + item.getName());
-        System.out.println("Seller         : " + seller.getUsername());
-        System.out.println("Current Price  : " + currentPrice + " VND");
-        System.out.println("Highest Bidder : " + (highestBidder == null ? "None" : highestBidder.getUsername()));
-        System.out.println("Active         : " + active);
-        System.out.println("Finished       : " + finished);
+        System.out.println("=== THÔNG TIN ĐẤU GIÁ ===");
+        System.out.println("Mã đấu giá     : " + getId());
+        System.out.println("Sản phẩm       : " + item.getName());
+        System.out.println("Người bán      : " + seller.getUsername());
+        System.out.println("Giá hiện tại   : " + currentPrice + " VND");
+        System.out.println("Người dẫn đầu  : " + (highestBidder == null ? "Chưa có" : highestBidder.getUsername()));
+        System.out.println("Trạng thái     : " + (active ? "Đang diễn ra" : "Đã dừng"));
     }
 }

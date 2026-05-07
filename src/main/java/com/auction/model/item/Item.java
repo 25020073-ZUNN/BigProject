@@ -6,18 +6,19 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Lớp trừu tượng đại diện cho một sản phẩm đấu giá
+ * Lớp trừu tượng Item đại diện cho một sản phẩm trong hệ thống đấu giá.
+ * Các lớp con như Electronics, Art, Vehicle sẽ kế thừa từ lớp này.
  */
 public abstract class Item extends Entity {
 
-    protected String name;
-    protected String description;
-    protected BigDecimal startingPrice;
-    protected BigDecimal currentPrice;
-    protected LocalDateTime startTime;
-    protected LocalDateTime endTime;
-    protected ItemStatus status;
-    protected String sellerId;
+    protected String name; // Tên sản phẩm
+    protected String description; // Mô tả chi tiết sản phẩm
+    protected BigDecimal startingPrice; // Giá khởi điểm khi bắt đầu đấu giá
+    protected BigDecimal currentPrice; // Giá hiện tại sau các lượt đặt giá
+    protected LocalDateTime startTime; // Thời điểm bắt đầu phiên đấu giá
+    protected LocalDateTime endTime; // Thời điểm kết thúc phiên đấu giá
+    protected ItemStatus status; // Trạng thái của mặt hàng (MỞ, ĐÓNG, ĐÃ BÁN, ...)
+    protected String sellerId; // ID của người bán mặt hàng này
 
     public Item(String name, String description, BigDecimal startingPrice,
                 LocalDateTime startTime, LocalDateTime endTime, String sellerId) {
@@ -32,21 +33,27 @@ public abstract class Item extends Entity {
         this.sellerId = sellerId;
     }
 
+    /**
+     * Kiểm tra xem phiên đấu giá của mặt hàng này có đang trong thời gian diễn ra hay không.
+     */
     public boolean isAuctionActive() {
         LocalDateTime now = LocalDateTime.now();
         return now.isAfter(startTime) && now.isBefore(endTime);
     }
 
+    /**
+     * Cập nhật giá mới cho sản phẩm nếu giá mới cao hơn giá hiện tại.
+     */
     public void updatePrice(BigDecimal newPrice) {
         if (newPrice.compareTo(currentPrice) > 0) {
             this.currentPrice = newPrice;
         }
     }
 
-    public abstract String getCategory();
-    public abstract void printInfo();
+    public abstract String getCategory(); // Lấy tên phân loại (Điện tử, Xe cộ, ...)
+    public abstract void printInfo(); // In thông tin chi tiết ra Console
 
-    // ===== Getters for JavaFX PropertyValueFactory =====
+    // ===== Getters hỗ trợ JavaFX PropertyValueFactory để hiển thị dữ liệu lên TableView =====
     public String getName() { return name; }
     public String getDescription() { return description; }
     public BigDecimal getStartingPrice() { return startingPrice; }
