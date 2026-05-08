@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<!--đăng ký-->
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
@@ -29,8 +29,8 @@
             </padding>
 
             <VBox spacing="0">
-                <Label text="AUREX" styleClass="logo-main"/>
-                <Label text="AUCTION PLATFORM" styleClass="logo-sub"/>
+                <Label text="AG.AL" styleClass="logo-main"/>
+                <Label text="UET online auction" styleClass="logo-sub"/>
             </VBox>
 
             <Region HBox.hgrow="ALWAYS"/>
@@ -80,8 +80,8 @@
                         <Label text="Loại tài khoản" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="field-label"/>
                         <ComboBox fx:id="accountTypeComboBox" promptText="Chọn loại tài khoản" GridPane.columnIndex="0" GridPane.rowIndex="5" styleClass="mail-field"/>
 
-                        <Label text="CMND/CCCD" GridPane.columnIndex="1" GridPane.rowIndex="4" styleClass="field-label"/>
-                        <TextField fx:id="idCardField" promptText="Nhập số giấy tờ" GridPane.columnIndex="1" GridPane.rowIndex="5" styleClass="mail-field"/>
+<!--                        <Label text="CMND/CCCD" GridPane.columnIndex="1" GridPane.rowIndex="4" styleClass="field-label"/>-->
+<!--                        <TextField fx:id="idCardField" promptText="Nhập số giấy tờ" GridPane.columnIndex="1" GridPane.rowIndex="5" styleClass="mail-field"/>-->
 
                         <Label text="Địa chỉ" GridPane.columnIndex="0" GridPane.rowIndex="6" styleClass="field-label"/>
                         <TextField fx:id="addressField" promptText="Nhập địa chỉ liên hệ" GridPane.columnIndex="0" GridPane.rowIndex="7" styleClass="mail-field"/>

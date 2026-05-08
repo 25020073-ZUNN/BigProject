@@ -28,7 +28,7 @@
                 </padding>
 
                 <VBox spacing="0">
-                    <Label text="DUREX" styleClass="logo-main"/>
+                    <Label text="AG.AL" styleClass="logo-main"/>
                     <Label text="UET online auction" styleClass="logo-sub"/>
                 </VBox>
 

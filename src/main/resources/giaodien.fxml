@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<!--Trang chủ-->
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -28,7 +28,7 @@
                 </padding>
 
                 <VBox spacing="0">
-                    <Label text="DUREX" styleClass="logo-main"/>
+                    <Label text="AG.AL" styleClass="logo-main"/>
                     <Label text="UET online auction" styleClass="logo-sub"/>
                 </VBox>
 
@@ -89,7 +89,7 @@
                                     <padding>
                                         <Insets top="12" right="12" bottom="12" left="12"/>
                                     </padding>
-                                    <Label text="99.9%" styleClass="mini-info-number"/>
+                                    <Label text="90%" styleClass="mini-info-number"/>
                                     <Label text="Ổn định hệ thống" styleClass="mini-info-text"/>
                                 </VBox>
 
@@ -106,7 +106,7 @@
                         <AnchorPane prefWidth="520" prefHeight="340" styleClass="hero-banner">
                             <children>
                                 <VBox layoutX="34" layoutY="34" spacing="12">
-                                    <Label text="AUREX AUCTION" styleClass="banner-chip"/>
+                                    <Label text="AG.AL AUCTION" styleClass="banner-chip"/>
                                     <Label text="ĐẤU GIÁ SỐ&#10;TRẢI NGHIỆM SANG HƠN"
                                            styleClass="banner-title"/>
                                     <Label text="Quản lý tài sản - phiên đấu giá - người tham gia"
@@ -153,7 +153,7 @@
                             </padding>
 
                             <Label text="Thông tin tài khoản" styleClass="login-panel-title"/>
-                            
+
                             <VBox spacing="8" styleClass="user-info-box">
                                 <HBox spacing="10" alignment="CENTER_LEFT">
                                     <Label text="Người dùng:" styleClass="login-panel-note" minWidth="80"/>
@@ -203,7 +203,7 @@
 
                         <VBox prefWidth="300" styleClass="stat-card">
                             <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
-                            <Label text="99.9%" styleClass="stat-number"/>
+                            <Label text="90%" styleClass="stat-number"/>
                             <Label text="Tỷ lệ hệ thống hoạt động ổn định" styleClass="stat-text"/>
                         </VBox>
                     </HBox>
@@ -329,7 +329,7 @@
                     </VBox>
 
                     <!-- PARTNERS -->
-                    <VBox spacing="18">
+                    <!--<VBox spacing="18">
                         <padding>
                             <Insets top="10" right="42" bottom="10" left="42"/>
                         </padding>
@@ -361,7 +361,7 @@
                                 <Label text="Quản trị tài sản thanh lý bằng giao diện hiện đại, dễ theo dõi." wrapText="true" styleClass="partner-text"/>
                             </VBox>
                         </HBox>
-                    </VBox>
+                    </VBox>-->
 
                     <!-- NEWSLETTER -->
                     <HBox spacing="24" styleClass="newsletter-box">
@@ -390,7 +390,7 @@
                         <HBox spacing="60">
                             <VBox spacing="10" prefWidth="280">
                                 <Label text="Công ty đấu giá hợp danh Aurex" styleClass="footer-title"/>
-                                <Label text="Mã số doanh nghiệp: 08058420&#10;Hotline: 1900 9999&#10;Email: info@aurexauction.vn"
+                                <Label text="Email: team6ltnc@gmail.com"
                                        wrapText="true" styleClass="footer-text"/>
                             </VBox>
 
@@ -408,13 +408,13 @@
 
                             <VBox spacing="10" prefWidth="260">
                                 <Label text="Liên hệ nhanh" styleClass="footer-title"/>
-                                <Label text="Địa chỉ: Hà Nội&#10;Giờ làm việc: 08:00 - 17:30"
+                                <Label text="Địa chỉ: Kiều Mai-Hà Nội&#10;Giờ làm việc: 08:00 - 17:30"
                                        wrapText="true" styleClass="footer-text"/>
                             </VBox>
                         </HBox>
 
                         <Separator styleClass="footer-separator"/>
-                        <Label text="Copyright 2026 © Aurex Auction"
+                        <Label text="Copyright 2026 © AG.AL Auction"
                                styleClass="copyright"/>
                     </VBox>
 
