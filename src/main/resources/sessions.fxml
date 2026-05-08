@@ -97,10 +97,10 @@
                                     <Insets top="20" right="20" bottom="20" left="20"/>
                                 </padding>
                                 <HBox spacing="15">
-                                    <AnchorPane prefWidth="120" prefHeight="100" styleClass="thumb thumb-4"/>
+                                    <AnchorPane prefWidth="120" prefHeight="100" styleClass="thumb thumb-3"/>
                                     <VBox spacing="8" HBox.hgrow="ALWAYS">
                                         <Label text="PHIÊN #00124" styleClass="hero-small"/>
-                                        <Label text="Máy móc công nghiệp nặng" styleClass="news-title" wrapText="true"/>
+                                        <Label text="Hệ thống máy chủ Server Dell PowerEdge" styleClass="news-title" wrapText="true"/>
                                         <Label text="Kết thúc trong: 02:14:55" styleClass="card-price" style="-fx-text-fill: #c84f37;"/>
                                     </VBox>
                                 </HBox>
@@ -110,7 +110,7 @@
                                 <HBox alignment="CENTER_LEFT">
                                     <VBox>
                                         <Label text="Giá hiện tại" styleClass="muted-text"/>
-                                        <Label text="4,240,000,000 VNĐ" styleClass="mini-info-number"/>
+                                        <Label text="850,000,000 VNĐ" styleClass="mini-info-number"/>
                                     </VBox>
                                     <Region HBox.hgrow="ALWAYS"/>
                                     <Button text="Trả giá ngay" onAction="#handleBid" styleClass="small-btn"/>
@@ -126,7 +126,7 @@
                                     <AnchorPane prefWidth="120" prefHeight="100" styleClass="thumb thumb-1"/>
                                     <VBox spacing="8" HBox.hgrow="ALWAYS">
                                         <Label text="PHIÊN #00125" styleClass="hero-small"/>
-                                        <Label text="Quyền sử dụng đất Long Biên" styleClass="news-title" wrapText="true"/>
+                                        <Label text="Tác phẩm nghệ thuật: Bức tranh Phố Phái" styleClass="news-title" wrapText="true"/>
                                         <Label text="Kết thúc trong: 05:30:12" styleClass="card-price" style="-fx-text-fill: #c84f37;"/>
                                     </VBox>
                                 </HBox>
@@ -136,7 +136,7 @@
                                 <HBox alignment="CENTER_LEFT">
                                     <VBox>
                                         <Label text="Giá hiện tại" styleClass="muted-text"/>
-                                        <Label text="18,500,000,000 VNĐ" styleClass="mini-info-number"/>
+                                        <Label text="1,250,000,000 VNĐ" styleClass="mini-info-number"/>
                                     </VBox>
                                     <Region HBox.hgrow="ALWAYS"/>
                                     <Button text="Trả giá ngay" onAction="#handleBid" styleClass="small-btn"/>
@@ -160,9 +160,9 @@
                             <HBox spacing="20" styleClass="price-row" alignment="CENTER_LEFT">
                                 <Label text="08/04/2026&#10;09:30" alignment="CENTER" styleClass="hero-small" prefWidth="100"/>
                                 <Separator orientation="VERTICAL"/>
-                                <AnchorPane prefWidth="80" prefHeight="60" styleClass="thumb thumb-3"/>
+                                <AnchorPane prefWidth="80" prefHeight="60" styleClass="thumb thumb-2"/>
                                 <VBox HBox.hgrow="ALWAYS">
-                                    <Label text="Xe ô tô hạng sang Mercedes-Benz" styleClass="news-title"/>
+                                    <Label text="Xe ô tô Mercedes-Benz S450 Luxury" styleClass="news-title"/>
                                     <Label text="Mã phiên: AU-MB2026 | Giá khởi điểm: 2,500,000,000 VNĐ" styleClass="muted-text"/>
                                 </VBox>
                                 <Button text="Đăng ký tham gia" onAction="#handleFollow" styleClass="secondary-btn-small"/>
@@ -173,10 +173,10 @@
                             <HBox spacing="20" styleClass="price-row" alignment="CENTER_LEFT">
                                 <Label text="09/04/2026&#10;14:00" alignment="CENTER" styleClass="hero-small" prefWidth="100"/>
                                 <Separator orientation="VERTICAL"/>
-                                <AnchorPane prefWidth="80" prefHeight="60" styleClass="thumb thumb-2"/>
+                                <AnchorPane prefWidth="80" prefHeight="60" styleClass="thumb thumb-4"/>
                                 <VBox HBox.hgrow="ALWAYS">
-                                    <Label text="Trụ sở văn phòng tại Quận 1" styleClass="news-title"/>
-                                    <Label text="Mã phiên: AU-VP2026 | Giá khởi điểm: 45,000,000,000 VNĐ" styleClass="muted-text"/>
+                                    <Label text="Xe mô tô Ducati Panigale V4 Speciale" styleClass="news-title"/>
+                                    <Label text="Mã phiên: AU-VP2026 | Giá khởi điểm: 1,850,000,000 VNĐ" styleClass="muted-text"/>
                                 </VBox>
                                 <Button text="Đăng ký tham gia" onAction="#handleFollow" styleClass="secondary-btn-small"/>
                                 <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>

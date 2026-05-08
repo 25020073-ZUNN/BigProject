@@ -67,7 +67,7 @@
                                    wrapText="true"
                                    styleClass="hero-title"/>
 
-                            <Label text="WEB ĐƯỢC BUILD BỞI  - NTD."
+                            <Label text="WEB ĐƯỢC BUILD BỞI  - Team6."
                                    wrapText="true"
                                    styleClass="hero-desc"/>
 
@@ -225,14 +225,14 @@
                             <VBox prefWidth="290" spacing="12" styleClass="auction-card">
                                 <AnchorPane prefHeight="150" styleClass="thumb thumb-1">
                                     <children>
-                                        <Label layoutX="14" layoutY="12" text="HOT" styleClass="badge-hot"/>
+                                        <Label layoutX="14" layoutY="12" text="ART" styleClass="badge-vip"/>
                                     </children>
                                 </AnchorPane>
                                 <VBox spacing="8">
-                                    <Label text="Quyền sử dụng đất tại Hà Nội" styleClass="card-title"/>
+                                    <Label text="Tác phẩm nghệ thuật: Bức tranh Phố Phái" styleClass="card-title"/>
                                     <Label text="Thời gian đấu giá: 07/04/2026 13:00:00"
                                            wrapText="true" styleClass="card-sub"/>
-                                    <Label text="Giá khởi điểm: 17,350,000,000 VNĐ"
+                                    <Label text="Giá khởi điểm: 1,250,000,000 VNĐ"
                                            wrapText="true" styleClass="card-price"/>
                                 </VBox>
                                 <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>
@@ -241,14 +241,14 @@
                             <VBox prefWidth="290" spacing="12" styleClass="auction-card">
                                 <AnchorPane prefHeight="150" styleClass="thumb thumb-2">
                                     <children>
-                                        <Label layoutX="14" layoutY="12" text="MỚI" styleClass="badge-new"/>
+                                        <Label layoutX="14" layoutY="12" text="VEHICLE" styleClass="badge-hot"/>
                                     </children>
                                 </AnchorPane>
                                 <VBox spacing="8">
-                                    <Label text="Tài sản thanh lý doanh nghiệp" styleClass="card-title"/>
-                                    <Label text="Thời gian đấu giá: 07/04/2026 14:00:00"
+                                    <Label text="Xe ô tô Mercedes-Benz S450 Luxury" styleClass="card-title"/>
+                                    <Label text="Thời gian đấu giá: 08/04/2026 09:30:00"
                                            wrapText="true" styleClass="card-sub"/>
-                                    <Label text="Giá khởi điểm: 3,720,000,000 VNĐ"
+                                    <Label text="Giá khởi điểm: 2,500,000,000 VNĐ"
                                            wrapText="true" styleClass="card-price"/>
                                 </VBox>
                                 <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>
@@ -257,14 +257,14 @@
                             <VBox prefWidth="290" spacing="12" styleClass="auction-card">
                                 <AnchorPane prefHeight="150" styleClass="thumb thumb-3">
                                     <children>
-                                        <Label layoutX="14" layoutY="12" text="VIP" styleClass="badge-vip"/>
+                                        <Label layoutX="14" layoutY="12" text="ELECTRONICS" styleClass="badge-live"/>
                                     </children>
                                 </AnchorPane>
                                 <VBox spacing="8">
-                                    <Label text="Xe ô tô thanh lý biển đẹp" styleClass="card-title"/>
-                                    <Label text="Thời gian đấu giá: 08/04/2026 09:30:00"
+                                    <Label text="Hệ thống máy chủ Server Dell PowerEdge" styleClass="card-title"/>
+                                    <Label text="Thời gian đấu giá: 07/04/2026 14:00:00"
                                            wrapText="true" styleClass="card-sub"/>
-                                    <Label text="Giá khởi điểm: 825,000,000 VNĐ"
+                                    <Label text="Giá khởi điểm: 850,000,000 VNĐ"
                                            wrapText="true" styleClass="card-price"/>
                                 </VBox>
                                 <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>
@@ -273,14 +273,14 @@
                             <VBox prefWidth="290" spacing="12" styleClass="auction-card">
                                 <AnchorPane prefHeight="150" styleClass="thumb thumb-4">
                                     <children>
-                                        <Label layoutX="14" layoutY="12" text="LIVE" styleClass="badge-live"/>
+                                        <Label layoutX="14" layoutY="12" text="VEHICLE" styleClass="badge-new"/>
                                     </children>
                                 </AnchorPane>
                                 <VBox spacing="8">
-                                    <Label text="Kho máy móc công nghiệp đã qua sử dụng" styleClass="card-title"/>
-                                    <Label text="Thời gian đấu giá: 08/04/2026 16:00:00"
+                                    <Label text="Xe mô tô Ducati Panigale V4 Speciale" styleClass="card-title"/>
+                                    <Label text="Thời gian đấu giá: 09/04/2026 14:00:00"
                                            wrapText="true" styleClass="card-sub"/>
-                                    <Label text="Giá khởi điểm: 4,240,000,000 VNĐ"
+                                    <Label text="Giá khởi điểm: 1,850,000,000 VNĐ"
                                            wrapText="true" styleClass="card-price"/>
                                 </VBox>
                                 <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>
