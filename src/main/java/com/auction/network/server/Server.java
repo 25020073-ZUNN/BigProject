@@ -82,6 +82,8 @@ public class Server {
      * Xử lý giao tiếp với một Client cụ thể.
      */
     private void handleClient(Socket clientSocket) {
+        String clientAddress = clientSocket.getRemoteSocketAddress().toString();
+        System.out.println(">>> [Server] Client connected: " + clientAddress);
         // Sử dụng try-with-resources để tự động đóng socket và luồng stream khi kết thúc
         try (Socket socket = clientSocket;
              ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
@@ -98,6 +100,8 @@ public class Server {
                     continue;
                 }
 
+                System.out.println("[Request] From " + clientAddress + ": " + request.getType());
+
                 // Xử lý yêu cầu và lấy phản hồi tương ứng
                 Message response = handleRequest(request);
                 
@@ -108,7 +112,9 @@ public class Server {
         } catch (EOFException ignored) {
             // Xảy ra khi Client ngắt kết nối đột ngột
         } catch (Exception e) {
-            System.err.println("Lỗi xử lý Client: " + e.getMessage());
+            System.err.println("!!! [Server] Error handling client [" + clientAddress + "]: " + e.getMessage());
+        } finally {
+            System.out.println("<<< [Server] Client disconnected: " + clientAddress);
         }
     }
 

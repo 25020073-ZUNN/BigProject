@@ -25,12 +25,34 @@ public class NetworkService {
     // Instance duy nhất của NetworkService (Singleton pattern)
     private static final NetworkService instance = new NetworkService();
 
+    private ServerConnection connection;
+
     /**
      * Lấy instance duy nhất của NetworkService.
      * @return NetworkService instance
      */
     public static NetworkService getInstance() {
         return instance;
+    }
+
+    private synchronized ServerConnection getOrConnect() throws IOException {
+        if (connection == null) {
+            connection = new ServerConnection(DEFAULT_HOST, DEFAULT_PORT);
+        }
+        return connection;
+    }
+
+    /**
+     * Đóng kết nối hiện tại tới Server.
+     */
+    public synchronized void closeConnection() {
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (IOException ignored) {
+            }
+            connection = null;
+        }
     }
 
     /**
@@ -41,7 +63,7 @@ public class NetworkService {
         try {
             Message response = send(Message.Type.PING, Map.of());
             return response.isSuccess();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -150,9 +172,17 @@ public class NetworkService {
      * @param payload Dữ liệu gửi đi
      * @return Thông điệp phản hồi từ Server
      */
-    private Message send(Message.Type type, Map<String, Object> payload) throws IOException, ClassNotFoundException {
-        try (ServerConnection connection = new ServerConnection(DEFAULT_HOST, DEFAULT_PORT)) {
-            return connection.send(new Message(type, payload));
+    private synchronized Message send(Message.Type type, Map<String, Object> payload) throws IOException, ClassNotFoundException {
+        try {
+            return getOrConnect().send(new Message(type, payload));
+        } catch (IOException e) {
+            // Nếu có lỗi kết nối, thử đóng và kết nối lại một lần
+            closeConnection();
+            try {
+                return getOrConnect().send(new Message(type, payload));
+            } catch (IOException ex) {
+                throw ex; // Nếu vẫn lỗi thì bắn ra ngoài
+            }
         }
     }
 

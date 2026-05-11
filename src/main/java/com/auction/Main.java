@@ -42,6 +42,7 @@ public class Main extends Application {
      */
     @Override
     public void stop() throws Exception {
+        com.auction.network.client.NetworkService.getInstance().closeConnection();
         if (embeddedServer != null) {
             embeddedServer.stop(); // Dừng server khi tắt ứng businessman
         }
