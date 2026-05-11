@@ -1,9 +1,10 @@
-package com.auction;
+package com.auction.controller;
 
 import com.auction.model.Auction;
 import com.auction.model.item.Item;
 import com.auction.model.user.Bidder;
 import com.auction.model.user.User;
+import com.auction.util.UserSession;
 import com.auction.service.AuctionService;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;

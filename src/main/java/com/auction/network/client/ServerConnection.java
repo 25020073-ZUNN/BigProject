@@ -1,5 +1,4 @@
-package com.auction.client.network;
-
+package com.auction.network.client;
 import com.auction.network.Message;
 
 import java.io.Closeable;

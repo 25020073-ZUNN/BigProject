@@ -1,6 +1,5 @@
-package com.auction.service;
+package com.auction.network.client;
 
-import com.auction.client.network.ServerConnection;
 import com.auction.model.user.Admin;
 import com.auction.model.user.Bidder;
 import com.auction.model.user.Seller;
@@ -153,7 +152,7 @@ public class NetworkService {
      */
     private Message send(Message.Type type, Map<String, Object> payload) throws IOException, ClassNotFoundException {
         try (ServerConnection connection = new ServerConnection(DEFAULT_HOST, DEFAULT_PORT)) {
-            return connection.send(type, payload);
+            return connection.send(new Message(type, payload));
         }
     }
 

@@ -2,7 +2,7 @@ package com.auction;
 
 import com.auction.config.DBConnection;
 import com.auction.service.AuthService;
-import com.auction.network.Server;
+import com.auction.network.server.Server;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

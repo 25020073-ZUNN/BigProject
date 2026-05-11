@@ -15,7 +15,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.auction.HomeController"
+            fx:controller="com.auction.controller.HomeController"
             prefWidth="1380"
             prefHeight="860"
             stylesheets="@style.css"
