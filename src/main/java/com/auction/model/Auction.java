@@ -19,6 +19,7 @@ public class Auction extends Entity {
 
     private BigDecimal startingPrice; // Giá khởi điểm
     private BigDecimal currentPrice; // Giá hiện tại (giá cao nhất đã đặt)
+    private BigDecimal minimumBidStep; // Bước giá tối thiểu của phiên đấu giá
 
     private User highestBidder; // Người đang giữ mức giá cao nhất
 
@@ -48,6 +49,7 @@ public class Auction extends Entity {
         this.seller = seller;
         this.startingPrice = startingPrice;
         this.currentPrice = startingPrice;
+        this.minimumBidStep = BigDecimal.ZERO;
         this.highestBidder = null;
         this.active = true;
         this.finished = false;
@@ -59,19 +61,24 @@ public class Auction extends Entity {
     public User getSeller() { return seller; }
     public BigDecimal getStartingPrice() { return startingPrice; }
     public BigDecimal getCurrentPrice() { return currentPrice; }
+    public BigDecimal getMinimumBidStep() { return minimumBidStep; }
     public User getHighestBidder() { return highestBidder; }
     public boolean isActive() { return active; }
     public boolean isFinished() { return finished; }
     public List<BidTransaction> getBidHistory() { return Collections.unmodifiableList(bidHistory); }
 
     public void setActive(boolean active) { this.active = active; }
+    public void setFinished(boolean finished) { this.finished = finished; }
+    public void setCurrentPrice(BigDecimal currentPrice) { this.currentPrice = currentPrice; }
+    public void setHighestBidder(User highestBidder) { this.highestBidder = highestBidder; }
+    public void setMinimumBidStep(BigDecimal minimumBidStep) { this.minimumBidStep = minimumBidStep; }
 
     /**
      * Thực hiện đặt giá mới cho phiên đấu giá.
      * @param bidder Người đặt giá
      * @param bidAmount Số tiền đặt giá mới
      */
-    public void placeBid(User bidder, BigDecimal bidAmount) {
+    public synchronized void placeBid(User bidder, BigDecimal bidAmount) {
         // 1. Kiểm tra trạng thái phiên đấu giá
         if (!active || finished) {
             throw new IllegalStateException("Phiên đấu giá đã đóng hoặc không khả dụng");
@@ -94,6 +101,7 @@ public class Auction extends Entity {
         // Cập nhật thông tin giá cao nhất và người thắng hiện tại
         this.currentPrice = bidAmount;
         this.highestBidder = bidder;
+        this.item.updatePrice(bidAmount);
 
         // Lưu vào lịch sử giao dịch
         BidTransaction transaction = new BidTransaction(this, bidder, bidAmount);
@@ -102,6 +110,21 @@ public class Auction extends Entity {
         // Cập nhật thông tin cho người dùng
         bidder.joinAuction(this.getId());
         bidder.increaseTotalBids();
+    }
+
+    /**
+     * Dùng riêng cho lớp DAO khi cần nạp lại lịch sử bid cũ từ cơ sở dữ liệu.
+     *
+     * Tại sao cần hàm này:
+     * - `getBidHistory()` trả về danh sách chỉ đọc để bảo vệ dữ liệu nghiệp vụ.
+     * - Nhưng khi khởi động ứng dụng, chúng ta vẫn cần "đổ" lịch sử thật từ DB vào object.
+     * - Hàm này tách biệt rõ với `placeBid()` để tránh vô tình chạy lại toàn bộ nghiệp vụ
+     *   như kiểm tra giá, cập nhật thống kê người dùng, hoặc tạo timestamp mới.
+     */
+    public void addHistoricalBid(BidTransaction transaction) {
+        if (transaction != null) {
+            bidHistory.add(transaction);
+        }
     }
 
     /**

@@ -64,4 +64,7 @@ public abstract class Item extends Entity {
     public String getSellerId() { return sellerId; }
 
     public void setStatus(ItemStatus status) { this.status = status; }
+    public void setCurrentPrice(BigDecimal currentPrice) { this.currentPrice = currentPrice; }
+    public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
+    public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
 }

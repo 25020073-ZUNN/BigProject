@@ -24,6 +24,14 @@ public class Electronics extends Item {
         return "Electronics";
     }
 
+    public String getBrand() {
+        return brand;
+    }
+
+    public int getWarrantyMonths() {
+        return warrantyMonths;
+    }
+
     @Override
     public void printInfo() {
         System.out.println("📱 Electronics: " + name

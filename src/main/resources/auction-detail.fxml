@@ -6,16 +6,14 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.auction.controller.HomeController"
+            fx:controller="com.auction.controller.AuctionCatalogController"
             prefWidth="1380"
             prefHeight="920"
             stylesheets="@style.css"
@@ -40,17 +38,16 @@
                 <Button text="Phiên đấu giá" onAction="#goToSessions" styleClass="nav-btn"/>
                 <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn"/>
                 <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
-
-                <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
+                <Button text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
             </HBox>
 
             <VBox spacing="12" styleClass="page-hero-small">
                 <padding>
                     <Insets top="24" right="42" bottom="24" left="42"/>
                 </padding>
-                <Label text="Danh sách tài sản đấu giá" styleClass="hero-title-small"/>
-                <Label text="Khám phá tài sản đang mở, sắp mở và nổi bật trên hệ thống."
-                       styleClass="hero-desc"/>
+                <Label text="Danh sách tài sản đấu giá thật" styleClass="hero-title-small"/>
+                <Label text="Tìm kiếm và lọc trực tiếp từ dữ liệu tài sản, phiên và mức giá thật trong cơ sở dữ liệu."
+                       styleClass="hero-desc" wrapText="true"/>
             </VBox>
         </VBox>
     </top>
@@ -58,154 +55,32 @@
     <center>
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
             <content>
-                <VBox spacing="22">
+                <VBox spacing="22" styleClass="page-section">
                     <padding>
                         <Insets top="24" right="42" bottom="32" left="42"/>
                     </padding>
 
-                    <HBox spacing="16" styleClass="filter-box">
+                    <VBox spacing="16" styleClass="filter-box">
                         <padding>
-                            <Insets top="16" right="16" bottom="16" left="16"/>
+                            <Insets top="18" right="18" bottom="18" left="18"/>
                         </padding>
 
-                        <TextField fx:id="searchField" promptText="Tìm kiếm tài sản..." prefWidth="260" styleClass="mail-field"/>
-                        <ComboBox promptText="Danh mục" prefWidth="180" styleClass="mail-field"/>
-                        <ComboBox promptText="Tỉnh/Thành phố" prefWidth="180" styleClass="mail-field"/>
-                        <ComboBox promptText="Mức giá" prefWidth="180" styleClass="mail-field"/>
-                        <ComboBox promptText="Trạng thái" prefWidth="180" styleClass="mail-field"/>
-                        <Button text="Tìm kiếm" onAction="#handleSearch" styleClass="primary-btn"/>
-                    </HBox>
+                        <HBox spacing="14" alignment="CENTER_LEFT">
+                            <TextField fx:id="searchField" promptText="Tìm theo tên tài sản, mã tài sản, mã phiên, người bán..." HBox.hgrow="ALWAYS" styleClass="mail-field"/>
+                            <ComboBox fx:id="categoryFilter" promptText="Danh mục" prefWidth="180" styleClass="mail-field"/>
+                            <ComboBox fx:id="statusFilter" promptText="Trạng thái" prefWidth="180" styleClass="mail-field"/>
+                            <Button text="Tìm kiếm" onAction="#handleSearch" styleClass="primary-btn"/>
+                            <Button text="Thêm tài sản đấu giá" onAction="#goToCreateAuction" styleClass="secondary-btn"/>
+                        </HBox>
 
-                    <HBox spacing="20">
-                        <VBox prefWidth="280" spacing="16" styleClass="sidebar-filter">
-                            <padding>
-                                <Insets top="20" right="18" bottom="20" left="18"/>
-                            </padding>
+                        <HBox alignment="CENTER_LEFT">
+                            <Label fx:id="resultCountLabel" text="0 tài sản phù hợp" styleClass="section-subtitle-bold"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label text="Dữ liệu đang đọc trực tiếp từ DB" styleClass="auction-notice"/>
+                        </HBox>
+                    </VBox>
 
-                            <Label text="Bộ lọc nhanh" styleClass="partner-title"/>
-
-                            <VBox spacing="10">
-                                <Label text="Loại tài sản" styleClass="field-label"/>
-                                <Button text="Bất động sản" styleClass="chip-btn"/>
-                                <Button text="Phương tiện" styleClass="chip-btn"/>
-                                <Button text="Máy móc thiết bị" styleClass="chip-btn"/>
-                                <Button text="Tài sản doanh nghiệp" styleClass="chip-btn"/>
-                            </VBox>
-
-                            <VBox spacing="10">
-                                <Label text="Trạng thái" styleClass="field-label"/>
-                                <Button text="Sắp mở" styleClass="chip-btn"/>
-                                <Button text="Đang diễn ra" styleClass="chip-btn"/>
-                                <Button text="Nổi bật" styleClass="chip-btn"/>
-                            </VBox>
-
-                            <VBox spacing="10">
-                                <Label text="Gợi ý" styleClass="field-label"/>
-                                <Label text="Chọn tài sản để xem chi tiết, hồ sơ, thời gian đấu giá và mức giá khởi điểm."
-                                       wrapText="true" styleClass="partner-text"/>
-                            </VBox>
-                        </VBox>
-
-                        <VBox spacing="18">
-                            <HBox alignment="CENTER_LEFT">
-                                <Label text="24 tài sản được tìm thấy" styleClass="section-subtitle-bold"/>
-                                <Region HBox.hgrow="ALWAYS"/>
-                                <ComboBox promptText="Sắp xếp theo" prefWidth="180" styleClass="mail-field"/>
-                            </HBox>
-
-                            <FlowPane hgap="20" vgap="20" prefWrapLength="1000">
-
-                                <VBox prefWidth="310" spacing="12" styleClass="auction-card-light">
-                                    <AnchorPane prefHeight="170" styleClass="thumb thumb-1">
-                                        <children>
-                                            <Label layoutX="14" layoutY="12" text="HOT" styleClass="badge-hot"/>
-                                        </children>
-                                    </AnchorPane>
-                                    <Label text="Quyền sử dụng đất tại khu đô thị mới Hà Nội"
-                                           wrapText="true" styleClass="news-title"/>
-                                    <Label text="Thời gian: 07/04/2026 13:00:00" styleClass="partner-text"/>
-                                    <Label text="Giá khởi điểm: 17,350,000,000 VNĐ" wrapText="true" styleClass="card-price-dark"/>
-                                    <HBox spacing="10">
-                                        <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>
-                                        <Button text="Theo dõi" onAction="#handleFollow" styleClass="secondary-btn-small"/>
-                                    </HBox>
-                                </VBox>
-
-                                <VBox prefWidth="310" spacing="12" styleClass="auction-card-light">
-                                    <AnchorPane prefHeight="170" styleClass="thumb thumb-2">
-                                        <children>
-                                            <Label layoutX="14" layoutY="12" text="MỚI" styleClass="badge-new"/>
-                                        </children>
-                                    </AnchorPane>
-                                    <Label text="Nhà xưởng và tài sản gắn liền với đất tại Bắc Ninh"
-                                           wrapText="true" styleClass="news-title"/>
-                                    <Label text="Thời gian: 08/04/2026 09:00:00" styleClass="partner-text"/>
-                                    <Label text="Giá khởi điểm: 9,800,000,000 VNĐ" wrapText="true" styleClass="card-price-dark"/>
-                                    <HBox spacing="10">
-                                        <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>
-                                        <Button text="Theo dõi" onAction="#handleFollow" styleClass="secondary-btn-small"/>
-                                    </HBox>
-                                </VBox>
-
-                                <VBox prefWidth="310" spacing="12" styleClass="auction-card-light">
-                                    <AnchorPane prefHeight="170" styleClass="thumb thumb-3">
-                                        <children>
-                                            <Label layoutX="14" layoutY="12" text="VIP" styleClass="badge-vip"/>
-                                        </children>
-                                    </AnchorPane>
-                                    <Label text="Xe ô tô thanh lý biển số đẹp"
-                                           wrapText="true" styleClass="news-title"/>
-                                    <Label text="Thời gian: 08/04/2026 10:30:00" styleClass="partner-text"/>
-                                    <Label text="Giá khởi điểm: 825,000,000 VNĐ" wrapText="true" styleClass="card-price-dark"/>
-                                    <HBox spacing="10">
-                                        <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>
-                                        <Button text="Theo dõi" onAction="#handleFollow" styleClass="secondary-btn-small"/>
-                                    </HBox>
-                                </VBox>
-
-                                <VBox prefWidth="310" spacing="12" styleClass="auction-card-light">
-                                    <AnchorPane prefHeight="170" styleClass="thumb thumb-4">
-                                        <children>
-                                            <Label layoutX="14" layoutY="12" text="LIVE" styleClass="badge-live"/>
-                                        </children>
-                                    </AnchorPane>
-                                    <Label text="Kho máy móc công nghiệp đã qua sử dụng"
-                                           wrapText="true" styleClass="news-title"/>
-                                    <Label text="Thời gian: 08/04/2026 16:00:00" styleClass="partner-text"/>
-                                    <Label text="Giá khởi điểm: 4,240,000,000 VNĐ" wrapText="true" styleClass="card-price-dark"/>
-                                    <HBox spacing="10">
-                                        <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>
-                                        <Button text="Theo dõi" onAction="#handleFollow" styleClass="secondary-btn-small"/>
-                                    </HBox>
-                                </VBox>
-
-                                <VBox prefWidth="310" spacing="12" styleClass="auction-card-light">
-                                    <AnchorPane prefHeight="170" styleClass="thumb thumb-2"/>
-                                    <Label text="Tài sản thanh lý doanh nghiệp logistics"
-                                           wrapText="true" styleClass="news-title"/>
-                                    <Label text="Thời gian: 09/04/2026 08:30:00" styleClass="partner-text"/>
-                                    <Label text="Giá khởi điểm: 3,720,000,000 VNĐ" wrapText="true" styleClass="card-price-dark"/>
-                                    <HBox spacing="10">
-                                        <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>
-                                        <Button text="Theo dõi" onAction="#handleFollow" styleClass="secondary-btn-small"/>
-                                    </HBox>
-                                </VBox>
-
-                                <VBox prefWidth="310" spacing="12" styleClass="auction-card-light">
-                                    <AnchorPane prefHeight="170" styleClass="thumb thumb-1"/>
-                                    <Label text="Quyền thuê mặt bằng thương mại trung tâm"
-                                           wrapText="true" styleClass="news-title"/>
-                                    <Label text="Thời gian: 09/04/2026 14:00:00" styleClass="partner-text"/>
-                                    <Label text="Giá khởi điểm: 6,150,000,000 VNĐ" wrapText="true" styleClass="card-price-dark"/>
-                                    <HBox spacing="10">
-                                        <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>
-                                        <Button text="Theo dõi" onAction="#handleFollow" styleClass="secondary-btn-small"/>
-                                    </HBox>
-                                </VBox>
-
-                            </FlowPane>
-                        </VBox>
-                    </HBox>
+                    <VBox fx:id="auctionListContainer" spacing="16"/>
                 </VBox>
             </content>
         </ScrollPane>

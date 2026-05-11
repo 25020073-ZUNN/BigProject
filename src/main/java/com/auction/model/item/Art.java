@@ -25,6 +25,14 @@ public class Art extends Item {
         return "Art";
     }
 
+    public String getArtist() {
+        return artist;
+    }
+
+    public int getYearCreated() {
+        return yearCreated;
+    }
+
     @Override
     public void printInfo() {
         System.out.println("🎨 Art: " + name

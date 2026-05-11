@@ -2,20 +2,18 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.auction.controller.HomeController"
+            fx:controller="com.auction.controller.SessionCatalogController"
             prefWidth="1380"
             prefHeight="920"
             stylesheets="@style.css"
@@ -40,200 +38,57 @@
                 <Button text="Phiên đấu giá" onAction="#goToSessions" styleClass="nav-btn-active"/>
                 <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn"/>
                 <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
-
-                <Label fx:id="clockLabel" text="08:30:12&#10;07/04/2026" styleClass="clock-label"/>
-
-                <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
+                <Button text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
             </HBox>
+
+            <VBox spacing="12" styleClass="page-hero-small">
+                <padding>
+                    <Insets top="24" right="42" bottom="24" left="42"/>
+                </padding>
+                <Label text="Danh sách phiên đấu giá thật" styleClass="hero-title-small"/>
+                <Label text="Theo dõi phiên sắp diễn ra, đang diễn ra và đã kết thúc bằng dữ liệu thật."
+                       styleClass="hero-desc" wrapText="true"/>
+            </VBox>
         </VBox>
     </top>
 
     <center>
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
             <content>
-                <VBox spacing="30">
+                <VBox spacing="24" styleClass="page-section">
+                    <padding>
+                        <Insets top="24" right="42" bottom="32" left="42"/>
+                    </padding>
 
-                    <!-- HEADER SECTION -->
-                    <VBox spacing="10" styleClass="page-hero-small">
+                    <VBox spacing="16" styleClass="filter-box">
                         <padding>
-                            <Insets top="40" right="42" bottom="40" left="42"/>
+                            <Insets top="18" right="18" bottom="18" left="18"/>
                         </padding>
-                        <Label text="DANH SÁCH PHIÊN ĐẤU GIÁ" styleClass="hero-small"/>
-                        <Label text="Tìm kiếm và tham gia các phiên đấu giá trực tuyến" styleClass="hero-title"/>
 
-                        <HBox spacing="15" alignment="CENTER_LEFT">
-                            <padding>
-                                <Insets top="20"/>
-                            </padding>
-                            <TextField fx:id="searchField" promptText="Tìm tên phiên, mã tài sản..." prefWidth="400" styleClass="mail-field"/>
+                        <HBox spacing="14" alignment="CENTER_LEFT">
+                            <TextField fx:id="searchField" promptText="Tìm theo tên phiên, mã phiên, mã tài sản, người bán..." HBox.hgrow="ALWAYS" styleClass="mail-field"/>
+                            <ComboBox fx:id="statusFilter" promptText="Trạng thái" prefWidth="180" styleClass="mail-field"/>
                             <Button text="Tìm kiếm" onAction="#handleSearch" styleClass="primary-btn"/>
-
-                            <Region HBox.hgrow="ALWAYS"/>
-
-                            <HBox spacing="10">
-                                <Button text="Tất cả" styleClass="chip-btn"/>
-                                <Button text="Đang diễn ra" styleClass="chip-btn"/>
-                                <Button text="Sắp diễn ra" styleClass="chip-btn"/>
-                                <Button text="Đã kết thúc" styleClass="chip-btn"/>
-                            </HBox>
                         </HBox>
                     </VBox>
 
-                    <!-- ACTIVE SESSIONS -->
-                    <VBox spacing="20">
-                        <padding>
-                            <Insets top="10" right="42" bottom="10" left="42"/>
-                        </padding>
-
-                        <HBox alignment="CENTER_LEFT">
+                    <VBox spacing="14">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
                             <Label text="Phiên đang diễn ra" styleClass="section-title-dark"/>
-                            <Label text=" (Live Now)" styleClass="badge-live" scaleX="0.8" scaleY="0.8"/>
+                            <Label text="LIVE" styleClass="badge-live"/>
                         </HBox>
-
-                        <FlowPane hgap="25" vgap="25">
-                            <!-- Session Card 1 -->
-                            <VBox prefWidth="400" styleClass="content-card">
-                                <padding>
-                                    <Insets top="20" right="20" bottom="20" left="20"/>
-                                </padding>
-                                <HBox spacing="15">
-                                    <AnchorPane prefWidth="120" prefHeight="100" styleClass="thumb thumb-3"/>
-                                    <VBox spacing="8" HBox.hgrow="ALWAYS">
-                                        <Label text="PHIÊN #00124" styleClass="hero-small"/>
-                                        <Label text="Hệ thống máy chủ Server Dell PowerEdge" styleClass="news-title" wrapText="true"/>
-                                        <Label text="Kết thúc trong: 02:14:55" styleClass="card-price" style="-fx-text-fill: #c84f37;"/>
-                                    </VBox>
-                                </HBox>
-                                <Separator>
-                                    <VBox.margin><Insets top="15" bottom="15"/></VBox.margin>
-                                </Separator>
-                                <HBox alignment="CENTER_LEFT">
-                                    <VBox>
-                                        <Label text="Giá hiện tại" styleClass="muted-text"/>
-                                        <Label text="850,000,000 VNĐ" styleClass="mini-info-number"/>
-                                    </VBox>
-                                    <Region HBox.hgrow="ALWAYS"/>
-                                    <Button text="Trả giá ngay" onAction="#handleBid" styleClass="small-btn"/>
-                                </HBox>
-                            </VBox>
-
-                            <!-- Session Card 2 -->
-                            <VBox prefWidth="400" styleClass="content-card">
-                                <padding>
-                                    <Insets top="20" right="20" bottom="20" left="20"/>
-                                </padding>
-                                <HBox spacing="15">
-                                    <AnchorPane prefWidth="120" prefHeight="100" styleClass="thumb thumb-1"/>
-                                    <VBox spacing="8" HBox.hgrow="ALWAYS">
-                                        <Label text="PHIÊN #00125" styleClass="hero-small"/>
-                                        <Label text="Tác phẩm nghệ thuật: Bức tranh Phố Phái" styleClass="news-title" wrapText="true"/>
-                                        <Label text="Kết thúc trong: 05:30:12" styleClass="card-price" style="-fx-text-fill: #c84f37;"/>
-                                    </VBox>
-                                </HBox>
-                                <Separator>
-                                    <VBox.margin><Insets top="15" bottom="15"/></VBox.margin>
-                                </Separator>
-                                <HBox alignment="CENTER_LEFT">
-                                    <VBox>
-                                        <Label text="Giá hiện tại" styleClass="muted-text"/>
-                                        <Label text="1,250,000,000 VNĐ" styleClass="mini-info-number"/>
-                                    </VBox>
-                                    <Region HBox.hgrow="ALWAYS"/>
-                                    <Button text="Trả giá ngay" onAction="#handleBid" styleClass="small-btn"/>
-                                </HBox>
-                            </VBox>
-                        </FlowPane>
+                        <VBox fx:id="runningSessionsContainer" spacing="14"/>
                     </VBox>
 
-                    <!-- UPCOMING SESSIONS -->
-                    <VBox spacing="20">
-                        <padding>
-                            <Insets top="10" right="42" bottom="10" left="42"/>
-                        </padding>
-
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="Phiên sắp diễn ra" styleClass="section-title-dark"/>
-                        </HBox>
-
-                        <VBox spacing="15">
-                            <!-- Upcoming row 1 -->
-                            <HBox spacing="20" styleClass="price-row" alignment="CENTER_LEFT">
-                                <Label text="08/04/2026&#10;09:30" alignment="CENTER" styleClass="hero-small" prefWidth="100"/>
-                                <Separator orientation="VERTICAL"/>
-                                <AnchorPane prefWidth="80" prefHeight="60" styleClass="thumb thumb-2"/>
-                                <VBox HBox.hgrow="ALWAYS">
-                                    <Label text="Xe ô tô Mercedes-Benz S450 Luxury" styleClass="news-title"/>
-                                    <Label text="Mã phiên: AU-MB2026 | Giá khởi điểm: 2,500,000,000 VNĐ" styleClass="muted-text"/>
-                                </VBox>
-                                <Button text="Đăng ký tham gia" onAction="#handleFollow" styleClass="secondary-btn-small"/>
-                                <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>
-                            </HBox>
-
-                            <!-- Upcoming row 2 -->
-                            <HBox spacing="20" styleClass="price-row" alignment="CENTER_LEFT">
-                                <Label text="09/04/2026&#10;14:00" alignment="CENTER" styleClass="hero-small" prefWidth="100"/>
-                                <Separator orientation="VERTICAL"/>
-                                <AnchorPane prefWidth="80" prefHeight="60" styleClass="thumb thumb-4"/>
-                                <VBox HBox.hgrow="ALWAYS">
-                                    <Label text="Xe mô tô Ducati Panigale V4 Speciale" styleClass="news-title"/>
-                                    <Label text="Mã phiên: AU-VP2026 | Giá khởi điểm: 1,850,000,000 VNĐ" styleClass="muted-text"/>
-                                </VBox>
-                                <Button text="Đăng ký tham gia" onAction="#handleFollow" styleClass="secondary-btn-small"/>
-                                <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>
-                            </HBox>
-
-                            <!-- Upcoming row 3 -->
-                            <HBox spacing="20" styleClass="price-row" alignment="CENTER_LEFT">
-                                <Label text="10/04/2026&#10;10:00" alignment="CENTER" styleClass="hero-small" prefWidth="100"/>
-                                <Separator orientation="VERTICAL"/>
-                                <AnchorPane prefWidth="80" prefHeight="60" styleClass="thumb thumb-1"/>
-                                <VBox HBox.hgrow="ALWAYS">
-                                    <Label text="Lô đất nền nghỉ dưỡng ven biển" styleClass="news-title"/>
-                                    <Label text="Mã phiên: AU-DB2026 | Giá khởi điểm: 12,000,000,000 VNĐ" styleClass="muted-text"/>
-                                </VBox>
-                                <Button text="Đăng ký tham gia" onAction="#handleFollow" styleClass="secondary-btn-small"/>
-                                <Button text="Chi tiết" onAction="#goToProductDetail" styleClass="small-btn"/>
-                            </HBox>
-                        </VBox>
+                    <VBox spacing="14">
+                        <Label text="Phiên sắp diễn ra" styleClass="section-title-dark"/>
+                        <VBox fx:id="upcomingSessionsContainer" spacing="14"/>
                     </VBox>
 
-                    <!-- FOOTER -->
-                    <VBox spacing="18" styleClass="footer">
-                        <padding>
-                            <Insets top="32" right="42" bottom="26" left="42"/>
-                        </padding>
-
-                        <HBox spacing="60">
-                            <VBox spacing="10" prefWidth="280">
-                                <Label text="Công ty đấu giá hợp danh Aurex" styleClass="footer-title"/>
-                                <Label text="Mã số doanh nghiệp: 08058420&#10;Hotline: 1900 9999&#10;Email: info@aurexauction.vn"
-                                       wrapText="true" styleClass="footer-text"/>
-                            </VBox>
-
-                            <VBox spacing="10" prefWidth="220">
-                                <Label text="Về chúng tôi" styleClass="footer-title"/>
-                                <Label text="Giới thiệu&#10;Quy chế hoạt động&#10;Hướng dẫn sử dụng"
-                                       wrapText="true" styleClass="footer-text"/>
-                            </VBox>
-
-                            <VBox spacing="10" prefWidth="220">
-                                <Label text="Chính sách" styleClass="footer-title"/>
-                                <Label text="Bảo mật&#10;Điều khoản sử dụng&#10;Quy định đấu giá"
-                                       wrapText="true" styleClass="footer-text"/>
-                            </VBox>
-
-                            <VBox spacing="10" prefWidth="260">
-                                <Label text="Liên hệ nhanh" styleClass="footer-title"/>
-                                <Label text="Địa chỉ: Hà Nội&#10;Giờ làm việc: 08:00 - 17:30"
-                                       wrapText="true" styleClass="footer-text"/>
-                            </VBox>
-                        </HBox>
-
-                        <Separator styleClass="footer-separator"/>
-                        <Label text="Copyright 2026 © Aurex Auction"
-                               styleClass="copyright"/>
+                    <VBox spacing="14">
+                        <Label text="Phiên đã kết thúc" styleClass="section-title-dark"/>
+                        <VBox fx:id="finishedSessionsContainer" spacing="14"/>
                     </VBox>
-
                 </VBox>
             </content>
         </ScrollPane>

@@ -27,6 +27,18 @@ public class Vehicle extends Item {
         return "Vehicle";
     }
 
+    public String getManufacturer() {
+        return manufacturer;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public int getMileage() {
+        return mileage;
+    }
+
     @Override
     public void printInfo() {
         System.out.println("🚗 Vehicle: " + name
