@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -14,7 +16,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.auction.controller.HomeController"
+            fx:controller="com.auction.controller.AuctionDetailController"
             prefWidth="1380"
             prefHeight="920"
             stylesheets="@style.css"
@@ -35,137 +37,130 @@
             <Button text="Phiên đấu giá" onAction="#goToSessions" styleClass="nav-btn"/>
             <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn"/>
             <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
-            <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
+            <Button text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
         </HBox>
     </top>
 
     <center>
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
             <content>
-                <VBox spacing="24">
+                <VBox spacing="22" styleClass="page-section">
                     <padding>
-                        <Insets top="24" right="42" bottom="40" left="42"/>
+                        <Insets top="28" right="34" bottom="32" left="34"/>
                     </padding>
 
-                    <!-- BREADCRUMB -->
-                    <HBox spacing="8" alignment="CENTER_LEFT">
-                        <Label text="Trang chủ" styleClass="muted-text"/>
-                        <Label text=" / " styleClass="muted-text"/>
-                        <Label text="Tài sản đấu giá" styleClass="muted-text"/>
-                        <Label text=" / " styleClass="muted-text"/>
-                        <Label text="Chi tiết phiên đấu giá" styleClass="partner-text-strong"/>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Màn hình đấu giá realtime" styleClass="section-title-dark"/>
+                        <Label fx:id="lblNotification" text="Đang đồng bộ dữ liệu phiên đấu giá." styleClass="auction-notice"/>
                     </HBox>
 
-                    <HBox spacing="30">
-                        <!-- LEFT: IMAGES -->
-                        <VBox spacing="16" prefWidth="780">
-                            <AnchorPane prefHeight="480" styleClass="thumb-1" style="-fx-background-radius: 24;">
-                                <children>
-                                    <Label layoutX="20" layoutY="20" text="ĐANG DIỄN RA" styleClass="badge-live"/>
-                                </children>
-                            </AnchorPane>
+                    <HBox spacing="22">
+                        <VBox spacing="16" prefWidth="360" styleClass="detail-side-card">
+                            <padding>
+                                <Insets top="22" right="20" bottom="22" left="20"/>
+                            </padding>
 
-                            <HBox spacing="14">
-                                <AnchorPane prefWidth="184" prefHeight="120" styleClass="thumb-1" style="-fx-opacity: 0.6; -fx-background-radius: 12;"/>
-                                <AnchorPane prefWidth="184" prefHeight="120" styleClass="thumb-2" style="-fx-opacity: 0.6; -fx-background-radius: 12;"/>
-                                <AnchorPane prefWidth="184" prefHeight="120" styleClass="thumb-3" style="-fx-opacity: 0.6; -fx-background-radius: 12;"/>
-                                <AnchorPane prefWidth="184" prefHeight="120" styleClass="thumb-4" style="-fx-opacity: 0.6; -fx-background-radius: 12;"/>
+                            <VBox spacing="6">
+                                <Label fx:id="lblName" text="Honda Vision 2023" styleClass="hero-title-small" wrapText="true"/>
+                                <Label fx:id="lblStatus" text="RUNNING" styleClass="badge-live"/>
+                            </VBox>
+
+                            <VBox spacing="4">
+                                <Label text="Giá hiện tại" styleClass="field-label"/>
+                                <Label fx:id="lblPrice" text="25,500,000 VND" styleClass="detail-price"/>
+                            </VBox>
+
+                            <HBox spacing="16">
+                                <VBox spacing="4">
+                                    <Label text="Người dẫn đầu" styleClass="field-label"/>
+                                    <Label fx:id="lblLeader" text="Chưa có" styleClass="partner-text-strong" wrapText="true"/>
+                                </VBox>
+                                <VBox spacing="4">
+                                    <Label text="Người bán" styleClass="field-label"/>
+                                    <Label fx:id="lblSeller" text="seller_001" styleClass="partner-text-strong" wrapText="true"/>
+                                </VBox>
                             </HBox>
 
-                            <VBox spacing="12" styleClass="content-card">
-                                <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
-                                <Label text="Mô tả tài sản" styleClass="partner-title"/>
-                                <Label text="Tác phẩm hội họa sơn dầu đặc sắc của danh họa Bùi Xuân Phái, thể hiện vẻ đẹp hoài cổ và linh hồn của Hà Nội xưa qua những mái ngói thâm nghiêm. Tác phẩm đi kèm giấy chứng nhận thẩm định nghệ thuật và hồ sơ nguồn gốc rõ ràng."
-                                       wrapText="true" styleClass="hero-desc"/>
-                                <Separator/>
-                                <Label text="Thông tin chi tiết" styleClass="partner-title"/>
-                                <HBox spacing="40">
-                                    <VBox spacing="8">
-                                        <Label text="Kích thước: 60x80 cm" styleClass="partner-text"/>
-                                        <Label text="Chất liệu: Sơn dầu trên toan" styleClass="partner-text"/>
-                                        <Label text="Tình trạng: Nguyên bản" styleClass="partner-text"/>
-                                    </VBox>
-                                    <VBox spacing="8">
-                                        <Label text="Năm sáng tác: 1978" styleClass="partner-text"/>
-                                        <Label text="Chủ đề: Phố cổ Hà Nội" styleClass="partner-text"/>
-                                        <Label text="Mã tài sản: ART-2026-001" styleClass="partner-text"/>
-                                    </VBox>
+                            <HBox spacing="16">
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="Còn lại" styleClass="field-label"/>
+                                    <Label fx:id="lblTime" text="00:00:00" styleClass="partner-title"/>
+                                </VBox>
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="Bước giá tối thiểu" styleClass="field-label"/>
+                                    <Label fx:id="lblMinimumBid" text="500,000 VND" styleClass="partner-text-strong"/>
+                                </VBox>
+                            </HBox>
+
+                            <Separator/>
+
+                            <VBox spacing="10">
+                                <Label text="Đặt giá thủ công" styleClass="partner-title"/>
+                                <HBox spacing="10">
+                                    <TextField fx:id="txtBidAmount" promptText="Số tiền (VND)" styleClass="mail-field" HBox.hgrow="ALWAYS"/>
+                                    <Button fx:id="btnBid" text="Đặt giá" onAction="#handleBid" styleClass="primary-btn"/>
                                 </HBox>
+                                <Label fx:id="lblBidHint" text="Giá đặt phải lớn hơn giá hiện tại + bước giá tối thiểu." styleClass="muted-text" wrapText="true"/>
+                            </VBox>
+
+                            <Separator/>
+
+                            <VBox spacing="10">
+                                <Label text="Auto-bid tự động" styleClass="partner-title"/>
+                                <TextField fx:id="txtAutoBidMax" promptText="Giá tối đa (VND)" styleClass="mail-field"/>
+                                <TextField fx:id="txtAutoBidStep" promptText="Bước tăng (VND)" styleClass="mail-field"/>
+                                <HBox spacing="10">
+                                    <Button text="Bật Auto-bid" onAction="#handleActivateAutoBid" styleClass="primary-btn"/>
+                                    <Button text="Tắt" onAction="#handleDisableAutoBid" styleClass="secondary-btn-small"/>
+                                </HBox>
+                                <Label fx:id="lblAutoBidStatus" text="Auto-bid chưa được kích hoạt." styleClass="muted-text" wrapText="true"/>
+                            </VBox>
+
+                            <Separator/>
+
+                            <VBox spacing="10" VBox.vgrow="ALWAYS">
+                                <Label text="Lịch sử đặt giá" styleClass="partner-title"/>
+                                <ListView fx:id="lvBidHistory" prefHeight="240" VBox.vgrow="ALWAYS" styleClass="auction-history-list"/>
                             </VBox>
                         </VBox>
 
-                        <!-- RIGHT: BIDDING PANEL -->
-                        <VBox spacing="20" prefWidth="480">
-                            <VBox spacing="18" styleClass="detail-side-card">
-                                <padding><Insets top="28" right="24" bottom="28" left="24"/></padding>
-
-                                <Label fx:id="detailItemNameLabel" text="Tác phẩm nghệ thuật: Bức tranh Phố Phái" styleClass="hero-title-small" wrapText="true"/>
-
-                                <VBox spacing="6" styleClass="price-row">
-                                    <Label text="Giá hiện tại" styleClass="field-label"/>
-                                    <Label text="1,250,000,000 VNĐ" styleClass="detail-price"/>
-                                </VBox>
-
-                                <HBox spacing="10" alignment="CENTER">
-                                    <VBox alignment="CENTER" styleClass="stat-card" prefWidth="80" prefHeight="70">
-                                        <Label text="02" styleClass="stat-number" style="-fx-font-size: 22;"/>
-                                        <Label text="NGÀY" styleClass="logo-sub"/>
-                                    </VBox>
-                                    <Label text=":" styleClass="stat-number"/>
-                                    <VBox alignment="CENTER" styleClass="stat-card" prefWidth="80" prefHeight="70">
-                                        <Label text="14" styleClass="stat-number" style="-fx-font-size: 22;"/>
-                                        <Label text="GIỜ" styleClass="logo-sub"/>
-                                    </VBox>
-                                    <Label text=":" styleClass="stat-number"/>
-                                    <VBox alignment="CENTER" styleClass="stat-card" prefWidth="80" prefHeight="70">
-                                        <Label text="45" styleClass="stat-number" style="-fx-font-size: 22;"/>
-                                        <Label text="PHÚT" styleClass="logo-sub"/>
-                                    </VBox>
-                                </HBox>
-
-                                <Separator/>
-
-                                <VBox spacing="12">
-                                    <Label text="Đặt giá của bạn" styleClass="field-label"/>
-                                    <HBox spacing="10">
-                                        <TextField fx:id="bidAmountField" text="1,260,000,000" styleClass="mail-field" HBox.hgrow="ALWAYS" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
-                                        <Label text="VNĐ" alignment="CENTER" prefHeight="45" styleClass="partner-text-strong"/>
-                                    </HBox>
-                                    <Label text="Bước giá tối thiểu: 10,000,000 VNĐ" styleClass="muted-text" style="-fx-font-size: 11;"/>
-
-                                    <Button text="ĐẶT GIÁ NGAY" onAction="#handleBid" maxWidth="1.7976931348623157E308" styleClass="primary-btn" style="-fx-font-size: 16; -fx-padding: 15;"/>
-                                </VBox>
+                        <VBox spacing="18" HBox.hgrow="ALWAYS">
+                            <VBox spacing="14" styleClass="content-card">
+                                <padding>
+                                    <Insets top="22" right="24" bottom="22" left="24"/>
+                                </padding>
+                                <Label text="Biểu đồ giá theo thời gian (Realtime)" styleClass="partner-title"/>
+                                <LineChart fx:id="priceChart"
+                                           animated="false"
+                                           createSymbols="true"
+                                           legendVisible="false"
+                                           prefHeight="620"
+                                           styleClass="auction-chart">
+                                    <xAxis>
+                                        <NumberAxis fx:id="xAxis" label="Giây kể từ bid đầu tiên"/>
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis fx:id="yAxis" label="Giá (VND)"/>
+                                    </yAxis>
+                                </LineChart>
                             </VBox>
 
-                            <VBox spacing="15" styleClass="content-card">
-                                <padding><Insets top="22" right="20" bottom="22" left="20"/></padding>
-                                <Label text="Lịch sử đấu giá" styleClass="partner-title"/>
-                                <VBox spacing="10">
-                                    <HBox alignment="CENTER_LEFT">
-                                        <Label text="Nguyễn Văn A" styleClass="partner-text-strong"/>
-                                        <Region HBox.hgrow="ALWAYS"/>
-                                        <Label text="1,250,000,000" styleClass="card-price-dark" style="-fx-font-size: 14;"/>
-                                    </HBox>
-                                    <Label text="10:24:15 - 07/04/2026" styleClass="muted-text" style="-fx-font-size: 11;"/>
-                                    <Separator style="-fx-opacity: 0.3;"/>
-
-                                    <HBox alignment="CENTER_LEFT">
-                                        <Label text="Trần Thị B" styleClass="partner-text-strong"/>
-                                        <Region HBox.hgrow="ALWAYS"/>
-                                        <Label text="18,400,000,000" styleClass="partner-text" style="-fx-font-size: 14;"/>
-                                    </HBox>
-                                    <Label text="10:20:02 - 07/04/2026" styleClass="muted-text" style="-fx-font-size: 11;"/>
-                                    <Separator style="-fx-opacity: 0.3;"/>
-
-                                    <HBox alignment="CENTER_LEFT">
-                                        <Label text="Lê Văn C" styleClass="partner-text-strong"/>
-                                        <Region HBox.hgrow="ALWAYS"/>
-                                        <Label text="18,350,000,000" styleClass="partner-text" style="-fx-font-size: 14;"/>
-                                    </HBox>
-                                    <Label text="10:15:30 - 07/04/2026" styleClass="muted-text" style="-fx-font-size: 11;"/>
+                            <HBox spacing="18">
+                                <VBox spacing="10" styleClass="content-card" HBox.hgrow="ALWAYS">
+                                    <padding>
+                                        <Insets top="18" right="18" bottom="18" left="18"/>
+                                    </padding>
+                                    <Label text="Realtime update" styleClass="partner-title"/>
+                                    <Label text="Client đang poll phiên đấu giá mỗi giây để làm mới giá, lịch sử và biểu đồ trong cùng JVM." styleClass="partner-text" wrapText="true"/>
                                 </VBox>
-                                <Button text="Xem tất cả lịch sử" maxWidth="1.7976931348623157E308" styleClass="secondary-btn-small"/>
-                            </VBox>
+                                <VBox spacing="10" styleClass="content-card" HBox.hgrow="ALWAYS">
+                                    <padding>
+                                        <Insets top="18" right="18" bottom="18" left="18"/>
+                                    </padding>
+                                    <Label text="Notification" styleClass="partner-title"/>
+                                    <Label text="Khi bị outbid hoặc auto-bid chạy, thông báo sẽ xuất hiện ở đầu màn hình và popup." styleClass="partner-text" wrapText="true"/>
+                                </VBox>
+                            </HBox>
                         </VBox>
                     </HBox>
                 </VBox>

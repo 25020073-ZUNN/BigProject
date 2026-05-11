@@ -555,4 +555,9 @@ public class HomeController {
     public void goToContact(ActionEvent event) {
         switchScene(event, "contact.fxml");
     }
+
+    @FXML
+    public void goToCreateAuction(ActionEvent event) {
+        switchScene(event, "create-auction.fxml");
+    }
 }

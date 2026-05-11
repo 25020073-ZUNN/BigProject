@@ -505,3 +505,78 @@
     -fx-background-radius: 14;
     -fx-padding: 12 14 12 14;
 }
+
+.auction-notice {
+    -fx-text-fill: #1b5f59;
+    -fx-background-color: rgba(42, 123, 118, 0.12);
+    -fx-background-radius: 999;
+    -fx-padding: 7 12 7 12;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.auction-history-list {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-border-color: #d7c6ab;
+    -fx-border-radius: 16;
+}
+
+.auction-history-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2e4359;
+    -fx-font-size: 12px;
+    -fx-padding: 10 12 10 12;
+}
+
+.auction-history-list .list-cell:filled:selected,
+.auction-history-list .list-cell:filled:selected:hover {
+    -fx-background-color: rgba(243, 198, 107, 0.22);
+    -fx-text-fill: #10233a;
+}
+
+.auction-chart {
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-border-color: #e2d4bc;
+    -fx-border-radius: 20;
+    -fx-padding: 16;
+}
+
+.auction-chart .chart-plot-background {
+    -fx-background-color: linear-gradient(to bottom, #fffdf8, #f6efe2);
+    -fx-background-insets: 0;
+    -fx-background-radius: 14;
+}
+
+.auction-chart .chart-vertical-grid-lines,
+.auction-chart .chart-horizontal-grid-lines {
+    -fx-stroke: rgba(16, 35, 58, 0.12);
+}
+
+.auction-chart .chart-series-line {
+    -fx-stroke: #0f4f8a;
+    -fx-stroke-width: 2.4px;
+}
+
+.auction-chart .chart-line-symbol {
+    -fx-background-color: #ffffff, #0f4f8a;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 8px;
+    -fx-padding: 5px;
+}
+
+.auction-data-card,
+.session-data-card {
+    -fx-background-color: rgba(255, 251, 245, 0.98);
+    -fx-background-radius: 22;
+    -fx-border-color: #e2d4bc;
+    -fx-border-radius: 22;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(16, 35, 58, 0.08), 14, 0.18, 0, 4);
+}
+
+.auction-data-card:hover,
+.session-data-card:hover {
+    -fx-translate-y: -2;
+}

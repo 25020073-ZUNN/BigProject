@@ -38,6 +38,7 @@ public class BidTransaction extends Entity {
     public User getBidder() { return bidder; }
     public BigDecimal getBidAmount() { return bidAmount; }
     public LocalDateTime getBidTime() { return bidTime; }
+    public void setBidTime(LocalDateTime bidTime) { this.bidTime = bidTime; }
 
     @Override
     public void printInfo() {

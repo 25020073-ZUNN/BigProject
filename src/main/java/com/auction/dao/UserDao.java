@@ -10,6 +10,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -111,6 +113,69 @@ public class UserDao {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * Tìm người dùng theo ID.
+     * Hàm này rất quan trọng cho bài toán đấu giá thật vì dữ liệu phiên đấu giá
+     * chỉ lưu khóa ngoại `seller_id` hoặc `highest_bidder_id`.
+     * Khi dựng lại đối tượng Auction từ DB, chúng ta cần truy ngược từ ID sang User.
+     */
+    public User findById(String id) {
+        String sql = "SELECT * FROM users WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                return mapUser(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Tìm người dùng theo username.
+     * Form tạo tài sản dùng hàm này để xác thực người bán nhập vào có thực sự tồn tại hay không.
+     */
+    public User findByUsername(String username) {
+        String sql = "SELECT * FROM users WHERE username = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                return mapUser(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Lấy danh sách người bán đang hoạt động.
+     * Danh sách này hữu ích khi cần đổ vào ComboBox hoặc hỗ trợ người kiểm thử chọn seller hợp lệ.
+     */
+    public List<User> findActiveSellers() {
+        String sql = "SELECT * FROM users WHERE role = 'SELLER' AND active = TRUE ORDER BY username";
+        List<User> sellers = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                sellers.add(mapUser(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return sellers;
     }
 
     /**

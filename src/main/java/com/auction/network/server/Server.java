@@ -1,6 +1,7 @@
 package com.auction.network.server;
 
 import com.auction.config.DBConnection;
+import com.auction.dao.UserDao;
 import com.auction.model.Auction;
 import com.auction.model.item.Item;
 import com.auction.model.user.Bidder;
@@ -35,6 +36,7 @@ public class Server {
     private final int port;
     private final AuthService authService; // Dịch vụ xử lý Đăng nhập/Đăng ký
     private final AuctionService auctionService; // Dịch vụ xử lý Đấu giá
+    private final UserDao userDao;
     private final ExecutorService executor; // Quản lý luồng (Thread) để xử lý nhiều Client cùng lúc
 
     private volatile boolean running; // Trạng thái hoạt động của Server
@@ -48,6 +50,7 @@ public class Server {
         this.port = port;
         this.authService = AuthService.getInstance();
         this.auctionService = AuctionService.getInstance();
+        this.userDao = new UserDao();
         // Sử dụng CachedThreadPool để tạo luồng mới khi cần hoặc tái sử dụng luồng rảnh
         this.executor = Executors.newCachedThreadPool();
     }
@@ -207,8 +210,17 @@ public class Server {
         if (auction == null) return Message.failure(request, "Không tìm thấy phiên đấu giá");
         if (bidderName == null || bidderName.isBlank()) return Message.failure(request, "Tên người đặt giá là bắt buộc");
 
-        // Tạo đối tượng người đặt giá (Trong thực tế nên lấy từ DB)
-        User bidder = new Bidder(bidderName, bidderName + "@example.com", "");
+        /*
+         * Ghi chú quan trọng:
+         * Sau khi chuyển sang DB thật, bidder dùng để đặt giá phải là user có thật trong DB.
+         * Nếu tiếp tục tạo user giả trong RAM như trước, câu lệnh INSERT vào `bid_transactions`
+         * sẽ lỗi khóa ngoại vì `bidder_id` không tồn tại trong bảng `users`.
+         */
+        User bidder = userDao.findByUsername(bidderName);
+        if (bidder == null) {
+            bidder = new Bidder(bidderName, bidderName + "@example.com", "");
+            return Message.failure(request, "Người đặt giá chưa tồn tại trong cơ sở dữ liệu");
+        }
         boolean success = auctionService.placeBid(auction, bidder, new BigDecimal(amountText));
         
         if (!success) return Message.failure(request, "Đặt giá thất bại (có thể giá của bạn thấp hơn giá hiện tại)");
@@ -259,6 +271,7 @@ public class Server {
         payload.put("sellerName", auction.getSeller().getUsername());
         payload.put("startingPrice", auction.getStartingPrice().toPlainString());
         payload.put("currentPrice", auction.getCurrentPrice().toPlainString());
+        payload.put("bidStep", auction.getMinimumBidStep() == null ? "0" : auction.getMinimumBidStep().toPlainString());
         payload.put("active", auction.isActive());
         payload.put("finished", auction.isFinished());
         payload.put("endTime", item.getEndTime().format(DATE_FORMATTER));

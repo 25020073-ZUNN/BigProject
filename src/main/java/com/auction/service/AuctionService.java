@@ -1,39 +1,43 @@
 package com.auction.service;
 
+import com.auction.dao.AuctionDao;
+import com.auction.dao.UserDao;
+import com.auction.factory.ItemFactory;
 import com.auction.model.Auction;
 import com.auction.model.item.Item;
-import com.auction.model.user.Bidder;
-import com.auction.model.user.Seller;
 import com.auction.model.user.User;
-import com.auction.factory.ItemFactory;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * AuctionService - Dịch vụ quản lý các phiên đấu giá.
- * Lớp này sử dụng mẫu thiết kế Singleton để quản lý danh sách các cuộc đấu giá trong bộ nhớ hệ thống.
- * Chịu trách nhiệm cung cấp dữ liệu về các tài sản đang đấu giá và xử lý logic đặt giá (bidding).
+ * Dịch vụ nghiệp vụ cho phiên đấu giá thật.
+ *
+ * Điểm thay đổi quan trọng so với phiên bản cũ:
+ * - Không còn nạp dữ liệu mẫu bằng `loadSampleData()`.
+ * - Dữ liệu được đọc/ghi từ MySQL thông qua `AuctionDao`.
+ * - Danh sách `auctions` chỉ đóng vai trò snapshot trong RAM để phục vụ UI nhanh hơn.
+ * - Sau mỗi thao tác tạo phiên hoặc đặt giá, service sẽ nạp lại từ DB để đồng bộ trạng thái.
  */
 public class AuctionService {
 
-    private static AuctionService instance; // Instance duy nhất của AuctionService
-    private List<Auction> auctions; // Danh sách lưu trữ các phiên đấu giá hiện có
+    private static AuctionService instance;
 
-    /**
-     * Constructor riêng tư. Khởi tạo danh sách và nạp dữ liệu mẫu khi Server khởi động.
-     */
+    private final AuctionDao auctionDao;
+    private final UserDao userDao;
+    private List<Auction> auctions;
+
     private AuctionService() {
-        auctions = new ArrayList<>();
-        loadSampleData();
+        this.auctionDao = new AuctionDao();
+        this.userDao = new UserDao();
+        this.auctions = new ArrayList<>();
+        refreshAuctions();
     }
 
-    /**
-     * Phương thức tĩnh để lấy instance duy nhất (Thread-safe với synchronized).
-     */
     public static synchronized AuctionService getInstance() {
         if (instance == null) {
             instance = new AuctionService();
@@ -42,86 +46,112 @@ public class AuctionService {
     }
 
     /**
-     * Nạp dữ liệu mẫu (Mock Data) để kiểm thử hệ thống khi chưa có dữ liệu thực từ Database.
-     * Tạo ra một số tài sản như iPhone, Laptop để hiển thị trên giao diện.
+     * Nạp lại toàn bộ phiên đấu giá từ DB.
+     *
+     * Ghi chú:
+     * Hàm này là "nguồn sự thật" mới của module auction.
+     * Khi DB chưa sẵn sàng, service sẽ trả danh sách rỗng thay vì bơm dữ liệu giả,
+     * để người dùng biết rõ hệ thống đang thiếu dữ liệu thật chứ không bị đánh lừa bởi mock.
      */
-    private void loadSampleData() {
-        // Tạo người dùng mẫu (Người bán)
-        User user1 = new Seller("user_001", "user1@example.com", "pass");
-        User user2 = new Seller("user_002", "user2@example.com", "pass");
-
-        // Sử dụng ItemFactory để tạo các mặt hàng điện tử mẫu
-        Item item1 = ItemFactory.createElectronics(
-                "iPhone 15 Pro Max", 
-                "Máy mới 99%, đầy đủ phụ kiện", 
-                new BigDecimal("25000000"),
-                LocalDateTime.now().minusDays(1),
-                LocalDateTime.now().plusDays(2),
-                user1.getId(),
-                "Apple",
-                12
-        );
-
-        Item item2 = ItemFactory.createElectronics(
-                "ASUS ROG Strix G15", 
-                "Laptop gaming cấu hình cao", 
-                new BigDecimal("30500000"),
-                LocalDateTime.now().minusHours(5),
-                LocalDateTime.now().plusHours(12),
-                user2.getId(),
-                "ASUS",
-                24
-        );
-
-        // Thêm vào danh sách quản lý
-        auctions.add(new Auction(item1, user1, item1.getCurrentPrice()));
-        auctions.add(new Auction(item2, user2, item2.getCurrentPrice()));
+    public synchronized void refreshAuctions() {
+        if (!userDao.isDatabaseAvailable()) {
+            this.auctions = new ArrayList<>();
+            return;
+        }
+        this.auctions = new ArrayList<>(auctionDao.findAllAuctions());
     }
 
-    /**
-     * Lấy danh sách tất cả các phiên đấu giá hiện có.
-     */
-    public List<Auction> getAllAuctions() {
-        return auctions;
+    public synchronized List<Auction> getAllAuctions() {
+        return new ArrayList<>(auctions);
     }
 
-    /**
-     * Chỉ lấy danh sách các mặt hàng (Item) từ các phiên đấu giá.
-     */
-    public List<Item> getAllItems() {
-        return auctions.stream().map(Auction::getItem).collect(Collectors.toList());
-    }
-
-    /**
-     * Tìm kiếm phiên đấu giá dựa trên một mặt hàng cụ thể.
-     */
-    public Auction getAuctionByItem(Item item) {
+    public synchronized List<Item> getAllItems() {
         return auctions.stream()
-                .filter(a -> a.getItem().equals(item))
+                .map(Auction::getItem)
+                .collect(Collectors.toList());
+    }
+
+    public synchronized Auction getAuctionByItem(Item item) {
+        if (item == null) {
+            return null;
+        }
+        return auctions.stream()
+                .filter(a -> a.getItem().getId().equals(item.getId()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public synchronized Auction getAuctionById(String auctionId) {
+        if (auctionId == null || auctionId.isBlank()) {
+            return null;
+        }
+        return auctions.stream()
+                .filter(a -> auctionId.equals(a.getId()))
                 .findFirst()
                 .orElse(null);
     }
 
     /**
-     * Xử lý logic đặt giá cho một phiên đấu giá.
-     * @param auction Phiên đấu giá mục tiêu
-     * @param bidder Người tham gia đặt giá
-     * @param amount Số tiền đặt giá mới
-     * @return true nếu đặt giá thành công (số tiền cao hơn giá hiện tại), false nếu thất bại.
+     * Tạo tài sản + phiên đấu giá mới từ dữ liệu người dùng nhập trên form.
      */
-    public boolean placeBid(Auction auction, User bidder, BigDecimal amount) {
-        // Kiểm tra tính hợp lệ của đối tượng
-        if (auction == null || bidder == null) return false;
-        
-        try {
-            // Gọi phương thức placeBid bên trong lớp Auction để thực hiện kiểm tra giá
-            // Phương thức này sẽ ném ngoại lệ nếu số tiền không hợp lệ hoặc thấp hơn giá hiện tại
-            auction.placeBid(bidder, amount);
-            return true;
-        } catch (Exception e) {
-            // Ghi nhận lỗi nếu quá trình đặt giá thất bại
-            System.err.println("Đặt giá thất bại: " + e.getMessage());
+    public synchronized boolean createAuction(
+            String itemType,
+            String name,
+            String description,
+            BigDecimal startingPrice,
+            BigDecimal bidStep,
+            LocalDateTime startTime,
+            LocalDateTime endTime,
+            User seller,
+            Map<String, Object> attributes
+    ) {
+        if (seller == null) {
+            throw new IllegalArgumentException("Không tìm thấy người bán hợp lệ.");
+        }
+        if (startingPrice == null || startingPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Giá khởi điểm phải lớn hơn 0.");
+        }
+        if (bidStep == null || bidStep.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Bước giá phải lớn hơn 0.");
+        }
+        if (startTime == null || endTime == null || !endTime.isAfter(startTime)) {
+            throw new IllegalArgumentException("Thời gian kết thúc phải lớn hơn thời gian bắt đầu.");
+        }
+
+        Item item = ItemFactory.createItem(
+                itemType,
+                name,
+                description,
+                startingPrice,
+                startTime,
+                endTime,
+                seller.getId(),
+                attributes
+        );
+
+        boolean created = auctionDao.createAuction(item, seller, bidStep);
+        if (created) {
+            refreshAuctions();
+        }
+        return created;
+    }
+
+    /**
+     * Đặt giá thật cho một phiên.
+     *
+     * Ghi chú:
+     * Sau khi DAO ghi thành công xuống DB, service nạp lại snapshot trong RAM
+     * để các màn hình JavaFX đang dùng chung singleton này nhìn thấy cùng trạng thái mới.
+     */
+    public synchronized boolean placeBid(Auction auction, User bidder, BigDecimal amount) {
+        if (auction == null || bidder == null || amount == null) {
             return false;
         }
+
+        boolean success = auctionDao.placeBid(auction, bidder, amount);
+        if (success) {
+            refreshAuctions();
+        }
+        return success;
     }
 }
