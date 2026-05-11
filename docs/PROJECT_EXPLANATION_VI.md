@@ -213,7 +213,7 @@ Moi file FXML co the co:
 
 Vi du:
 
-- `fx:controller="com.auction.HomeController"`
+- `fx:controller="com.auction.controller.HomeController"`
 - `onAction="#handleLogin"`
 
 Nghia la khi bam nut, JavaFX se goi method `handleLogin(...)` trong `HomeController`.

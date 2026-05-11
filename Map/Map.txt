@@ -32,69 +32,123 @@
 ┃     ┗━ 🤖 AutoBidStrategy (Logic tự động nhảy giá)
 ┃
 ┗━ 📂 Kiến trúc MVC (Phân tách Client & Server)
-   ┣━ 🖥️ View (Giao diện JavaFX - .fxml)
-   ┃  ┣━ Màn hình Đăng nhập / Đăng ký
-   ┃  ┣━ Màn hình Quản lý Sản phẩm (Cho Seller)
-   ┃  ┗━ Màn hình Đấu giá Trực tiếp (Realtime Bidding - Cập nhật biểu đồ giá)
-   ┃
-   ┣━ 🎮 Controller (Xử lý sự kiện từ UI)
-   ┃  ┗━ Bắt sự kiện click, gọi Data qua Server/API
-   ┃
-   ┗━ 🗄️ DAO / Repository (Data Access Object)
-      ┗━ Tầng tương tác trực tiếp với Database để lưu trữ dữ liệu bền vững
+     ┣━ 🖥️ View (Giao diện JavaFX - .fxml)
+     ┃  ┣━ Màn hình Đăng nhập / Đăng ký
+     ┃  ┣━ Màn hình Quản lý Sản phẩm (Cho Seller)
+     ┃  ┗━ Màn hình Đấu giá Trực tiếp (Realtime Bidding - Cập nhật biểu đồ giá)
+     ┃
+     ┣━ 🎮 Controller (Xử lý sự kiện từ UI)
+     ┃  ┗━ Bắt sự kiện click, gọi Data qua Server/API
+     ┃
+     ┗━ 🗄️ DAO / Repository (Data Access Object)
+            ┗━ Tầng tương tác trực tiếp với Database để lưu trữ dữ liệu bền vững
 ______________________________________________________________________________________________________________________
 src/
 └── main/
-    └── java/
-        └── com/
-            └── uet/
-                └── bidding/
-                    ├── Main.java                     // Điểm khởi chạy chương trình
-                    │
-                    ├── controller/                  // Xử lý điều hướng / nhận yêu cầu từ giao diện
-                    │   ├── AuctionController.java
-                    │   ├── BidController.java
-                    │   └── UserController.java
-                    │
-                    ├── model/                       // Chứa các lớp dữ liệu, đối tượng nghiệp vụ chính
-                    │   ├── Entity.java              // Lớp cha chung, quản lý id hoặc thông tin cơ bản
-                    │   ├── Auction.java             // Thông tin một phiên đấu giá
-                    │   ├── BidTransaction.java      // Lưu thông tin một lần ra giá
-                    │   │
-                    │   ├── item/                    // Nhóm các loại sản phẩm được đấu giá
-                    │   │   ├── Item.java            // Lớp cha của các sản phẩm
-                    │   │   ├── ItemStatus.java      // Enum trạng thái sản phẩm
-                    │   │   ├── Art.java             // Mặt hàng nghệ thuật
-                    │   │   ├── Electronics.java     // Mặt hàng điện tử
-                    │   │   └── Vehicle.java         // Mặt hàng xe cộ
-                    │   │
-                    │   └── user/                    // Nhóm các loại người dùng trong hệ thống
-                    │       ├── User.java            // Lớp cha người dùng
-                    │       ├── Admin.java           // Quản trị viên
-                    │       ├── Bidder.java          // Người tham gia đấu giá
-                    │       ├── Seller.java          // Người bán
-                    │       └── InsufficientFundsException.java // Ngoại lệ không đủ tiền
-                    │
-                    ├── service/                     // Xử lý logic nghiệp vụ chính
-                    │   ├── AuctionService.java
-                    │   ├── BidService.java
-                    │   └── UserService.java
-                    │
-                    ├── factory/                     // Tạo object theo mẫu, giảm lặp code
-                    │   ├── ItemFactory.java
-                    │   └── UserFactory.java
-                    │
-                    ├── observer/                    // Theo dõi thay đổi và gửi thông báo
-                    │   ├── AuctionObserver.java
-                    │   └── NotificationObserver.java
-                    │
-                    ├── network/                     // Xử lý giao tiếp client-server nếu có
-                    │   ├── Client.java
-                    │   ├── Server.java
-                    │   ├── Request.java
-                    │   └── Response.java
-                    │
-                    └── util/                        // Các hàm tiện ích dùng chung
-                        ├── Validator.java
-                        ├── PasswordUtils.java
-                        └── IdGenerator.java
+        └── java/
+                └── com/
+                        └── uet/
+                                └── bidding/
+                                        ├── Main.java                     // Điểm khởi chạy chương trình
+                                        │
+                                        ├── controller/                  // Xử lý điều hướng / nhận yêu cầu từ giao diện
+                                        │   ├── AuctionController.java
+                                        │   ├── BidController.java
+                                        │   └── UserController.java
+                                        │
+                                        ├── model/                       // Chứa các lớp dữ liệu, đối tượng nghiệp vụ chính
+                                        │   ├── Entity.java              // Lớp cha chung, quản lý id hoặc thông tin cơ bản
+                                        │   ├── Auction.java             // Thông tin một phiên đấu giá
+                                        │   ├── BidTransaction.java      // Lưu thông tin một lần ra giá
+                                        │   │
+                                        │   ├── item/                    // Nhóm các loại sản phẩm được đấu giá
+                                        │   │   ├── Item.java            // Lớp cha của các sản phẩm
+                                        │   │   ├── ItemStatus.java      // Enum trạng thái sản phẩm
+                                        │   │   ├── Art.java             // Mặt hàng nghệ thuật
+                                        │   │   ├── Electronics.java     // Mặt hàng điện tử
+                                        │   │   └── Vehicle.java         // Mặt hàng xe cộ
+                                        │   │
+                                        │   └── user/                    // Nhóm các loại người dùng trong hệ thống
+                                        │       ├── User.java            // Lớp cha người dùng
+                                        │       ├── Admin.java           // Quản trị viên
+                                        │       ├── Bidder.java          // Người tham gia đấu giá
+                                        │       ├── Seller.java          // Người bán
+                                        │       └── InsufficientFundsException.java // Ngoại lệ không đủ tiền
+                                        │
+                                        ├── service/                     // Xử lý logic nghiệp vụ chính
+                                        │   ├── AuctionService.java
+                                        │   ├── BidService.java
+                                        │   └── UserService.java
+                                        │
+                                        ├── factory/                     // Tạo object theo mẫu, giảm lặp code
+                                        │   ├── ItemFactory.java
+                                        │   └── UserFactory.java
+                                        │
+                                        ├── observer/                    // Theo dõi thay đổi và gửi thông báo
+                                        │   ├── AuctionObserver.java
+                                        │   └── NotificationObserver.java
+                                        │
+                                        ├── network/                     // Xử lý giao tiếp client-server nếu có
+                                        │   ├── Client.java
+                                        │   ├── Server.java
+                                        │   ├── Request.java
+                                        │   └── Response.java
+                                        │
+                                        └── util/                        // Các hàm tiện ích dùng chung
+                                                ├── Validator.java
+                                                ├── PasswordUtils.java
+                                                └── IdGenerator.java
+
+```mermaid
+flowchart TB
+    subgraph Root[BigProject (root)]
+        POM[`pom.xml`]
+        README[`README.md`]
+    end
+    subgraph Src[src/]
+        subgraph Main[src/main]
+            subgraph Java[src/main/java]
+                pkg[com.auction/*]
+                pkg --> Controllers[Controllers\n- AuctionDetailController.java\n- AuctionListController.java\n- HomeController.java\n- Main.java\n- MainApp.java\n- UserSession.java]
+                pkg --> Client[client.network/*]
+                pkg --> Config[config\n- DBConnection.java]
+                pkg --> Dao[dao\n- UserDao.java]
+                pkg --> Factory[factory\n- ItemFactory.java]
+                pkg --> Model[model\n- Auction.java\n- BidTransaction.java\n- item/ , user/]
+                pkg --> Network[network\n- Message.java\n- Server.java]
+                pkg --> Observer[observer\n- AuctionSubject.java\n- AuctionObserver.java]
+                pkg --> Service[service\n- AuctionManager.java\n- ...]
+                pkg --> Util[util/*]
+            end
+            subgraph Resources[src/main/resources]
+                FXML[FXML files\n(e.g., auctions.fxml, auction-detail.fxml, login.fxml, ...)]
+                ASSETS[images/ , style.css]
+                DB_RES[Database/docker-compose.yml\nDatabase/init/01_schema.sql]
+            end
+        end
+        subgraph Test[test/]
+            TEST_JAVA[test/java/com/auction/*]
+        end
+    end
+    subgraph Target[target/]
+        CLASSES[target/classes/ (compiled resources & classes)]
+        GENERATED[target/generated-sources/]
+        SUREFIRE[target/surefire-reports/]
+    end
+
+    Root --> POM
+    Root --> README
+    Root --> Src
+    Root --> Target
+    Src --> Test
+    Java --> FXML
+    Java --> ASSETS
+
+    style Root fill:#f2f2f2,stroke:#333,stroke-width:1px
+    style Src fill:#eaf2ff,stroke:#333,stroke-width:1px
+    style Main fill:#ffffff,stroke:#666,stroke-width:1px
+    style Java fill:#fff7e6,stroke:#333,stroke-width:1px
+    style Resources fill:#e6ffe6,stroke:#333,stroke-width:1px
+    style Test fill:#ffe6f2,stroke:#333,stroke-width:1px
+    style Target fill:#f9f3e6,stroke:#333,stroke-width:1px
+```

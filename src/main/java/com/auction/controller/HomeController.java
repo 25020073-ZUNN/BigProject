@@ -1,4 +1,4 @@
-package com.auction;
+package com.auction.controller;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -22,8 +22,9 @@ import java.time.format.DateTimeFormatter;
 
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ComboBox;
-import com.auction.service.NetworkService;
+import com.auction.network.client.NetworkService;
 import com.auction.model.user.User;
+import com.auction.util.UserSession;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
