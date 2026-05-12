@@ -18,8 +18,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        // 1. Khởi động Server nhúng trong một luồng riêng biệt
-        startEmbeddedServer();
+        // 1. Khởi động Server nhúng (ĐÃ TẮT ĐỂ CHẠY THỦ CÔNG)
+        // startEmbeddedServer();
         
         // 2. Kiểm tra và in thông tin cấu hình Database ra console
         logDatabaseConfiguration();

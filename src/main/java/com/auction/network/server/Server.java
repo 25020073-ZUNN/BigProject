@@ -67,6 +67,8 @@ public class Server {
         // Vòng lặp chính: Chấp nhận mọi kết nối đến
         while (running) {
             Socket clientSocket = serverSocket.accept(); // Chờ đợi một Client kết nối
+            System.out.println("[SERVER] Client mới kết nối: " + clientSocket.getRemoteSocketAddress());
+            
             // Khi có Client kết nối, đẩy vào một Thread riêng để xử lý, không làm treo Server
             executor.submit(() -> handleClient(clientSocket));
         }
@@ -85,6 +87,7 @@ public class Server {
      * Xử lý giao tiếp với một Client cụ thể.
      */
     private void handleClient(Socket clientSocket) {
+        String clientAddress = clientSocket.getRemoteSocketAddress().toString();
         // Sử dụng try-with-resources để tự động đóng socket và luồng stream khi kết thúc
         try (Socket socket = clientSocket;
              ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
@@ -111,7 +114,9 @@ public class Server {
         } catch (EOFException ignored) {
             // Xảy ra khi Client ngắt kết nối đột ngột
         } catch (Exception e) {
-            System.err.println("Lỗi xử lý Client: " + e.getMessage());
+            System.err.println("[SERVER] Lỗi xử lý Client [" + clientAddress + "]: " + e.getMessage());
+        } finally {
+            System.out.println("[SERVER] Client đã ngắt kết nối: " + clientAddress);
         }
     }
 
@@ -314,6 +319,13 @@ public class Server {
             // Lưu ý: Phải khởi tạo ObjectOutputStream trước ObjectInputStream để tránh tình trạng deadlock (treo luồng)
             this.outputStream = new ObjectOutputStream(socket.getOutputStream());
             this.inputStream = new ObjectInputStream(socket.getInputStream());
+        }
+
+        /**
+         * Kiểm tra xem kết nối có còn hoạt động không.
+         */
+        public boolean isConnected() {
+            return socket != null && !socket.isClosed() && socket.isConnected();
         }
 
         /**
