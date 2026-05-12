@@ -2,6 +2,9 @@ package com.auction.controller;
 
 import com.auction.model.Auction;
 import com.auction.model.item.Item;
+import com.auction.model.user.User;
+import com.auction.service.AuctionService;
+import com.auction.util.UserSession;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -56,11 +59,15 @@ public class AuctionCatalogController {
     private Label resultCountLabel;
     @FXML
     private VBox auctionListContainer;
+    @FXML
+    private Button loginButton;
 
     @FXML
     public void initialize() {
         categoryFilter.setItems(FXCollections.observableArrayList("Tất cả", "Electronics", "Vehicle", "Art"));
         categoryFilter.setValue("Tất cả");
+
+        updateLoginState();
 
         statusFilter.setItems(FXCollections.observableArrayList("Tất cả", "Sắp diễn ra", "Đang diễn ra", "Đã kết thúc"));
         statusFilter.setValue("Tất cả");
@@ -70,6 +77,32 @@ public class AuctionCatalogController {
         statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> renderAuctions());
 
         renderAuctions();
+    }
+
+    private void updateLoginState() {
+        if (UserSession.isLoggedIn()) {
+            User user = UserSession.getLoggedInUser();
+            if (loginButton != null) {
+                loginButton.setText("Đăng xuất (" + user.getUsername() + ")");
+                loginButton.setOnAction(this::handleLogout);
+            }
+        } else {
+            if (loginButton != null) {
+                loginButton.setText("Đăng nhập");
+                loginButton.setOnAction(this::goToLogin);
+            }
+        }
+    }
+
+    @FXML
+    public void handleLogout(ActionEvent event) {
+        UserSession.logout();
+        updateLoginState();
+        try {
+            goToHome(event);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

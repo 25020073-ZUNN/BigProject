@@ -87,6 +87,8 @@ public class AuctionDetailController {
     @FXML
     private Button btnBid;
     @FXML
+    private Button loginButton;
+    @FXML
     private ListView<String> lvBidHistory;
     @FXML
     private LineChart<Number, Number> priceChart;
@@ -101,11 +103,86 @@ public class AuctionDetailController {
         xAxis.setForceZeroInRange(false);
         yAxis.setForceZeroInRange(false);
 
+        updateLoginState();
+
         if (currentAuction == null && !auctionService.getAllAuctions().isEmpty()) {
             currentAuction = auctionService.getAllAuctions().get(0);
             bindAuction(currentAuction);
         }
     }
+
+    private void updateLoginState() {
+        if (UserSession.isLoggedIn()) {
+            User user = UserSession.getLoggedInUser();
+            if (loginButton != null) {
+                loginButton.setText("Đăng xuất (" + user.getUsername() + ")");
+                loginButton.setOnAction(this::handleLogout);
+            }
+        } else {
+            if (loginButton != null) {
+                loginButton.setText("Đăng nhập");
+                loginButton.setOnAction(this::goToLogin);
+            }
+        }
+    }
+
+    @FXML
+    public void handleLogout(ActionEvent event) {
+        UserSession.logout();
+        updateLoginState();
+        try {
+            goToHome(event);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void goToHome(ActionEvent event) {
+        switchScene(event, "giaodien.fxml");
+    }
+
+    @FXML
+    public void goToLogin(ActionEvent event) {
+        switchScene(event, "login.fxml");
+    }
+
+    @FXML
+    public void goToAuctionList(ActionEvent event) {
+        switchScene(event, "auction-detail.fxml");
+    }
+
+    @FXML
+    public void goToSessions(ActionEvent event) {
+        switchScene(event, "sessions.fxml");
+    }
+
+    @FXML
+    public void goToNews(ActionEvent event) {
+        switchScene(event, "news.fxml");
+    }
+
+    @FXML
+    public void goToContact(ActionEvent event) {
+        switchScene(event, "contact.fxml");
+    }
+
+    private void switchScene(ActionEvent event, String fxmlFile) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/" + fxmlFile));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene currentScene = stage.getScene();
+            if (currentScene == null) {
+                stage.setScene(new Scene(root, 1380, 920));
+            } else {
+                currentScene.setRoot(root);
+            }
+        } catch (IOException e) {
+            showError("Không thể tải giao diện: " + fxmlFile);
+        }
+    }
+
 
     public void setItemData(Item item) {
         Auction auction = auctionService.getAuctionByItem(item);
@@ -434,51 +511,5 @@ public class AuctionDetailController {
         DecimalFormat format = new DecimalFormat("#,##0", symbols);
         format.setGroupingUsed(true);
         return format;
-    }
-
-    @FXML
-    public void goToHome(ActionEvent event) {
-        switchScene(event, "giaodien.fxml");
-    }
-
-    @FXML
-    public void goToAuctionList(ActionEvent event) {
-        switchScene(event, "auction-detail.fxml");
-    }
-
-    @FXML
-    public void goToLogin(ActionEvent event) {
-        switchScene(event, "login.fxml");
-    }
-
-    @FXML
-    public void goToSessions(ActionEvent event) {
-        switchScene(event, "sessions.fxml");
-    }
-
-    @FXML
-    public void goToNews(ActionEvent event) {
-        switchScene(event, "news.fxml");
-    }
-
-    @FXML
-    public void goToContact(ActionEvent event) {
-        switchScene(event, "contact.fxml");
-    }
-
-    private void switchScene(ActionEvent event, String fxmlFile) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/" + fxmlFile));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene currentScene = stage.getScene();
-
-            if (currentScene == null) {
-                stage.setScene(new Scene(root, 1380, 920));
-            } else {
-                currentScene.setRoot(root);
-            }
-        } catch (IOException e) {
-            showError("Không thể tải giao diện: " + fxmlFile);
-        }
     }
 }

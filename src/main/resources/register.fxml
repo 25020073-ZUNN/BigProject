@@ -40,7 +40,7 @@
             <Button text="Phiên đấu giá" onAction="#goToSessions" styleClass="nav-btn"/>
             <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn"/>
             <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
-            <Label fx:id="dbStatusLabel" text="DB: checking..." styleClass="partner-text"/>
+            <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
         </HBox>
     </top>
 

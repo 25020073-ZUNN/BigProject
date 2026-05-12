@@ -12,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -75,11 +76,15 @@ public class CreateAuctionController {
     private TextField yearCreatedField;
     @FXML
     private Label hintLabel;
+    @FXML
+    private Button loginButton;
 
     @FXML
     public void initialize() {
         categoryComboBox.setItems(FXCollections.observableArrayList("Electronics", "Vehicle", "Art"));
         categoryComboBox.setValue("Electronics");
+
+        updateLoginState();
 
         List<String> sellers = userDao.findActiveSellers().stream()
                 .map(User::getUsername)
@@ -96,6 +101,32 @@ public class CreateAuctionController {
         endTimeField.setText(LocalDateTime.now().plusMonths(3).format(DATE_TIME_FORMATTER));
         bidStepField.setText("500000");
         hintLabel.setText("Định dạng thời gian: yyyy-MM-dd HH:mm:ss. Bạn có thể đặt phiên kéo dài 3 tháng để làm mẫu.");
+    }
+
+    private void updateLoginState() {
+        if (UserSession.isLoggedIn()) {
+            User user = UserSession.getLoggedInUser();
+            if (loginButton != null) {
+                loginButton.setText("Đăng xuất (" + user.getUsername() + ")");
+                loginButton.setOnAction(this::handleLogout);
+            }
+        } else {
+            if (loginButton != null) {
+                loginButton.setText("Đăng nhập");
+                loginButton.setOnAction(this::goToLogin);
+            }
+        }
+    }
+
+    @FXML
+    public void handleLogout(ActionEvent event) {
+        UserSession.logout();
+        updateLoginState();
+        try {
+            goToHome(event);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

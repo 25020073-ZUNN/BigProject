@@ -37,9 +37,10 @@
 
             <Button text="Trang chủ" onAction="#goToHome" styleClass="nav-btn"/>
             <Button text="Tài sản đấu giá" onAction="#goToAuctionList" styleClass="nav-btn"/>
-            <Button text="Phiên đấu giá" styleClass="nav-btn"/>
-            <Button text="Tin tức" styleClass="nav-btn"/>
-            <Button text="Liên hệ" styleClass="nav-btn"/>
+            <Button text="Phiên đấu giá" onAction="#goToSessions" styleClass="nav-btn"/>
+            <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn"/>
+            <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
+            <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
         </HBox>
     </top>
 

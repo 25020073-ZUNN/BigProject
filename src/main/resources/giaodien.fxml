@@ -41,7 +41,6 @@
                 <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
 
                 <Label fx:id="clockLabel" text="08:30:12&#10;07/04/2026" styleClass="clock-label"/>
-                <Label fx:id="dbStatusLabel" text="DB: checking..." styleClass="partner-text"/>
 
                 <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
             </HBox>

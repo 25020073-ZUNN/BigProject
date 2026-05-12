@@ -96,8 +96,6 @@ public class HomeController {
     private TextField bidAmountField; // Ô nhập số tiền đặt giá
     @FXML
     private Label detailItemNameLabel; // Nhãn tên tài sản đang xem chi tiết
-    @FXML
-    private Label dbStatusLabel; // Nhãn hiển thị trạng thái kết nối Database
 
     // Dịch vụ mạng để giao tiếp với Server
     private final NetworkService networkService = NetworkService.getInstance();
@@ -114,9 +112,6 @@ public class HomeController {
         if (clockLabel != null) {
             initClock();
         }
-        
-        // Kiểm tra và hiển thị trạng thái kết nối cơ sở dữ liệu
-        refreshDatabaseStatus();
 
         if (accountTypeComboBox != null) {
             accountTypeComboBox.getItems().setAll("BIDDER", "SELLER");
@@ -377,31 +372,6 @@ public class HomeController {
     @FXML
     public void handleSubscribe(ActionEvent event) {
         showInformation("Đăng ký thành công", "Chúng tôi sẽ gửi các bản tin đấu giá mới nhất qua email của bạn.");
-    }
-
-    /**
-     * Kiểm tra và cập nhật trạng thái kết nối tới cơ sở dữ liệu.
-     */
-    private void refreshDatabaseStatus() {
-        if (dbStatusLabel == null) {
-            return;
-        }
-
-        try {
-            Map<String, Object> status = networkService.getDatabaseStatus();
-            boolean available = Boolean.parseBoolean(String.valueOf(status.getOrDefault("available", false)));
-            
-            if (available) {
-                dbStatusLabel.setText("Database: Connect");
-                dbStatusLabel.setStyle("-fx-text-fill: #2ecc71; -fx-font-weight: bold;");
-            } else {
-                dbStatusLabel.setText("Database: Error");
-                dbStatusLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
-            }
-        } catch (Exception e) {
-            dbStatusLabel.setText("DB: Offline");
-            dbStatusLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
-        }
     }
 
     /**

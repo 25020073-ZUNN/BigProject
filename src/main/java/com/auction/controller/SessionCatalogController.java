@@ -1,7 +1,9 @@
 package com.auction.controller;
 
 import com.auction.model.Auction;
+import com.auction.model.user.User;
 import com.auction.service.AuctionService;
+import com.auction.util.UserSession;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -13,6 +15,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -60,17 +63,47 @@ public class SessionCatalogController {
     private VBox upcomingSessionsContainer;
     @FXML
     private VBox finishedSessionsContainer;
+    @FXML
+    private Button loginButton;
 
     @FXML
     public void initialize() {
         statusFilter.setItems(FXCollections.observableArrayList("Tất cả", "Đang diễn ra", "Sắp diễn ra", "Đã kết thúc"));
         statusFilter.setValue("Tất cả");
 
+        updateLoginState();
+
         searchField.textProperty().addListener((observable, oldValue, newValue) -> renderSessions());
         statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> renderSessions());
 
         startRefreshLoop();
         renderSessions();
+    }
+
+    private void updateLoginState() {
+        if (UserSession.isLoggedIn()) {
+            User user = UserSession.getLoggedInUser();
+            if (loginButton != null) {
+                loginButton.setText("Đăng xuất (" + user.getUsername() + ")");
+                loginButton.setOnAction(this::handleLogout);
+            }
+        } else {
+            if (loginButton != null) {
+                loginButton.setText("Đăng nhập");
+                loginButton.setOnAction(this::goToLogin);
+            }
+        }
+    }
+
+    @FXML
+    public void handleLogout(ActionEvent event) {
+        UserSession.logout();
+        updateLoginState();
+        try {
+            goToHome(event);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
