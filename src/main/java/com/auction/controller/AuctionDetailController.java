@@ -7,6 +7,7 @@ import com.auction.model.user.Bidder;
 import com.auction.model.user.User;
 import com.auction.service.AuctionService;
 import com.auction.util.UserSession;
+import javafx.application.Platform;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
@@ -36,11 +37,20 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AuctionDetailController {
 
     private static final DecimalFormat PRICE_FORMAT = createPriceFormat();
     private static final BigDecimal MIN_INCREMENT_FLOOR = new BigDecimal("500000");
+    private static final ExecutorService REFRESH_EXECUTOR = Executors.newSingleThreadExecutor(r -> {
+        Thread thread = new Thread(r, "auction-detail-refresh");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     private final AuctionService auctionService = AuctionService.getInstance();
     private final User currentUser = UserSession.isLoggedIn()
@@ -52,7 +62,10 @@ public class AuctionDetailController {
     private Auction currentAuction;
     private Timeline countdownTimeline;
     private Timeline refreshTimeline;
+    private final AtomicBoolean refreshInProgress = new AtomicBoolean(false);
     private int lastSeenBidCount = -1;
+    private int lastRenderedBidCount = -1;
+    private BigDecimal lastRenderedPrice;
 
     private boolean autoBidEnabled;
     private BigDecimal autoBidMaximum;
@@ -263,6 +276,8 @@ public class AuctionDetailController {
     private void bindAuction(Auction auction) {
         currentAuction = auction;
         lastSeenBidCount = -1;
+        lastRenderedBidCount = -1;
+        lastRenderedPrice = null;
         autoBidEnabled = false;
         autoBidMaximum = null;
         autoBidStep = null;
@@ -292,8 +307,15 @@ public class AuctionDetailController {
         lblMinimumBid.setText(formatPrice(resolveMinimumIncrement()));
         lblBidHint.setText("Giá đặt tiếp theo tối thiểu: "
                 + formatPrice(currentAuction.getCurrentPrice().add(resolveMinimumIncrement())) + ".");
-        redrawHistory();
-        redrawChart();
+
+        int currentBidCount = currentAuction.getBidHistory().size();
+        BigDecimal currentPrice = currentAuction.getCurrentPrice();
+        if (currentBidCount != lastRenderedBidCount || !Objects.equals(currentPrice, lastRenderedPrice)) {
+            redrawHistory();
+            redrawChart();
+            lastRenderedBidCount = currentBidCount;
+            lastRenderedPrice = currentPrice;
+        }
     }
 
     private void redrawHistory() {
@@ -401,11 +423,25 @@ public class AuctionDetailController {
     private void startRefreshLoop() {
         stopRefreshLoop();
         refreshTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
-            auctionService.refreshAuctions();
-            refreshAuctionState();
+            refreshAuctionStateAsync();
         }));
         refreshTimeline.setCycleCount(Timeline.INDEFINITE);
         refreshTimeline.play();
+    }
+
+    private void refreshAuctionStateAsync() {
+        if (!refreshInProgress.compareAndSet(false, true)) {
+            return;
+        }
+
+        REFRESH_EXECUTOR.execute(() -> {
+            try {
+                auctionService.refreshAuctions();
+                Platform.runLater(this::refreshAuctionState);
+            } finally {
+                refreshInProgress.set(false);
+            }
+        });
     }
 
     private void stopCountdown() {
