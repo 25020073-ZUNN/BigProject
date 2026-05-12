@@ -151,7 +151,7 @@
                                         <Insets top="18" right="18" bottom="18" left="18"/>
                                     </padding>
                                     <Label text="Realtime update" styleClass="partner-title"/>
-                                    <Label text="Client đang poll phiên đấu giá mỗi giây để làm mới giá, lịch sử và biểu đồ trong cùng JVM." styleClass="partner-text" wrapText="true"/>
+                                    <Label text="Màn hình nhận cập nhật theo observer nội bộ, không còn tự poll dữ liệu mỗi giây." styleClass="partner-text" wrapText="true"/>
                                 </VBox>
                                 <VBox spacing="10" styleClass="content-card" HBox.hgrow="ALWAYS">
                                     <padding>

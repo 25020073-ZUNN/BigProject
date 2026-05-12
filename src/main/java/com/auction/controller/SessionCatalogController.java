@@ -2,12 +2,11 @@ package com.auction.controller;
 
 import com.auction.model.Auction;
 import com.auction.model.user.User;
-import com.auction.service.AuctionService;
+import com.auction.network.client.AuctionPayloadMapper;
+import com.auction.network.client.AuctionUpdateListener;
+import com.auction.network.client.NetworkService;
 import com.auction.util.UserSession;
 import javafx.application.Platform;
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,9 +34,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -48,20 +44,14 @@ import java.util.stream.Collectors;
  * - Đang diễn ra
  * - Đã kết thúc
  *
- * Ngoài ra, phần tìm kiếm và bộ lọc đều chạy trên dữ liệu thật từ DB.
+ * Ngoài ra, phần tìm kiếm và bộ lọc đều chạy trên snapshot thật từ server.
  */
 public class SessionCatalogController {
 
     private static final DecimalFormat PRICE_FORMAT = createPriceFormat();
-    private static final ExecutorService REFRESH_EXECUTOR = Executors.newSingleThreadExecutor(r -> {
-        Thread thread = new Thread(r, "session-catalog-refresh");
-        thread.setDaemon(true);
-        return thread;
-    });
 
-    private final AuctionService auctionService = AuctionService.getInstance();
-    private final AtomicBoolean refreshInProgress = new AtomicBoolean(false);
-    private Timeline refreshTimeline;
+    private final NetworkService networkService = NetworkService.getInstance();
+    private final AuctionUpdateListener auctionUpdateListener = auctionData -> Platform.runLater(this::renderSessions);
 
     @FXML
     private TextField searchField;
@@ -86,8 +76,8 @@ public class SessionCatalogController {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> renderSessions());
         statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> renderSessions());
 
-        startRefreshLoop();
-        refreshSessionsAsync();
+        registerObserverLifecycle();
+        networkService.addAuctionUpdateListener(auctionUpdateListener);
     }
 
     private void updateLoginState() {
@@ -118,17 +108,19 @@ public class SessionCatalogController {
 
     @FXML
     public void handleSearch(ActionEvent event) {
-        refreshSessionsAsync();
+        renderSessions();
     }
 
-    private void startRefreshLoop() {
-        refreshTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> refreshSessionsAsync()));
-        refreshTimeline.setCycleCount(Animation.INDEFINITE);
-        refreshTimeline.play();
+    private void registerObserverLifecycle() {
+        searchField.sceneProperty().addListener((observable, oldScene, newScene) -> {
+            if (oldScene != null && newScene == null) {
+                networkService.removeAuctionUpdateListener(auctionUpdateListener);
+            }
+        });
     }
 
     private void renderSessions() {
-        List<Auction> filteredAuctions = filterAuctions(auctionService.getAllAuctions());
+        List<Auction> filteredAuctions = filterAuctions(loadAuctionsFromServer());
         List<Auction> running = filteredAuctions.stream().filter(auction -> "Đang diễn ra".equals(resolveStatusLabel(auction))).collect(Collectors.toList());
         List<Auction> upcoming = filteredAuctions.stream().filter(auction -> "Sắp diễn ra".equals(resolveStatusLabel(auction))).collect(Collectors.toList());
         List<Auction> finished = filteredAuctions.stream().filter(auction -> "Đã kết thúc".equals(resolveStatusLabel(auction))).collect(Collectors.toList());
@@ -136,21 +128,6 @@ public class SessionCatalogController {
         renderSection(runningSessionsContainer, running, "Không có phiên đang diễn ra.");
         renderSection(upcomingSessionsContainer, upcoming, "Không có phiên sắp diễn ra.");
         renderSection(finishedSessionsContainer, finished, "Không có phiên đã kết thúc.");
-    }
-
-    private void refreshSessionsAsync() {
-        if (!refreshInProgress.compareAndSet(false, true)) {
-            return;
-        }
-
-        REFRESH_EXECUTOR.execute(() -> {
-            try {
-                auctionService.refreshAuctions();
-                Platform.runLater(this::renderSessions);
-            } finally {
-                refreshInProgress.set(false);
-            }
-        });
     }
 
     private List<Auction> filterAuctions(List<Auction> auctions) {
@@ -161,6 +138,18 @@ public class SessionCatalogController {
                 .filter(auction -> matchesKeyword(auction, keyword))
                 .filter(auction -> status == null || "Tất cả".equals(status) || resolveStatusLabel(auction).equals(status))
                 .collect(Collectors.toList());
+    }
+
+    private List<Auction> loadAuctionsFromServer() {
+        try {
+            List<java.util.Map<String, Object>> snapshot = networkService.getLatestAuctionSnapshot();
+            if (snapshot.isEmpty()) {
+                snapshot = networkService.getAuctions();
+            }
+            return AuctionPayloadMapper.toAuctions(snapshot);
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     private boolean matchesKeyword(Auction auction, String keyword) {

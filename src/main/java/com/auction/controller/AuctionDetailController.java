@@ -5,7 +5,9 @@ import com.auction.model.BidTransaction;
 import com.auction.model.item.Item;
 import com.auction.model.user.Bidder;
 import com.auction.model.user.User;
-import com.auction.service.AuctionService;
+import com.auction.network.client.AuctionPayloadMapper;
+import com.auction.network.client.AuctionUpdateListener;
+import com.auction.network.client.NetworkService;
 import com.auction.util.UserSession;
 import javafx.application.Platform;
 import javafx.animation.KeyFrame;
@@ -38,34 +40,27 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AuctionDetailController {
 
     private static final DecimalFormat PRICE_FORMAT = createPriceFormat();
     private static final BigDecimal MIN_INCREMENT_FLOOR = new BigDecimal("500000");
-    private static final ExecutorService REFRESH_EXECUTOR = Executors.newSingleThreadExecutor(r -> {
-        Thread thread = new Thread(r, "auction-detail-refresh");
-        thread.setDaemon(true);
-        return thread;
-    });
 
-    private final AuctionService auctionService = AuctionService.getInstance();
+    private final NetworkService networkService = NetworkService.getInstance();
     private final User currentUser = UserSession.isLoggedIn()
             ? UserSession.getLoggedInUser()
             : new Bidder("guest_user", "guest@example.com", "guest");
+    private final AuctionUpdateListener auctionUpdateListener = auctionData -> Platform.runLater(this::handleAuctionsUpdated);
 
     private final XYChart.Series<Number, Number> priceSeries = new XYChart.Series<>();
 
     private Auction currentAuction;
     private Timeline countdownTimeline;
-    private Timeline refreshTimeline;
-    private final AtomicBoolean refreshInProgress = new AtomicBoolean(false);
     private int lastSeenBidCount = -1;
     private int lastRenderedBidCount = -1;
     private BigDecimal lastRenderedPrice;
+    private LocalDateTime lastRenderedEndTime;
+    private String currentAuctionId;
 
     private boolean autoBidEnabled;
     private BigDecimal autoBidMaximum;
@@ -117,10 +112,14 @@ public class AuctionDetailController {
         yAxis.setForceZeroInRange(false);
 
         updateLoginState();
+        registerObserverLifecycle();
+        networkService.addAuctionUpdateListener(auctionUpdateListener);
 
-        if (currentAuction == null && !auctionService.getAllAuctions().isEmpty()) {
-            currentAuction = auctionService.getAllAuctions().get(0);
-            bindAuction(currentAuction);
+        if (currentAuction == null) {
+            List<Auction> auctions = loadAuctionsFromServer();
+            if (!auctions.isEmpty()) {
+                bindAuction(auctions.get(0));
+            }
         }
     }
 
@@ -198,7 +197,10 @@ public class AuctionDetailController {
 
 
     public void setItemData(Item item) {
-        Auction auction = auctionService.getAuctionByItem(item);
+        Auction auction = loadAuctionsFromServer().stream()
+                .filter(candidate -> candidate.getItem().getId().equals(item.getId()))
+                .findFirst()
+                .orElse(null);
         if (auction != null) {
             bindAuction(auction);
         }
@@ -220,11 +222,7 @@ public class AuctionDetailController {
                 return;
             }
 
-            boolean success = auctionService.placeBid(currentAuction, currentUser, bidAmount);
-            if (!success) {
-                showError("Đặt giá thất bại. Có thể giá đã thay đổi trước khi gửi yêu cầu.");
-                return;
-            }
+            networkService.placeBid(currentAuction.getItem().getId(), currentUser.getUsername(), bidAmount.toPlainString());
 
             txtBidAmount.clear();
             publishNotification("Bạn đang dẫn đầu với mức " + formatPrice(bidAmount) + ".");
@@ -275,20 +273,21 @@ public class AuctionDetailController {
 
     private void bindAuction(Auction auction) {
         currentAuction = auction;
+        currentAuctionId = auction.getId();
         lastSeenBidCount = -1;
         lastRenderedBidCount = -1;
         lastRenderedPrice = null;
         autoBidEnabled = false;
         autoBidMaximum = null;
         autoBidStep = null;
+        lastRenderedEndTime = auction.getItem().getEndTime();
         lblAutoBidStatus.setText("Auto-bid chưa được kích hoạt.");
 
         lblName.setText(auction.getItem().getName());
         lblSeller.setText(auction.getSeller().getUsername());
         txtBidAmount.setText(formatInputSuggestion(auction.getCurrentPrice().add(resolveMinimumIncrement())));
         refreshAuctionState();
-        startCountdown(auction.getItem().getEndTime());
-        startRefreshLoop();
+        startCountdown(lastRenderedEndTime);
     }
 
     private void refreshAuctionState() {
@@ -296,9 +295,14 @@ public class AuctionDetailController {
             return;
         }
 
-        Auction latestAuction = auctionService.getAuctionById(currentAuction.getId());
+        Auction latestAuction = findAuctionById(currentAuctionId);
         if (latestAuction != null) {
             currentAuction = latestAuction;
+        }
+
+        if (!Objects.equals(lastRenderedEndTime, currentAuction.getItem().getEndTime())) {
+            lastRenderedEndTime = currentAuction.getItem().getEndTime();
+            startCountdown(lastRenderedEndTime);
         }
 
         lblPrice.setText(formatPrice(currentAuction.getCurrentPrice()));
@@ -394,11 +398,12 @@ public class AuctionDetailController {
             return;
         }
 
-        boolean success = auctionService.placeBid(currentAuction, currentUser, nextBid);
-        if (success) {
+        try {
+            networkService.placeBid(currentAuction.getItem().getId(), currentUser.getUsername(), nextBid.toPlainString());
             lblAutoBidStatus.setText("Auto-bid vừa nâng lên " + formatPrice(nextBid) + ".");
             publishNotification("Auto-bid đã phản ứng với mức " + formatPrice(nextBid) + ".");
             refreshAuctionState();
+        } catch (Exception ignored) {
         }
     }
 
@@ -412,36 +417,11 @@ public class AuctionDetailController {
                 currentAuction.closeAuction();
                 refreshAuctionState();
                 stopCountdown();
-                stopRefreshLoop();
                 publishNotification("Phiên đấu giá đã kết thúc.");
             }
         }));
         countdownTimeline.setCycleCount(Timeline.INDEFINITE);
         countdownTimeline.play();
-    }
-
-    private void startRefreshLoop() {
-        stopRefreshLoop();
-        refreshTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
-            refreshAuctionStateAsync();
-        }));
-        refreshTimeline.setCycleCount(Timeline.INDEFINITE);
-        refreshTimeline.play();
-    }
-
-    private void refreshAuctionStateAsync() {
-        if (!refreshInProgress.compareAndSet(false, true)) {
-            return;
-        }
-
-        REFRESH_EXECUTOR.execute(() -> {
-            try {
-                auctionService.refreshAuctions();
-                Platform.runLater(this::refreshAuctionState);
-            } finally {
-                refreshInProgress.set(false);
-            }
-        });
     }
 
     private void stopCountdown() {
@@ -450,10 +430,24 @@ public class AuctionDetailController {
         }
     }
 
-    private void stopRefreshLoop() {
-        if (refreshTimeline != null) {
-            refreshTimeline.stop();
+    private void registerObserverLifecycle() {
+        lblName.sceneProperty().addListener((observable, oldScene, newScene) -> {
+            if (oldScene != null && newScene == null) {
+                networkService.removeAuctionUpdateListener(auctionUpdateListener);
+                stopCountdown();
+            }
+        });
+    }
+
+    private void handleAuctionsUpdated() {
+        if (currentAuction == null) {
+            List<Auction> auctions = loadAuctionsFromServer();
+            if (!auctions.isEmpty()) {
+                bindAuction(auctions.get(0));
+            }
+            return;
         }
+        refreshAuctionState();
     }
 
     private void updateTimeLabel(LocalDateTime endTime) {
@@ -527,6 +521,28 @@ public class AuctionDetailController {
             return userId == null ? "Ẩn danh" : userId;
         }
         return userId.substring(0, 8) + "...";
+    }
+
+    private Auction findAuctionById(String auctionId) {
+        if (auctionId == null || auctionId.isBlank()) {
+            return null;
+        }
+        return loadAuctionsFromServer().stream()
+                .filter(auction -> auctionId.equals(auction.getId()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private List<Auction> loadAuctionsFromServer() {
+        try {
+            List<java.util.Map<String, Object>> snapshot = networkService.getLatestAuctionSnapshot();
+            if (snapshot.isEmpty()) {
+                snapshot = networkService.getAuctions();
+            }
+            return AuctionPayloadMapper.toAuctions(snapshot);
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     private void publishNotification(String message) {
