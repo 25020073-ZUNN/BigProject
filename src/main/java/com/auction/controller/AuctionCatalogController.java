@@ -3,11 +3,10 @@ package com.auction.controller;
 import com.auction.model.Auction;
 import com.auction.model.item.Item;
 import com.auction.model.user.User;
-import com.auction.service.AuctionService;
+import com.auction.network.client.AuctionPayloadMapper;
+import com.auction.network.client.AuctionUpdateListener;
+import com.auction.network.client.NetworkService;
 import com.auction.util.UserSession;
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -26,7 +25,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import com.auction.service.AuctionService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -36,9 +34,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -46,22 +41,16 @@ import java.util.stream.Collectors;
  *
  * Mục tiêu của màn hình này:
  * - Không hiển thị card mẫu hard-code nữa.
- * - Luôn đọc danh sách tài sản thật từ AuctionService/DB.
+ * - Luôn đọc danh sách tài sản thật từ Server snapshot.
  * - Cho phép tìm kiếm và lọc theo danh mục/trạng thái ngay trên dữ liệu thật.
  */
 public class AuctionCatalogController {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     private static final DecimalFormat PRICE_FORMAT = createPriceFormat();
-    private static final ExecutorService REFRESH_EXECUTOR = Executors.newSingleThreadExecutor(r -> {
-        Thread thread = new Thread(r, "auction-catalog-refresh");
-        thread.setDaemon(true);
-        return thread;
-    });
 
-    private final AuctionService auctionService = AuctionService.getInstance();
-    private final AtomicBoolean refreshInProgress = new AtomicBoolean(false);
-    private Timeline refreshTimeline;
+    private final NetworkService networkService = NetworkService.getInstance();
+    private final AuctionUpdateListener auctionUpdateListener = auctionData -> Platform.runLater(this::renderAuctions);
 
     @FXML
     private TextField searchField;
@@ -90,8 +79,8 @@ public class AuctionCatalogController {
         categoryFilter.valueProperty().addListener((observable, oldValue, newValue) -> renderAuctions());
         statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> renderAuctions());
 
-        startRefreshLoop();
-        refreshAuctionsAsync();
+        registerObserverLifecycle();
+        networkService.addAuctionUpdateListener(auctionUpdateListener);
     }
 
     private void updateLoginState() {
@@ -122,11 +111,11 @@ public class AuctionCatalogController {
 
     @FXML
     public void handleSearch(ActionEvent event) {
-        refreshAuctionsAsync();
+        renderAuctions();
     }
 
     private void renderAuctions() {
-        List<Auction> filteredAuctions = filterAuctions(auctionService.getAllAuctions());
+        List<Auction> filteredAuctions = filterAuctions(loadAuctionsFromServer());
 
         resultCountLabel.setText(filteredAuctions.size() + " tài sản phù hợp");
         auctionListContainer.getChildren().clear();
@@ -141,23 +130,10 @@ public class AuctionCatalogController {
         }
     }
 
-    private void startRefreshLoop() {
-        refreshTimeline = new Timeline(new KeyFrame(javafx.util.Duration.seconds(1), event -> refreshAuctionsAsync()));
-        refreshTimeline.setCycleCount(Animation.INDEFINITE);
-        refreshTimeline.play();
-    }
-
-    private void refreshAuctionsAsync() {
-        if (!refreshInProgress.compareAndSet(false, true)) {
-            return;
-        }
-
-        REFRESH_EXECUTOR.execute(() -> {
-            try {
-                auctionService.refreshAuctions();
-                Platform.runLater(this::renderAuctions);
-            } finally {
-                refreshInProgress.set(false);
+    private void registerObserverLifecycle() {
+        searchField.sceneProperty().addListener((observable, oldScene, newScene) -> {
+            if (oldScene != null && newScene == null) {
+                networkService.removeAuctionUpdateListener(auctionUpdateListener);
             }
         });
     }
@@ -169,15 +145,26 @@ public class AuctionCatalogController {
 
         /*
          * Ghi chú quan trọng:
-         * Bộ lọc phải chạy trên dữ liệu thật lấy từ DB thay vì text mẫu trong FXML.
-         * Vì vậy mỗi lần render, controller luôn lấy snapshot mới nhất từ AuctionService,
-         * sau đó áp dụng toàn bộ điều kiện lọc trong Java để tránh phụ thuộc giao diện cứng.
+         * Controller này không đọc DB trực tiếp nữa.
+         * Nó chỉ lọc snapshot mới nhất do server broadcast xuống qua NetworkService.
          */
         return auctions.stream()
                 .filter(auction -> matchesKeyword(auction, keyword))
                 .filter(auction -> matchesCategory(auction, category))
                 .filter(auction -> matchesStatus(auction, status))
                 .collect(Collectors.toList());
+    }
+
+    private List<Auction> loadAuctionsFromServer() {
+        try {
+            List<java.util.Map<String, Object>> snapshot = networkService.getLatestAuctionSnapshot();
+            if (snapshot.isEmpty()) {
+                snapshot = networkService.getAuctions();
+            }
+            return AuctionPayloadMapper.toAuctions(snapshot);
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     private boolean matchesKeyword(Auction auction, String keyword) {

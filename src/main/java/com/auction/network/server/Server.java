@@ -3,22 +3,31 @@ package com.auction.network.server;
 import com.auction.config.DBConnection;
 import com.auction.dao.UserDao;
 import com.auction.model.Auction;
+import com.auction.model.BidTransaction;
+import com.auction.model.item.Art;
+import com.auction.model.item.Electronics;
 import com.auction.model.item.Item;
+import com.auction.model.item.Vehicle;
 import com.auction.model.user.Bidder;
 import com.auction.model.user.Seller;
 import com.auction.model.user.User;
 import com.auction.network.Message;
 import com.auction.service.AuctionService;
 import com.auction.service.AuthService;
+import com.auction.observer.AuctionObserver;
 
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -38,6 +47,8 @@ public class Server {
     private final AuctionService auctionService; // Dịch vụ xử lý Đấu giá
     private final UserDao userDao;
     private final ExecutorService executor; // Quản lý luồng (Thread) để xử lý nhiều Client cùng lúc
+    private final Set<ClientSession> clientSessions;
+    private final AuctionObserver auctionBroadcastObserver;
 
     private volatile boolean running; // Trạng thái hoạt động của Server
     private ServerSocket serverSocket; // Socket lắng nghe kết nối
@@ -53,6 +64,9 @@ public class Server {
         this.userDao = new UserDao();
         // Sử dụng CachedThreadPool để tạo luồng mới khi cần hoặc tái sử dụng luồng rảnh
         this.executor = Executors.newCachedThreadPool();
+        this.clientSessions = ConcurrentHashMap.newKeySet();
+        this.auctionBroadcastObserver = auctions -> broadcastAuctionSnapshot();
+        this.auctionService.addAuctionObserver(auctionBroadcastObserver);
     }
 
     /**
@@ -80,6 +94,7 @@ public class Server {
     public void stop() throws IOException {
         running = false;
         if (serverSocket != null && !serverSocket.isClosed()) serverSocket.close();
+        auctionService.removeAuctionObserver(auctionBroadcastObserver);
         executor.shutdownNow();
     }
 
@@ -92,6 +107,9 @@ public class Server {
         try (Socket socket = clientSocket;
              ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
              ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream())) {
+            ClientSession session = new ClientSession(socket, outputStream);
+            clientSessions.add(session);
+            session.send(buildAuctionSyncMessage());
 
             // Liên tục lắng nghe tin nhắn từ Client này cho đến khi ngắt kết nối
             while (running && !socket.isClosed()) {
@@ -108,14 +126,14 @@ public class Server {
                 Message response = handleRequest(request);
                 
                 // Gửi phản hồi về cho Client
-                outputStream.writeObject(response);
-                outputStream.flush();
+                session.send(response);
             }
         } catch (EOFException ignored) {
             // Xảy ra khi Client ngắt kết nối đột ngột
         } catch (Exception e) {
             System.err.println("[SERVER] Lỗi xử lý Client [" + clientAddress + "]: " + e.getMessage());
         } finally {
+            clientSessions.removeIf(session -> session.matches(clientSocket));
             System.out.println("[SERVER] Client đã ngắt kết nối: " + clientAddress);
         }
     }
@@ -133,6 +151,7 @@ public class Server {
                 case GET_AUCTIONS -> handleGetAuctions(request);
                 case PLACE_BID -> handlePlaceBid(request);
                 case DB_STATUS -> handleDatabaseStatus(request); // Đây là nơi nhận lệnh check DB từ Home
+                case AUCTION_SYNC -> Message.failure(request, "Client không được phép gửi AUCTION_SYNC");
                 case ERROR -> Message.failure(request, "Client gửi tin nhắn lỗi");
             };
         } catch (Exception e) {
@@ -271,6 +290,7 @@ public class Server {
         payload.put("auctionId", auction.getId());
         payload.put("itemId", item.getId());
         payload.put("itemName", item.getName());
+        payload.put("description", item.getDescription());
         payload.put("category", item.getCategory());
         payload.put("sellerId", auction.getSeller().getId());
         payload.put("sellerName", auction.getSeller().getUsername());
@@ -279,8 +299,53 @@ public class Server {
         payload.put("bidStep", auction.getMinimumBidStep() == null ? "0" : auction.getMinimumBidStep().toPlainString());
         payload.put("active", auction.isActive());
         payload.put("finished", auction.isFinished());
+        payload.put("startTime", item.getStartTime().format(DATE_FORMATTER));
         payload.put("endTime", item.getEndTime().format(DATE_FORMATTER));
+        payload.put("seller", userPayload(auction.getSeller()));
+        payload.put("highestBidder", auction.getHighestBidder() == null ? null : userPayload(auction.getHighestBidder()));
+        payload.put("item", itemPayload(item));
+        payload.put("bidHistory", auction.getBidHistory().stream().map(this::bidPayload).collect(Collectors.toList()));
         return payload;
+    }
+
+    private Map<String, Object> itemPayload(Item item) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("id", item.getId());
+        payload.put("name", item.getName());
+        payload.put("description", item.getDescription());
+        payload.put("category", item.getCategory());
+        payload.put("sellerId", item.getSellerId());
+        payload.put("startingPrice", item.getStartingPrice().toPlainString());
+        payload.put("currentPrice", item.getCurrentPrice().toPlainString());
+        payload.put("startTime", item.getStartTime().format(DATE_FORMATTER));
+        payload.put("endTime", item.getEndTime().format(DATE_FORMATTER));
+        payload.put("attributes", itemAttributesPayload(item));
+        return payload;
+    }
+
+    private Map<String, Object> bidPayload(BidTransaction transaction) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("id", transaction.getId());
+        payload.put("bidAmount", transaction.getBidAmount().toPlainString());
+        payload.put("bidTime", transaction.getBidTime().format(DATE_FORMATTER));
+        payload.put("bidder", userPayload(transaction.getBidder()));
+        return payload;
+    }
+
+    private Map<String, Object> itemAttributesPayload(Item item) {
+        Map<String, Object> attributes = new HashMap<>();
+        if (item instanceof Electronics electronics) {
+            attributes.put("brand", electronics.getBrand());
+            attributes.put("warrantyMonths", electronics.getWarrantyMonths());
+        } else if (item instanceof Vehicle vehicle) {
+            attributes.put("manufacturer", vehicle.getManufacturer());
+            attributes.put("year", vehicle.getYear());
+            attributes.put("mileage", vehicle.getMileage());
+        } else if (item instanceof Art art) {
+            attributes.put("artist", art.getArtist());
+            attributes.put("yearCreated", art.getYearCreated());
+        }
+        return attributes;
     }
 
     /**
@@ -290,12 +355,55 @@ public class Server {
         return value == null ? null : String.valueOf(value).trim();
     }
 
+    private void broadcastAuctionSnapshot() {
+        if (clientSessions.isEmpty()) {
+            return;
+        }
+
+        Message snapshot = buildAuctionSyncMessage();
+        List<ClientSession> disconnectedSessions = new ArrayList<>();
+        for (ClientSession session : clientSessions) {
+            try {
+                session.send(snapshot);
+            } catch (IOException e) {
+                disconnectedSessions.add(session);
+            }
+        }
+        clientSessions.removeAll(disconnectedSessions);
+    }
+
+    private Message buildAuctionSyncMessage() {
+        List<Map<String, Object>> auctions = auctionService.getAllAuctions().stream()
+                .map(this::auctionPayload)
+                .collect(Collectors.toList());
+        return new Message(UUID.randomUUID().toString(), Message.Type.AUCTION_SYNC, Map.of("auctions", auctions), true, null);
+    }
+
     /**
      * Điểm chạy chương trình Server.
      */
     public static void main(String[] args) throws IOException {
         int serverPort = args.length > 0 ? Integer.parseInt(args[0]) : DEFAULT_PORT;
         new Server(serverPort).start();
+    }
+
+    private static final class ClientSession {
+        private final Socket socket;
+        private final ObjectOutputStream outputStream;
+
+        private ClientSession(Socket socket, ObjectOutputStream outputStream) {
+            this.socket = socket;
+            this.outputStream = outputStream;
+        }
+
+        private synchronized void send(Message message) throws IOException {
+            outputStream.writeObject(message);
+            outputStream.flush();
+        }
+
+        private boolean matches(Socket candidate) {
+            return socket == candidate;
+        }
     }
 
     /**

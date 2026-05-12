@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -33,6 +34,9 @@ import java.util.Map;
  *   nhưng lại chưa ghi lịch sử vào `bid_transactions`.
  */
 public class AuctionDao {
+
+    private static final long ANTI_SNIPING_WINDOW_MINUTES = 2L;
+    private static final long ANTI_SNIPING_EXTENSION_MINUTES = 2L;
 
     private final UserDao userDao = new UserDao();
     private final Object stateSyncLock = new Object();
@@ -230,7 +234,7 @@ public class AuctionDao {
      */
     public boolean placeBid(Auction auction, User bidder, BigDecimal amount) {
         String lockAuctionSql = """
-                SELECT a.current_price, a.seller_id, a.finished, a.active, i.bid_step
+                SELECT a.current_price, a.seller_id, a.finished, a.active, i.bid_step, i.end_time
                 FROM auctions a
                 JOIN items i ON i.id = a.item_id
                 WHERE a.id = ?
@@ -245,7 +249,7 @@ public class AuctionDao {
 
         String updateItemSql = """
                 UPDATE items
-                SET current_price = ?, updated_at = CURRENT_TIMESTAMP
+                SET current_price = ?, end_time = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
                 """;
 
@@ -270,6 +274,7 @@ public class AuctionDao {
                     BigDecimal currentPrice = BigDecimal.valueOf(rs.getLong("current_price"));
                     BigDecimal bidStep = BigDecimal.valueOf(rs.getLong("bid_step"));
                     String sellerId = rs.getString("seller_id");
+                    LocalDateTime currentEndTime = rs.getTimestamp("end_time").toLocalDateTime();
 
                     if (!active || finished) {
                         conn.rollback();
@@ -287,6 +292,14 @@ public class AuctionDao {
                         return false;
                     }
 
+                    /*
+                     * Anti-sniping:
+                     * Nếu bid hợp lệ đến trong 2 phút cuối, hệ thống tự cộng thêm 2 phút.
+                     * Rule này phải nằm ở DAO/transaction thay vì UI để mọi client đều chịu cùng
+                     * một luật và không ai có thể "né" anti-sniping bằng cách gọi trực tiếp DB/server.
+                     */
+                    LocalDateTime effectiveEndTime = resolveEffectiveEndTime(currentEndTime);
+
                     try (PreparedStatement updateAuctionStmt = conn.prepareStatement(updateAuctionSql);
                          PreparedStatement updateItemStmt = conn.prepareStatement(updateItemSql);
                          PreparedStatement insertBidStmt = conn.prepareStatement(insertBidSql)) {
@@ -297,7 +310,8 @@ public class AuctionDao {
                         updateAuctionStmt.executeUpdate();
 
                         updateItemStmt.setLong(1, amount.longValueExact());
-                        updateItemStmt.setString(2, auction.getItem().getId());
+                        updateItemStmt.setTimestamp(2, Timestamp.valueOf(effectiveEndTime));
+                        updateItemStmt.setString(3, auction.getItem().getId());
                         updateItemStmt.executeUpdate();
 
                         BidTransaction transaction = new BidTransaction(auction, bidder, amount);
@@ -311,6 +325,7 @@ public class AuctionDao {
                         conn.commit();
 
                         auction.setMinimumBidStep(bidStep);
+                        auction.getItem().setEndTime(effectiveEndTime);
                         auction.placeBid(bidder, amount);
                         return true;
                     }
@@ -326,6 +341,21 @@ public class AuctionDao {
             e.printStackTrace();
             return false;
         }
+    }
+
+    static LocalDateTime resolveEffectiveEndTime(LocalDateTime currentEndTime) {
+        if (currentEndTime == null) {
+            return null;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        long secondsRemaining = ChronoUnit.SECONDS.between(now, currentEndTime);
+        long antiSnipingWindowSeconds = ANTI_SNIPING_WINDOW_MINUTES * 60L;
+
+        if (secondsRemaining > 0 && secondsRemaining <= antiSnipingWindowSeconds) {
+            return currentEndTime.plusMinutes(ANTI_SNIPING_EXTENSION_MINUTES);
+        }
+        return currentEndTime;
     }
 
     private void loadBidHistory(Connection conn, Map<String, Auction> auctionsById) throws SQLException {

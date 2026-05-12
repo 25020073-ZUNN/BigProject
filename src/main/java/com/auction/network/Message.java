@@ -29,6 +29,8 @@ public class Message implements Serializable {
         PLACE_BID,
         /** Kiểm tra trạng thái cơ sở dữ liệu */
         DB_STATUS,
+        /** Đồng bộ snapshot phiên đấu giá từ server xuống client */
+        AUCTION_SYNC,
         /** Kiểm tra kết nối (Ping) */
         PING,
         /** Thông báo lỗi */

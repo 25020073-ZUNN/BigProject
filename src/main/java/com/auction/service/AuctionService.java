@@ -6,6 +6,8 @@ import com.auction.factory.ItemFactory;
 import com.auction.model.Auction;
 import com.auction.model.item.Item;
 import com.auction.model.user.User;
+import com.auction.observer.AuctionObserver;
+import com.auction.observer.AuctionSubject;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -23,7 +25,7 @@ import java.util.stream.Collectors;
  * - Danh sách `auctions` chỉ đóng vai trò snapshot trong RAM để phục vụ UI nhanh hơn.
  * - Sau mỗi thao tác tạo phiên hoặc đặt giá, service sẽ nạp lại từ DB để đồng bộ trạng thái.
  */
-public class AuctionService {
+public class AuctionService extends AuctionSubject {
 
     private static AuctionService instance;
 
@@ -56,9 +58,11 @@ public class AuctionService {
     public synchronized void refreshAuctions() {
         if (!userDao.isDatabaseAvailable()) {
             this.auctions = new ArrayList<>();
+            notifyObservers(getAllAuctions());
             return;
         }
         this.auctions = new ArrayList<>(auctionDao.findAllAuctions());
+        notifyObservers(getAllAuctions());
     }
 
     public synchronized List<Auction> getAllAuctions() {
@@ -153,5 +157,14 @@ public class AuctionService {
             refreshAuctions();
         }
         return success;
+    }
+
+    public void addAuctionObserver(AuctionObserver observer) {
+        addObserver(observer);
+        observer.onAuctionsUpdated(getAllAuctions());
+    }
+
+    public void removeAuctionObserver(AuctionObserver observer) {
+        removeObserver(observer);
     }
 }

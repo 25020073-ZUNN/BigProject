@@ -22,7 +22,9 @@ import java.time.format.DateTimeFormatter;
 
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ComboBox;
+import javafx.application.Platform;
 import com.auction.network.client.NetworkService;
+import com.auction.network.client.AuctionUpdateListener;
 import com.auction.model.user.User;
 import com.auction.util.UserSession;
 
@@ -31,6 +33,7 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ArrayList;
 
 /**
  * HomeController - Bộ điều khiển chính cho giao diện người dùng.
@@ -99,6 +102,17 @@ public class HomeController {
 
     // Dịch vụ mạng để giao tiếp với Server
     private final NetworkService networkService = NetworkService.getInstance();
+    private final List<Map<String, Object>> latestAuctions = new ArrayList<>();
+    private final AuctionUpdateListener auctionUpdateListener = auctionData -> Platform.runLater(() -> {
+        synchronized (latestAuctions) {
+            int existingIndex = findAuctionIndex(String.valueOf(auctionData.get("auctionId")));
+            if (existingIndex >= 0) {
+                latestAuctions.set(existingIndex, auctionData);
+            } else {
+                latestAuctions.add(auctionData);
+            }
+        }
+    });
 
     /**
      * Phương thức khởi tạo tự động được gọi bởi JavaFX sau khi FXML được tải.
@@ -117,6 +131,9 @@ public class HomeController {
             accountTypeComboBox.getItems().setAll("BIDDER", "SELLER");
             accountTypeComboBox.setValue("BIDDER");
         }
+
+        networkService.addAuctionUpdateListener(auctionUpdateListener);
+        registerListenerLifecycle();
     }
 
     /**
@@ -286,8 +303,7 @@ public class HomeController {
         }
 
         try {
-            // Lấy danh sách các cuộc đấu giá hiện tại từ server
-            List<Map<String, Object>> auctions = networkService.getAuctions();
+            List<Map<String, Object>> auctions = getKnownAuctions();
             // Xác định tài sản mục tiêu người dùng đang xem hoặc tìm kiếm
             Map<String, Object> targetAuction = resolveTargetAuction(auctions);
             
@@ -324,8 +340,7 @@ public class HomeController {
         String query = searchField != null ? searchField.getText().trim().toLowerCase() : "";
 
         try {
-            // Lấy dữ liệu và lọc theo tên tài sản hoặc danh mục
-            List<Map<String, Object>> auctions = networkService.getAuctions();
+            List<Map<String, Object>> auctions = getKnownAuctions();
             List<Map<String, Object>> filtered = auctions.stream()
                     .filter(auction -> query.isBlank()
                             || String.valueOf(auction.getOrDefault("itemName", "")).toLowerCase().contains(query)
@@ -444,6 +459,42 @@ public class HomeController {
     private String formatCurrency(String amount) {
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
         return formatter.format(new BigDecimal(amount));
+    }
+
+    private List<Map<String, Object>> getKnownAuctions() throws IOException, ClassNotFoundException {
+        synchronized (latestAuctions) {
+            if (!latestAuctions.isEmpty()) {
+                return new ArrayList<>(latestAuctions);
+            }
+        }
+
+        List<Map<String, Object>> auctions = networkService.getAuctions();
+        synchronized (latestAuctions) {
+            latestAuctions.clear();
+            latestAuctions.addAll(auctions);
+            return new ArrayList<>(latestAuctions);
+        }
+    }
+
+    private int findAuctionIndex(String auctionId) {
+        for (int i = 0; i < latestAuctions.size(); i++) {
+            Map<String, Object> current = latestAuctions.get(i);
+            if (auctionId.equals(String.valueOf(current.get("auctionId")))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void registerListenerLifecycle() {
+        if (loginButton == null) {
+            return;
+        }
+        loginButton.sceneProperty().addListener((observable, oldScene, newScene) -> {
+            if (oldScene != null && newScene == null) {
+                networkService.removeAuctionUpdateListener(auctionUpdateListener);
+            }
+        });
     }
 
     /**
