@@ -222,28 +222,35 @@ public class UserDao {
      * Hàm ánh xạ (Mapping) từ dữ liệu dòng trong SQL sang đối tượng Java.
      */
     private User mapUser(ResultSet rs) throws SQLException {
-        String role = rs.getString("role").toUpperCase(Locale.ROOT);
-        String username = rs.getString("username");
-        String fullName = rs.getString("full_name");
-        String email = rs.getString("email");
-        String passwordHash = rs.getString("password");
+        User user = mapRowToUser(
+                rs.getString("username"),
+                rs.getString("full_name"),
+                rs.getString("email"),
+                rs.getString("password"),
+                rs.getString("role"),
+                rs.getLong("balance"),
+                rs.getBoolean("active")
+        );
+        user.setId(rs.getString("id"));
+        return user;
+    }
+
+    User mapRowToUser(String username, String fullName, String email, String passwordHash,
+                      String role, long balance, boolean active) {
+        String normalizedRole = role.toUpperCase(Locale.ROOT);
 
         User user;
-        if ("ADMIN".equals(role)) {
+        if ("ADMIN".equals(normalizedRole)) {
             user = new Admin(username, email, passwordHash, "SYSTEM_ADMIN");
-        } else if ("SELLER".equals(role)) {
+        } else if ("SELLER".equals(normalizedRole)) {
             user = new Seller(username, email, passwordHash);
         } else {
             user = new Bidder(username, email, passwordHash);
         }
 
-        // Lấy dữ liệu từ các cột theo tên hoặc chỉ số dòng
-        user.setId(rs.getString("id"));
         user.setFullname(fullName);
-        user.setActive(rs.getBoolean("active"));
-        long balance = rs.getLong("balance");
+        user.setActive(active);
         if (balance > 0) user.deposit(balance);
-
         return user;
     }
 

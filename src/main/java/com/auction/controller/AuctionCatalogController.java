@@ -5,10 +5,14 @@ import com.auction.model.item.Item;
 import com.auction.model.user.User;
 import com.auction.service.AuctionService;
 import com.auction.util.UserSession;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -32,6 +36,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -46,8 +53,15 @@ public class AuctionCatalogController {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     private static final DecimalFormat PRICE_FORMAT = createPriceFormat();
+    private static final ExecutorService REFRESH_EXECUTOR = Executors.newSingleThreadExecutor(r -> {
+        Thread thread = new Thread(r, "auction-catalog-refresh");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     private final AuctionService auctionService = AuctionService.getInstance();
+    private final AtomicBoolean refreshInProgress = new AtomicBoolean(false);
+    private Timeline refreshTimeline;
 
     @FXML
     private TextField searchField;
@@ -76,7 +90,8 @@ public class AuctionCatalogController {
         categoryFilter.valueProperty().addListener((observable, oldValue, newValue) -> renderAuctions());
         statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> renderAuctions());
 
-        renderAuctions();
+        startRefreshLoop();
+        refreshAuctionsAsync();
     }
 
     private void updateLoginState() {
@@ -107,11 +122,10 @@ public class AuctionCatalogController {
 
     @FXML
     public void handleSearch(ActionEvent event) {
-        renderAuctions();
+        refreshAuctionsAsync();
     }
 
     private void renderAuctions() {
-        auctionService.refreshAuctions();
         List<Auction> filteredAuctions = filterAuctions(auctionService.getAllAuctions());
 
         resultCountLabel.setText(filteredAuctions.size() + " tài sản phù hợp");
@@ -125,6 +139,27 @@ public class AuctionCatalogController {
         for (Auction auction : filteredAuctions) {
             auctionListContainer.getChildren().add(createAuctionCard(auction));
         }
+    }
+
+    private void startRefreshLoop() {
+        refreshTimeline = new Timeline(new KeyFrame(javafx.util.Duration.seconds(1), event -> refreshAuctionsAsync()));
+        refreshTimeline.setCycleCount(Animation.INDEFINITE);
+        refreshTimeline.play();
+    }
+
+    private void refreshAuctionsAsync() {
+        if (!refreshInProgress.compareAndSet(false, true)) {
+            return;
+        }
+
+        REFRESH_EXECUTOR.execute(() -> {
+            try {
+                auctionService.refreshAuctions();
+                Platform.runLater(this::renderAuctions);
+            } finally {
+                refreshInProgress.set(false);
+            }
+        });
     }
 
     private List<Auction> filterAuctions(List<Auction> auctions) {

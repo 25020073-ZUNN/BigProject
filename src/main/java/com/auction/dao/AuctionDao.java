@@ -16,7 +16,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +35,8 @@ import java.util.Map;
 public class AuctionDao {
 
     private final UserDao userDao = new UserDao();
+    private final Object stateSyncLock = new Object();
+    private volatile long lastStateSyncAtMillis;
 
     /**
      * Lấy toàn bộ phiên đấu giá và dựng lại object domain đầy đủ.
@@ -48,6 +52,22 @@ public class AuctionDao {
                        a.current_price AS auction_current_price,
                        a.active,
                        a.finished,
+                       seller.id AS seller_id,
+                       seller.username AS seller_username,
+                       seller.full_name AS seller_full_name,
+                       seller.email AS seller_email,
+                       seller.password AS seller_password,
+                       seller.role AS seller_role,
+                       seller.balance AS seller_balance,
+                       seller.active AS seller_active,
+                       highest.id AS highest_bidder_id_ref,
+                       highest.username AS highest_bidder_username,
+                       highest.full_name AS highest_bidder_full_name,
+                       highest.email AS highest_bidder_email,
+                       highest.password AS highest_bidder_password,
+                       highest.role AS highest_bidder_role,
+                       highest.balance AS highest_bidder_balance,
+                       highest.active AS highest_bidder_active,
                        i.id AS item_id,
                        i.seller_id AS item_seller_id,
                        i.name,
@@ -68,23 +88,28 @@ public class AuctionDao {
                        i.year_created
                 FROM auctions a
                 JOIN items i ON i.id = a.item_id
+                JOIN users seller ON seller.id = a.seller_id
+                LEFT JOIN users highest ON highest.id = a.highest_bidder_id
                 ORDER BY i.end_time ASC, i.created_at DESC
                 """;
 
-        List<Auction> auctions = new ArrayList<>();
+        Map<String, Auction> auctionsById = new LinkedHashMap<>();
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 Auction auction = mapAuction(rs);
-                loadBidHistory(conn, auction);
-                auctions.add(auction);
+                auctionsById.put(auction.getId(), auction);
+            }
+
+            if (!auctionsById.isEmpty()) {
+                loadBidHistory(conn, auctionsById);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return auctions;
+        return new ArrayList<>(auctionsById.values());
     }
 
     /**
@@ -99,6 +124,17 @@ public class AuctionDao {
      * dữ liệu trong DB vẫn phản ánh đúng trạng thái thời gian thực mà không cần dựa vào UI.
      */
     private void synchronizeAuctionStates() {
+        long now = System.currentTimeMillis();
+        if (now - lastStateSyncAtMillis < 1_000L) {
+            return;
+        }
+
+        synchronized (stateSyncLock) {
+            now = System.currentTimeMillis();
+            if (now - lastStateSyncAtMillis < 1_000L) {
+                return;
+            }
+
         String sql = """
                 UPDATE auctions a
                 JOIN items i ON i.id = a.item_id
@@ -120,8 +156,10 @@ public class AuctionDao {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
+            lastStateSyncAtMillis = now;
         } catch (SQLException e) {
             e.printStackTrace();
+        }
         }
     }
 
@@ -290,23 +328,42 @@ public class AuctionDao {
         }
     }
 
-    private void loadBidHistory(Connection conn, Auction auction) throws SQLException {
+    private void loadBidHistory(Connection conn, Map<String, Auction> auctionsById) throws SQLException {
+        List<String> auctionIds = new ArrayList<>(auctionsById.keySet());
+        auctionIds.sort(Comparator.naturalOrder());
+
+        String placeholders = String.join(", ", java.util.Collections.nCopies(auctionIds.size(), "?"));
         String sql = """
-                SELECT id, bidder_id, bid_amount, bid_time
-                FROM bid_transactions
-                WHERE auction_id = ?
+                SELECT bt.id,
+                       bt.auction_id,
+                       bt.bidder_id,
+                       bt.bid_amount,
+                       bt.bid_time,
+                       bidder.username AS bidder_username,
+                       bidder.full_name AS bidder_full_name,
+                       bidder.email AS bidder_email,
+                       bidder.password AS bidder_password,
+                       bidder.role AS bidder_role,
+                       bidder.balance AS bidder_balance,
+                       bidder.active AS bidder_active
+                FROM bid_transactions bt
+                JOIN users bidder ON bidder.id = bt.bidder_id
+                WHERE auction_id IN (PLACEHOLDER_IDS)
                 ORDER BY bid_time ASC
-                """;
+                """.replace("PLACEHOLDER_IDS", placeholders);
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, auction.getId());
+            for (int index = 0; index < auctionIds.size(); index++) {
+                stmt.setString(index + 1, auctionIds.get(index));
+            }
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    User bidder = userDao.findById(rs.getString("bidder_id"));
-                    if (bidder == null) {
+                    Auction auction = auctionsById.get(rs.getString("auction_id"));
+                    if (auction == null) {
                         continue;
                     }
 
+                    User bidder = mapUser(rs, "bidder_");
                     BigDecimal bidAmount = BigDecimal.valueOf(rs.getLong("bid_amount"));
                     BidTransaction transaction = new BidTransaction(auction, bidder, bidAmount);
                     transaction.setId(rs.getString("id"));
@@ -319,10 +376,7 @@ public class AuctionDao {
     }
 
     private Auction mapAuction(ResultSet rs) throws SQLException {
-        User seller = userDao.findById(rs.getString("auction_seller_id"));
-        if (seller == null) {
-            throw new SQLException("Không tìm thấy seller cho auction: " + rs.getString("auction_id"));
-        }
+        User seller = mapUser(rs, "seller_");
 
         Item item = mapItem(rs);
         Auction auction = new Auction(item, seller, BigDecimal.valueOf(rs.getLong("auction_starting_price")));
@@ -332,9 +386,9 @@ public class AuctionDao {
         auction.setFinished(rs.getBoolean("finished"));
         auction.setMinimumBidStep(BigDecimal.valueOf(rs.getLong("bid_step")));
 
-        String highestBidderId = rs.getString("highest_bidder_id");
+        String highestBidderId = rs.getString("highest_bidder_id_ref");
         if (highestBidderId != null && !highestBidderId.isBlank()) {
-            auction.setHighestBidder(userDao.findById(highestBidderId));
+            auction.setHighestBidder(mapUser(rs, "highest_bidder_"));
         }
 
         return auction;
@@ -375,6 +429,27 @@ public class AuctionDao {
         item.setCurrentPrice(BigDecimal.valueOf(rs.getLong("item_current_price")));
         item.setStatus(parseItemStatus(rs.getString("status")));
         return item;
+    }
+
+    private User mapUser(ResultSet rs, String prefix) throws SQLException {
+        String id = rs.getString(prefix + "id");
+        if (id == null || id.isBlank()) {
+            return null;
+        }
+
+        String username = rs.getString(prefix + "username");
+        String fullName = rs.getString(prefix + "full_name");
+        String email = rs.getString(prefix + "email");
+        String passwordHash = rs.getString(prefix + "password");
+        String role = rs.getString(prefix + "role");
+        if (role == null || role.isBlank()) {
+            throw new SQLException("Thiếu role cho user " + id);
+        }
+
+        User user = userDao.mapRowToUser(username, fullName, email, passwordHash, role,
+                rs.getLong(prefix + "balance"), rs.getBoolean(prefix + "active"));
+        user.setId(id);
+        return user;
     }
 
     private void fillItemInsertStatement(PreparedStatement stmt, Item item, BigDecimal bidStep) throws SQLException {
