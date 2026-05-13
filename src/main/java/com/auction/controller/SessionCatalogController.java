@@ -234,23 +234,8 @@ public class SessionCatalogController {
     }
 
     private void openAuctionDetail(Auction auction) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/product-detail.fxml"));
-            Parent root = loader.load();
-
-            AuctionDetailController controller = loader.getController();
-            controller.setItemData(auction.getItem());
-
-            Stage stage = (Stage) searchField.getScene().getWindow();
-            Scene scene = stage.getScene();
-            if (scene == null) {
-                stage.setScene(new Scene(root, 1380, 920));
-            } else {
-                scene.setRoot(root);
-            }
-        } catch (IOException e) {
-            AlertHelper.showError("Lỗi", "Không thể mở chi tiết phiên đấu giá.");
-        }
+        Stage stage = (Stage) searchField.getScene().getWindow();
+        SceneNavigator.navigateToAuctionDetailOrSummary(stage, auction);
     }
 
     private String formatPrice(BigDecimal amount) {
