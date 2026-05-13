@@ -190,6 +190,38 @@ public class UserDao {
     }
 
     /**
+     * Cập nhật họ tên và email cho người dùng theo username.
+     */
+    public boolean updateProfile(String username, String newFullName, String newEmail) {
+        String sql = "UPDATE users SET full_name = ?, email = ? WHERE username = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newFullName);
+            stmt.setString(2, newEmail);
+            stmt.setString(3, username);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Xóa tài khoản người dùng (soft delete bằng cách đặt active = false).
+     */
+    public boolean deleteAccount(String username) {
+        String sql = "UPDATE users SET active = FALSE WHERE username = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * Thực thi lệnh INSERT để thêm mới một dòng vào bảng users.
      */
     private boolean insertUser(String id, String username, String fullName, String email, 
