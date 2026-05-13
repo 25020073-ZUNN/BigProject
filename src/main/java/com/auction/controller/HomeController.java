@@ -27,6 +27,7 @@ import com.auction.network.client.NetworkService;
 import com.auction.network.client.AuctionUpdateListener;
 import com.auction.model.user.User;
 import com.auction.util.UserSession;
+import com.auction.util.FxAsync;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -236,17 +237,15 @@ public class HomeController {
             return;
         }
 
-        try {
-            // Gọi NetworkService để xác thực với server
-            User user = networkService.login(username, password);
-            // Lưu thông tin phiên đăng nhập
-            UserSession.login(user);
-            showInformation("Đăng nhập thành công", "Chào mừng " + user.getUsername() + " quay trở lại!");
-            // Chuyển về trang chủ
-            goToHome(event);
-        } catch (Exception e) {
-            showError("Lỗi đăng nhập", "Không thể đăng nhập qua server: " + e.getMessage());
-        }
+        FxAsync.run(
+                () -> networkService.login(username, password),
+                user -> {
+                    UserSession.login(user);
+                    showInformation("Đăng nhập thành công", "Chào mừng " + user.getUsername() + " quay trở lại!");
+                    goToHome(event);
+                },
+                errorMsg -> showError("Lỗi đăng nhập", "Không thể đăng nhập: " + errorMsg)
+        );
     }
 
     /**
@@ -254,41 +253,34 @@ public class HomeController {
      */
     @FXML
     public void handleRegister(ActionEvent event) {
-        // Lấy dữ liệu từ form
         String fullName = fullNameField.getText();
         String username = regUsernameField.getText();
-        String phone = phoneField.getText();
         String email = emailField.getText();
-        String address = addressField.getText();
         String role = accountTypeComboBox != null ? accountTypeComboBox.getValue() : "BIDDER";
         String password = regPasswordField.getText();
         String confirmPassword = confirmPasswordField.getText();
 
-        // Kiểm tra dữ liệu đầu vào
         if (fullName.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            showError("Lỗi đăng ký", "Vui lòng điền đầy đủ các thông tin bắt buộc (Họ tên, Tên đăng nhập, Email, Mật khẩu).");
+            showError("Lỗi đăng ký", "Vui lòng điền đầy đủ các thông tin bắt buộc.");
             return;
         }
-
         if (role == null || role.isBlank()) {
             showError("Lỗi đăng ký", "Vui lòng chọn loại tài khoản.");
             return;
         }
-
         if (!password.equals(confirmPassword)) {
             showError("Lỗi đăng ký", "Mật khẩu xác nhận không khớp.");
             return;
         }
 
-        try {
-            // Gửi yêu cầu đăng ký lên server qua NetworkService
-            networkService.register(username, fullName, email, password, role);
-            showInformation("Đăng ký thành công", "Tài khoản của bạn đã được tạo. Vui lòng đăng nhập.");
-            // Chuyển sang màn hình đăng nhập
-            goToLogin(event);
-        } catch (Exception e) {
-            showError("Lỗi đăng ký", "Không thể đăng ký qua server: " + e.getMessage());
-        }
+        FxAsync.run(
+                () -> networkService.register(username, fullName, email, password, role),
+                user -> {
+                    showInformation("Đăng ký thành công", "Tài khoản đã được tạo. Vui lòng đăng nhập.");
+                    goToLogin(event);
+                },
+                errorMsg -> showError("Lỗi đăng ký", "Không thể đăng ký: " + errorMsg)
+        );
     }
 
     /**
@@ -296,40 +288,28 @@ public class HomeController {
      */
     @FXML
     public void handleBid(ActionEvent event) {
-        // Kiểm tra xem đã đăng nhập chưa
         if (!UserSession.isLoggedIn()) {
             showError("Chưa đăng nhập", "Bạn cần đăng nhập trước khi đặt giá.");
             return;
         }
 
-        try {
-            List<Map<String, Object>> auctions = getKnownAuctions();
-            // Xác định tài sản mục tiêu người dùng đang xem hoặc tìm kiếm
-            Map<String, Object> targetAuction = resolveTargetAuction(auctions);
-            
-            if (targetAuction == null) {
-                showError("Không tìm thấy phiên", "Không xác định được tài sản để đặt giá.");
-                return;
-            }
-
-            // Lấy số tiền người dùng nhập hoặc tính toán giá tiếp theo
-            String amount = resolveBidAmount(targetAuction);
-            
-            // Gửi yêu cầu đặt giá lên server
-            Map<String, Object> result = networkService.placeBid(
-                    String.valueOf(targetAuction.get("itemId")),
-                    UserSession.getLoggedInUser().getUsername(),
-                    amount
-            );
-
-            showInformation(
-                    "Đặt giá thành công",
-                    "Bạn đã đặt giá cho " + result.get("itemName")
-                            + "\nGiá hiện tại mới: " + formatCurrency(String.valueOf(result.get("currentPrice"))) + " VND"
-            );
-        } catch (Exception e) {
-            showError("Đặt giá thất bại", e.getMessage());
-        }
+        FxAsync.run(
+                () -> {
+                    List<Map<String, Object>> auctions = getKnownAuctions();
+                    Map<String, Object> targetAuction = resolveTargetAuction(auctions);
+                    if (targetAuction == null) throw new RuntimeException("Không xác định được tài sản.");
+                    String amount = resolveBidAmount(targetAuction);
+                    return networkService.placeBid(
+                            String.valueOf(targetAuction.get("itemId")),
+                            UserSession.getLoggedInUser().getUsername(),
+                            amount
+                    );
+                },
+                result -> showInformation("Đặt giá thành công",
+                        "Bạn đã đặt giá cho " + result.get("itemName")
+                        + "\nGiá hiện tại mới: " + formatCurrency(String.valueOf(result.get("currentPrice"))) + " VND"),
+                errorMsg -> showError("Đặt giá thất bại", errorMsg)
+        );
     }
 
     /**
@@ -339,30 +319,27 @@ public class HomeController {
     public void handleSearch(ActionEvent event) {
         String query = searchField != null ? searchField.getText().trim().toLowerCase() : "";
 
-        try {
-            List<Map<String, Object>> auctions = getKnownAuctions();
-            List<Map<String, Object>> filtered = auctions.stream()
-                    .filter(auction -> query.isBlank()
-                            || String.valueOf(auction.getOrDefault("itemName", "")).toLowerCase().contains(query)
-                            || String.valueOf(auction.getOrDefault("category", "")).toLowerCase().contains(query))
-                    .toList();
-
-            // Tạo chuỗi tóm tắt kết quả tìm kiếm
-            String summary = filtered.isEmpty()
-                    ? "Không có tài sản nào khớp."
-                    : filtered.stream()
-                    .limit(5) // Chỉ hiển thị tối đa 5 kết quả đầu tiên trong thông báo
-                    .map(auction -> "- " + auction.get("itemName") + " | " + formatCurrency(String.valueOf(auction.get("currentPrice"))) + " VND")
-                    .reduce((a, b) -> a + "\n" + b)
-                    .orElse("");
-
-            showInformation(
-                    "Kết quả tìm kiếm",
-                    "Tìm thấy " + filtered.size() + " tài sản.\n" + summary
-            );
-        } catch (Exception e) {
-            showError("Lỗi tìm kiếm", "Không thể lấy dữ liệu từ server: " + e.getMessage());
-        }
+        FxAsync.run(
+                () -> {
+                    List<Map<String, Object>> auctions = getKnownAuctions();
+                    return auctions.stream()
+                            .filter(auction -> query.isBlank()
+                                    || String.valueOf(auction.getOrDefault("itemName", "")).toLowerCase().contains(query)
+                                    || String.valueOf(auction.getOrDefault("category", "")).toLowerCase().contains(query))
+                            .toList();
+                },
+                filtered -> {
+                    String summary = filtered.isEmpty()
+                            ? "Không có tài sản nào khớp."
+                            : filtered.stream()
+                            .limit(5)
+                            .map(a -> "- " + a.get("itemName") + " | " + formatCurrency(String.valueOf(a.get("currentPrice"))) + " VND")
+                            .reduce((a, b) -> a + "\n" + b)
+                            .orElse("");
+                    showInformation("Kết quả tìm kiếm", "Tìm thấy " + filtered.size() + " tài sản.\n" + summary);
+                },
+                errorMsg -> showError("Lỗi tìm kiếm", "Không thể lấy dữ liệu: " + errorMsg)
+        );
     }
 
     /**

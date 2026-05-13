@@ -20,6 +20,8 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,24 +36,23 @@ import java.util.stream.Collectors;
 
 /**
  * Lớp Server - Trái tim của hệ thống đấu giá phía máy chủ.
- * Chịu trách nhiệm lắng nghe kết nối từ Client, giải mã các yêu cầu (Message)
- * và điều phối tới các dịch vụ nghiệp vụ (AuthService, AuctionService).
+ * Giao tiếp qua giao thức JSON trên TCP (newline-delimited JSON).
  */
 public class Server {
 
-    public static final int DEFAULT_PORT = 5050; // Cổng mặc định mà Server sẽ lắng nghe
+    public static final int DEFAULT_PORT = 5050;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     private final int port;
-    private final AuthService authService; // Dịch vụ xử lý Đăng nhập/Đăng ký
-    private final AuctionService auctionService; // Dịch vụ xử lý Đấu giá
+    private final AuthService authService;
+    private final AuctionService auctionService;
     private final UserDao userDao;
-    private final ExecutorService executor; // Quản lý luồng (Thread) để xử lý nhiều Client cùng lúc
+    private final ExecutorService executor;
     private final Set<ClientSession> clientSessions;
     private final AuctionObserver auctionBroadcastObserver;
 
-    private volatile boolean running; // Trạng thái hoạt động của Server
-    private ServerSocket serverSocket; // Socket lắng nghe kết nối
+    private volatile boolean running;
+    private ServerSocket serverSocket;
 
     public Server() {
         this(DEFAULT_PORT);
@@ -62,35 +63,25 @@ public class Server {
         this.authService = AuthService.getInstance();
         this.auctionService = AuctionService.getInstance();
         this.userDao = new UserDao();
-        // Sử dụng CachedThreadPool để tạo luồng mới khi cần hoặc tái sử dụng luồng rảnh
         this.executor = Executors.newCachedThreadPool();
         this.clientSessions = ConcurrentHashMap.newKeySet();
         this.auctionBroadcastObserver = auctions -> broadcastAuctionSnapshot();
         this.auctionService.addAuctionObserver(auctionBroadcastObserver);
     }
 
-    /**
-     * Khởi động Server.
-     */
     public void start() throws IOException {
         if (running) return;
         serverSocket = new ServerSocket(port);
         running = true;
-        System.out.println("Auction server started on port " + port);
+        System.out.println("Auction server started on port " + port + " (JSON protocol)");
 
-        // Vòng lặp chính: Chấp nhận mọi kết nối đến
         while (running) {
-            Socket clientSocket = serverSocket.accept(); // Chờ đợi một Client kết nối
+            Socket clientSocket = serverSocket.accept();
             System.out.println("[SERVER] Client mới kết nối: " + clientSocket.getRemoteSocketAddress());
-            
-            // Khi có Client kết nối, đẩy vào một Thread riêng để xử lý, không làm treo Server
             executor.submit(() -> handleClient(clientSocket));
         }
     }
 
-    /**
-     * Dừng Server và giải phóng tài nguyên.
-     */
     public void stop() throws IOException {
         running = false;
         if (serverSocket != null && !serverSocket.isClosed()) serverSocket.close();
@@ -99,39 +90,40 @@ public class Server {
     }
 
     /**
-     * Xử lý giao tiếp với một Client cụ thể.
+     * Xử lý giao tiếp với một Client. Đọc/ghi JSON qua TCP.
      */
     private void handleClient(Socket clientSocket) {
         String clientAddress = clientSocket.getRemoteSocketAddress().toString();
-        // Sử dụng try-with-resources để tự động đóng socket và luồng stream khi kết thúc
         try (Socket socket = clientSocket;
-             ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-             ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream())) {
-            ClientSession session = new ClientSession(socket, outputStream);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+             PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true)) {
+
+            ClientSession session = new ClientSession(socket, writer);
             clientSessions.add(session);
             session.send(buildAuctionSyncMessage());
 
-            // Liên tục lắng nghe tin nhắn từ Client này cho đến khi ngắt kết nối
-            while (running && !socket.isClosed()) {
-                Object rawRequest = inputStream.readObject(); // Đọc đối tượng gửi từ Client
-                
-                // Kiểm tra định dạng tin nhắn có phải là lớp Message không
-                if (!(rawRequest instanceof Message request)) {
-                    outputStream.writeObject(Message.failure(null, "Định dạng yêu cầu không hợp lệ"));
-                    outputStream.flush();
+            String line;
+            while (running && !socket.isClosed() && (line = reader.readLine()) != null) {
+                Message request;
+                try {
+                    request = Message.fromJson(line);
+                } catch (Exception e) {
+                    session.send(Message.failure(null, "Định dạng JSON không hợp lệ"));
                     continue;
                 }
 
-                // Xử lý yêu cầu và lấy phản hồi tương ứng
+                if (request == null || request.getType() == null) {
+                    session.send(Message.failure(null, "Yêu cầu không hợp lệ"));
+                    continue;
+                }
+
                 Message response = handleRequest(request);
-                
-                // Gửi phản hồi về cho Client
                 session.send(response);
             }
-        } catch (EOFException ignored) {
-            // Xảy ra khi Client ngắt kết nối đột ngột
         } catch (Exception e) {
-            System.err.println("[SERVER] Lỗi xử lý Client [" + clientAddress + "]: " + e.getMessage());
+            if (running) {
+                System.err.println("[SERVER] Lỗi xử lý Client [" + clientAddress + "]: " + e.getMessage());
+            }
         } finally {
             clientSessions.removeIf(session -> session.matches(clientSocket));
             System.out.println("[SERVER] Client đã ngắt kết nối: " + clientAddress);
@@ -139,8 +131,7 @@ public class Server {
     }
 
     /**
-     * Bộ điều phối yêu cầu (Request Dispatcher).
-     * Dựa vào loại tin nhắn (Type) để gọi phương thức xử lý phù hợp.
+     * Bộ điều phối yêu cầu.
      */
     private Message handleRequest(Message request) {
         try {
@@ -150,7 +141,8 @@ public class Server {
                 case REGISTER -> handleRegister(request);
                 case GET_AUCTIONS -> handleGetAuctions(request);
                 case PLACE_BID -> handlePlaceBid(request);
-                case DB_STATUS -> handleDatabaseStatus(request); // Đây là nơi nhận lệnh check DB từ Home
+                case CREATE_AUCTION -> handleCreateAuction(request);
+                case DB_STATUS -> handleDatabaseStatus(request);
                 case AUCTION_SYNC -> Message.failure(request, "Client không được phép gửi AUCTION_SYNC");
                 case ERROR -> Message.failure(request, "Client gửi tin nhắn lỗi");
             };
@@ -159,9 +151,6 @@ public class Server {
         }
     }
 
-    /**
-     * Xử lý đăng nhập. Gọi sang AuthService để kiểm tra trong DB qua UserDao.
-     */
     private Message handleLogin(Message request) {
         Map<String, Object> payload = request.getPayload();
         String username = stringValue(payload.get("username"));
@@ -172,9 +161,6 @@ public class Server {
                 .orElseGet(() -> Message.failure(request, "Tên đăng nhập hoặc mật khẩu không đúng"));
     }
 
-    /**
-     * Xử lý đăng ký thành viên mới.
-     */
     private Message handleRegister(Message request) {
         Map<String, Object> payload = request.getPayload();
         String username = stringValue(payload.get("username"));
@@ -206,9 +192,6 @@ public class Server {
         return Message.success(request, userPayload(user));
     }
 
-    /**
-     * Lấy danh sách tất cả các phiên đấu giá đang diễn ra.
-     */
     private Message handleGetAuctions(Message request) {
         List<Map<String, Object>> auctions = auctionService.getAllAuctions().stream()
                 .map(this::auctionPayload)
@@ -216,16 +199,12 @@ public class Server {
         return Message.success(request, Map.of("auctions", auctions));
     }
 
-    /**
-     * Xử lý việc đặt giá của người dùng.
-     */
     private Message handlePlaceBid(Message request) {
         Map<String, Object> payload = request.getPayload();
         String itemId = stringValue(payload.get("itemId"));
         String bidderName = stringValue(payload.get("bidderUsername"));
         String amountText = stringValue(payload.get("amount"));
 
-        // Tìm phiên đấu giá tương ứng với ID tài sản
         Auction auction = auctionService.getAllAuctions().stream()
                 .filter(current -> current.getItem().getId().equals(itemId))
                 .findFirst()
@@ -234,41 +213,74 @@ public class Server {
         if (auction == null) return Message.failure(request, "Không tìm thấy phiên đấu giá");
         if (bidderName == null || bidderName.isBlank()) return Message.failure(request, "Tên người đặt giá là bắt buộc");
 
-        /*
-         * Ghi chú quan trọng:
-         * Sau khi chuyển sang DB thật, bidder dùng để đặt giá phải là user có thật trong DB.
-         * Nếu tiếp tục tạo user giả trong RAM như trước, câu lệnh INSERT vào `bid_transactions`
-         * sẽ lỗi khóa ngoại vì `bidder_id` không tồn tại trong bảng `users`.
-         */
         User bidder = userDao.findByUsername(bidderName);
         if (bidder == null) {
-            bidder = new Bidder(bidderName, bidderName + "@example.com", "");
             return Message.failure(request, "Người đặt giá chưa tồn tại trong cơ sở dữ liệu");
         }
         boolean success = auctionService.placeBid(auction, bidder, new BigDecimal(amountText));
-        
+
         if (!success) return Message.failure(request, "Đặt giá thất bại (có thể giá của bạn thấp hơn giá hiện tại)");
 
         return Message.success(request, auctionPayload(auction));
     }
 
-    /**
-     * Kiểm tra trạng thái kết nối Database.
-     * Đây là phương thức trả lời câu hỏi của bạn về việc "check" ở đâu.
-     */
+    @SuppressWarnings("unchecked")
+    private Message handleCreateAuction(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String itemType = stringValue(payload.get("itemType"));
+        String name = stringValue(payload.get("name"));
+        String description = stringValue(payload.get("description"));
+        String startingPriceStr = stringValue(payload.get("startingPrice"));
+        String bidStepStr = stringValue(payload.get("bidStep"));
+        String startTimeStr = stringValue(payload.get("startTime"));
+        String endTimeStr = stringValue(payload.get("endTime"));
+        String sellerUsername = stringValue(payload.get("sellerUsername"));
+
+        Map<String, Object> attributes = payload.get("attributes") instanceof Map<?, ?> rawMap
+                ? (Map<String, Object>) rawMap
+                : Map.of();
+
+        if (sellerUsername == null || sellerUsername.isBlank()) {
+            return Message.failure(request, "Thiếu thông tin người bán");
+        }
+
+        User seller = userDao.findByUsername(sellerUsername);
+        if (seller == null) {
+            return Message.failure(request, "Không tìm thấy người bán: " + sellerUsername);
+        }
+
+        try {
+            BigDecimal startingPrice = new BigDecimal(startingPriceStr);
+            BigDecimal bidStep = new BigDecimal(bidStepStr);
+            LocalDateTime startTime = LocalDateTime.parse(startTimeStr, DATE_FORMATTER);
+            LocalDateTime endTime = LocalDateTime.parse(endTimeStr, DATE_FORMATTER);
+
+            boolean created = auctionService.createAuction(
+                    itemType, name, description, startingPrice, bidStep,
+                    startTime, endTime, seller, attributes
+            );
+
+            if (!created) {
+                return Message.failure(request, "Không thể tạo phiên đấu giá. Kiểm tra kết nối DB.");
+            }
+
+            return Message.success(request, Map.of("created", true));
+        } catch (Exception e) {
+            return Message.failure(request, "Lỗi tạo phiên: " + e.getMessage());
+        }
+    }
+
     private Message handleDatabaseStatus(Message request) {
-        // AuthService.isDatabaseAvailable() sẽ gọi tới DBConnection để kiểm tra
         boolean available = authService.isDatabaseAvailable();
         return Message.success(request, Map.of(
                 "available", available,
-                "dbUrl", DBConnection.getConfiguredUrl(), // Lấy URL cấu hình từ DBConnection
-                "dbUser", DBConnection.getConfiguredUser() // Lấy Username cấu hình từ DBConnection
+                "dbUrl", DBConnection.getConfiguredUrl(),
+                "dbUser", DBConnection.getConfiguredUser()
         ));
     }
 
-    /**
-     * Chuyển đổi đối tượng User sang Map để gửi qua mạng.
-     */
+    // ===== Payload builders =====
+
     private Map<String, Object> userPayload(User user) {
         return Map.of(
                 "id", user.getId(),
@@ -281,9 +293,6 @@ public class Server {
         );
     }
 
-    /**
-     * Chuyển đổi đối tượng Auction sang Map để gửi qua mạng.
-     */
     private Map<String, Object> auctionPayload(Auction auction) {
         Item item = auction.getItem();
         Map<String, Object> payload = new HashMap<>();
@@ -348,28 +357,27 @@ public class Server {
         return attributes;
     }
 
-    /**
-     * Tiện ích chuyển đổi giá trị sang String và cắt khoảng trắng.
-     */
     private String stringValue(Object value) {
         return value == null ? null : String.valueOf(value).trim();
     }
 
+    // ===== Broadcast =====
+
     private void broadcastAuctionSnapshot() {
-        if (clientSessions.isEmpty()) {
-            return;
-        }
+        if (clientSessions.isEmpty()) return;
 
         Message snapshot = buildAuctionSyncMessage();
-        List<ClientSession> disconnectedSessions = new ArrayList<>();
+        String jsonLine = snapshot.toJson();
+
+        List<ClientSession> disconnected = new ArrayList<>();
         for (ClientSession session : clientSessions) {
             try {
-                session.send(snapshot);
+                session.sendRaw(jsonLine);
             } catch (IOException e) {
-                disconnectedSessions.add(session);
+                disconnected.add(session);
             }
         }
-        clientSessions.removeAll(disconnectedSessions);
+        clientSessions.removeAll(disconnected);
     }
 
     private Message buildAuctionSyncMessage() {
@@ -379,98 +387,34 @@ public class Server {
         return new Message(UUID.randomUUID().toString(), Message.Type.AUCTION_SYNC, Map.of("auctions", auctions), true, null);
     }
 
-    /**
-     * Điểm chạy chương trình Server.
-     */
     public static void main(String[] args) throws IOException {
         int serverPort = args.length > 0 ? Integer.parseInt(args[0]) : DEFAULT_PORT;
         new Server(serverPort).start();
     }
 
+    // ===== Client Session (JSON over TCP) =====
+
     private static final class ClientSession {
         private final Socket socket;
-        private final ObjectOutputStream outputStream;
+        private final PrintWriter writer;
 
-        private ClientSession(Socket socket, ObjectOutputStream outputStream) {
+        private ClientSession(Socket socket, PrintWriter writer) {
             this.socket = socket;
-            this.outputStream = outputStream;
+            this.writer = writer;
         }
 
         private synchronized void send(Message message) throws IOException {
-            outputStream.writeObject(message);
-            outputStream.flush();
+            writer.println(message.toJson());
+            if (writer.checkError()) throw new IOException("Write failed");
+        }
+
+        private synchronized void sendRaw(String jsonLine) throws IOException {
+            writer.println(jsonLine);
+            if (writer.checkError()) throw new IOException("Write failed");
         }
 
         private boolean matches(Socket candidate) {
             return socket == candidate;
-        }
-    }
-
-    /**
-     * Lớp ServerConnection chịu trách nhiệm thiết lập và quản lý kết nối Socket từ Client tới Server.
-     * Nó sử dụng ObjectStream để truyền tải các đối tượng Message qua mạng.
-     */
-    public static class ServerConnection implements Closeable {
-
-        private final Socket socket; // Socket kết nối đến server
-        private final ObjectOutputStream outputStream; // Luồng xuất dữ liệu (gửi message)
-        private final ObjectInputStream inputStream; // Luồng nhập dữ liệu (nhận phản hồi)
-
-        /**
-         * Khởi tạo một kết nối mới tới Server.
-         * @param host Địa chỉ IP hoặc tên miền của Server
-         * @param port Cổng dịch vụ của Server
-         * @throws IOException Nếu không thể thiết lập kết nối hoặc khởi tạo luồng dữ liệu
-         */
-        public ServerConnection(String host, int port) throws IOException {
-            this.socket = new Socket(host, port);
-            // Lưu ý: Phải khởi tạo ObjectOutputStream trước ObjectInputStream để tránh tình trạng deadlock (treo luồng)
-            this.outputStream = new ObjectOutputStream(socket.getOutputStream());
-            this.inputStream = new ObjectInputStream(socket.getInputStream());
-        }
-
-        /**
-         * Kiểm tra xem kết nối có còn hoạt động không.
-         */
-        public boolean isConnected() {
-            return socket != null && !socket.isClosed() && socket.isConnected();
-        }
-
-        /**
-         * Gửi một yêu cầu tới Server dựa trên loại Message và dữ liệu đi kèm.
-         */
-        public Message send(Message.Type type, Map<String, Object> payload) throws IOException, ClassNotFoundException {
-            return send(new Message(type, payload));
-        }
-
-        /**
-         * Gửi đối tượng Message tới Server và đợi nhận phản hồi.
-         * @param message Đối tượng chứa thông tin yêu cầu
-         * @return Message Phản hồi từ Server
-         * @throws IOException Nếu có lỗi trong quá trình truyền tải dữ liệu
-         * @throws ClassNotFoundException Nếu lớp của đối tượng nhận được không tồn tại ở phía Client
-         */
-        public Message send(Message message) throws IOException, ClassNotFoundException {
-            // Ghi đối tượng vào luồng xuất
-            outputStream.writeObject(message);
-            outputStream.flush(); // Đẩy dữ liệu đi ngay lập tức
-
-            // Đọc phản hồi từ luồng nhập
-            Object response = inputStream.readObject();
-            if (!(response instanceof Message serverMessage)) {
-                throw new IOException("Phản hồi từ server không đúng định dạng Message");
-            }
-            return serverMessage;
-        }
-
-        /**
-         * Đóng tất cả các tài nguyên kết nối (Luồng và Socket).
-         */
-        @Override
-        public void close() throws IOException {
-            if (inputStream != null) inputStream.close();
-            if (outputStream != null) outputStream.close();
-            if (socket != null) socket.close();
         }
     }
 }

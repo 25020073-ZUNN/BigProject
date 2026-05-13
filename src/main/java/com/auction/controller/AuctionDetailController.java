@@ -8,6 +8,8 @@ import com.auction.model.user.User;
 import com.auction.network.client.AuctionPayloadMapper;
 import com.auction.network.client.AuctionUpdateListener;
 import com.auction.network.client.NetworkService;
+import com.auction.service.AutoBidStrategy;
+import com.auction.util.FxAsync;
 import com.auction.util.UserSession;
 import javafx.application.Platform;
 import javafx.animation.KeyFrame;
@@ -47,6 +49,7 @@ public class AuctionDetailController {
     private static final BigDecimal MIN_INCREMENT_FLOOR = new BigDecimal("500000");
 
     private final NetworkService networkService = NetworkService.getInstance();
+    private final AutoBidStrategy autoBidStrategy = new AutoBidStrategy();
     private final User currentUser = UserSession.isLoggedIn()
             ? UserSession.getLoggedInUser()
             : new Bidder("guest_user", "guest@example.com", "guest");
@@ -222,15 +225,21 @@ public class AuctionDetailController {
                 return;
             }
 
-            networkService.placeBid(currentAuction.getItem().getId(), currentUser.getUsername(), bidAmount.toPlainString());
+            String itemId = currentAuction.getItem().getId();
+            String username = currentUser.getUsername();
+            String amount = bidAmount.toPlainString();
 
-            txtBidAmount.clear();
-            publishNotification("Bạn đang dẫn đầu với mức " + formatPrice(bidAmount) + ".");
-            refreshAuctionState();
+            FxAsync.run(
+                    () -> networkService.placeBid(itemId, username, amount),
+                    result -> {
+                        txtBidAmount.clear();
+                        publishNotification("Bạn đang dẫn đầu với mức " + formatPrice(bidAmount) + ".");
+                        refreshAuctionState();
+                    },
+                    errorMsg -> showError("Đặt giá thất bại: " + errorMsg)
+            );
         } catch (IllegalArgumentException ex) {
             showError(ex.getMessage());
-        } catch (Exception ex) {
-            showError("Định dạng số tiền không hợp lệ.");
         }
     }
 
@@ -390,21 +399,37 @@ public class AuctionDetailController {
             return;
         }
 
-        BigDecimal nextBid = currentAuction.getCurrentPrice().add(autoBidStep.max(resolveMinimumIncrement()));
-        if (nextBid.compareTo(autoBidMaximum) > 0) {
+        AutoBidStrategy.AutoBidDecision decision = autoBidStrategy.decide(
+                currentAuction.getCurrentPrice(),
+                resolveMinimumIncrement(),
+                autoBidStep,
+                autoBidMaximum
+        );
+
+        if (!decision.shouldBid()) {
             autoBidEnabled = false;
-            lblAutoBidStatus.setText("Auto-bid đã dừng vì giá tiếp theo vượt quá mức tối đa.");
-            publishNotification("Auto-bid dừng do chạm trần cấu hình.");
+            lblAutoBidStatus.setText(decision.stopReason());
+            publishNotification(decision.stopReason());
             return;
         }
 
-        try {
-            networkService.placeBid(currentAuction.getItem().getId(), currentUser.getUsername(), nextBid.toPlainString());
-            lblAutoBidStatus.setText("Auto-bid vừa nâng lên " + formatPrice(nextBid) + ".");
-            publishNotification("Auto-bid đã phản ứng với mức " + formatPrice(nextBid) + ".");
-            refreshAuctionState();
-        } catch (Exception ignored) {
-        }
+        BigDecimal bidAmount = decision.bidAmount();
+        String itemId = currentAuction.getItem().getId();
+        String username = currentUser.getUsername();
+        boolean usedMax = decision.usedMaximum();
+
+        FxAsync.run(
+                () -> networkService.placeBid(itemId, username, bidAmount.toPlainString()),
+                result -> {
+                    String statusMsg = usedMax
+                            ? "Auto-bid đã đặt mức tối đa: " + formatPrice(bidAmount) + "."
+                            : "Auto-bid vừa nâng lên " + formatPrice(bidAmount) + ".";
+                    lblAutoBidStatus.setText(statusMsg);
+                    publishNotification(statusMsg);
+                    refreshAuctionState();
+                },
+                errorMsg -> publishNotification("Auto-bid lỗi: " + errorMsg)
+        );
     }
 
     private void startCountdown(LocalDateTime endTime) {

@@ -2,7 +2,8 @@ package com.auction.controller;
 
 import com.auction.dao.UserDao;
 import com.auction.model.user.User;
-import com.auction.service.AuctionService;
+import com.auction.network.client.NetworkService;
+import com.auction.util.FxAsync;
 import com.auction.util.UserSession;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -41,7 +42,9 @@ public class CreateAuctionController {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private final AuctionService auctionService = AuctionService.getInstance();
+    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+    private final NetworkService networkService = NetworkService.getInstance();
     private final UserDao userDao = new UserDao();
 
     @FXML
@@ -133,39 +136,35 @@ public class CreateAuctionController {
     public void handleCreateAuction(ActionEvent event) {
         try {
             String sellerUsername = sellerComboBox.getValue();
-            User seller = userDao.findByUsername(sellerUsername);
-            if (seller == null) {
-                showError("Không tìm thấy người bán hợp lệ trong cơ sở dữ liệu.");
+            if (sellerUsername == null || sellerUsername.isBlank()) {
+                showError("Vui lòng chọn người bán.");
                 return;
             }
 
             String category = categoryComboBox.getValue();
+            String name = requireText(nameField.getText(), "Tên tài sản");
+            String description = requireText(descriptionArea.getText(), "Mô tả tài sản");
             BigDecimal startingPrice = parseMoney(startingPriceField.getText(), "Giá khởi điểm");
             BigDecimal bidStep = parseMoney(bidStepField.getText(), "Bước giá");
             LocalDateTime startTime = parseDateTime(startTimeField.getText(), "Thời gian bắt đầu");
             LocalDateTime endTime = parseDateTime(endTimeField.getText(), "Thời gian kết thúc");
-
             Map<String, Object> attributes = buildAttributes(category);
 
-            boolean created = auctionService.createAuction(
-                    category,
-                    requireText(nameField.getText(), "Tên tài sản"),
-                    requireText(descriptionArea.getText(), "Mô tả tài sản"),
-                    startingPrice,
-                    bidStep,
-                    startTime,
-                    endTime,
-                    seller,
-                    attributes
+            FxAsync.run(
+                    () -> {
+                        networkService.createAuction(
+                                category, name, description,
+                                startingPrice.toPlainString(), bidStep.toPlainString(),
+                                startTime.format(ISO_FORMATTER), endTime.format(ISO_FORMATTER),
+                                sellerUsername, attributes
+                        );
+                    },
+                    () -> {
+                        showInformation("Tạo phiên thành công", "Tài sản và phiên đấu giá đã được lưu vào CSDL.");
+                        clearFormForNextEntry();
+                    },
+                    errorMsg -> showError("Không thể tạo phiên đấu giá: " + errorMsg)
             );
-
-            if (!created) {
-                showError("Không thể tạo phiên đấu giá. Vui lòng kiểm tra lại kết nối DB hoặc dữ liệu nhập.");
-                return;
-            }
-
-            showInformation("Tạo phiên thành công", "Tài sản và phiên đấu giá đã được lưu thật vào cơ sở dữ liệu.");
-            clearFormForNextEntry();
         } catch (IllegalArgumentException ex) {
             showError(ex.getMessage());
         }
