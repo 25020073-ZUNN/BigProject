@@ -14,6 +14,7 @@ import com.auction.model.user.User;
 import com.auction.network.Message;
 import com.auction.service.AuctionService;
 import com.auction.service.AuthService;
+import com.auction.util.ValidationUtil;
 import com.auction.observer.AuctionObserver;
 
 import java.io.*;
@@ -70,7 +71,8 @@ public class Server {
     }
 
     public void start() throws IOException {
-        if (running) return;
+        if (running)
+            return;
         serverSocket = new ServerSocket(port);
         running = true;
         System.out.println("Auction server started on port " + port + " (JSON protocol)");
@@ -84,7 +86,8 @@ public class Server {
 
     public void stop() throws IOException {
         running = false;
-        if (serverSocket != null && !serverSocket.isClosed()) serverSocket.close();
+        if (serverSocket != null && !serverSocket.isClosed())
+            serverSocket.close();
         auctionService.removeAuctionObserver(auctionBroadcastObserver);
         executor.shutdownNow();
     }
@@ -95,8 +98,10 @@ public class Server {
     private void handleClient(Socket clientSocket) {
         String clientAddress = clientSocket.getRemoteSocketAddress().toString();
         try (Socket socket = clientSocket;
-             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-             PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true)) {
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+                PrintWriter writer = new PrintWriter(
+                        new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true)) {
 
             ClientSession session = new ClientSession(socket, writer);
             clientSessions.add(session);
@@ -156,6 +161,10 @@ public class Server {
         String username = stringValue(payload.get("username"));
         String password = stringValue(payload.get("password"));
 
+        if (!com.auction.util.ValidationUtil.isUsernameValid(username)) {
+            return Message.failure(request, "Tên đăng nhập không hợp lệ");
+        }
+
         return authService.login(username, password)
                 .map(user -> Message.success(request, userPayload(user)))
                 .orElseGet(() -> Message.failure(request, "Tên đăng nhập hoặc mật khẩu không đúng"));
@@ -169,8 +178,19 @@ public class Server {
         String password = stringValue(payload.get("password"));
         String role = stringValue(payload.get("role"));
 
-        if (username == null || username.isBlank() || email == null || email.isBlank() || password == null || password.isBlank()) {
+        if (username == null || username.isBlank() || email == null || email.isBlank() || password == null
+                || password.isBlank()) {
             return Message.failure(request, "Thiếu thông tin đăng ký bắt buộc");
+        }
+
+        if (!ValidationUtil.isUsernameValid(username)) {
+            return Message.failure(request, "Tên đăng nhập không hợp lệ (3-16 ký tự, chỉ chữ và số)");
+        }
+        if (!ValidationUtil.isEmailValid(email)) {
+            return Message.failure(request, "Định dạng email không hợp lệ");
+        }
+        if (!ValidationUtil.isPasswordValid(password)) {
+            return Message.failure(request, "Mật khẩu quá yếu (cần ít nhất 8 ký tự, có chữ hoa, chữ thường và số)");
         }
 
         if (role == null || role.isBlank()) {
@@ -179,9 +199,11 @@ public class Server {
 
         User user;
         if ("SELLER".equalsIgnoreCase(role)) {
-            user = new Seller(username, fullName == null || fullName.isBlank() ? username : fullName, email, String.valueOf(password.hashCode()));
+            user = new Seller(username, fullName == null || fullName.isBlank() ? username : fullName, email,
+                    String.valueOf(password.hashCode()));
         } else {
-            user = new Bidder(username, fullName == null || fullName.isBlank() ? username : fullName, email, String.valueOf(password.hashCode()));
+            user = new Bidder(username, fullName == null || fullName.isBlank() ? username : fullName, email,
+                    String.valueOf(password.hashCode()));
         }
 
         boolean created = authService.register(user);
@@ -210,8 +232,10 @@ public class Server {
                 .findFirst()
                 .orElse(null);
 
-        if (auction == null) return Message.failure(request, "Không tìm thấy phiên đấu giá");
-        if (bidderName == null || bidderName.isBlank()) return Message.failure(request, "Tên người đặt giá là bắt buộc");
+        if (auction == null)
+            return Message.failure(request, "Không tìm thấy phiên đấu giá");
+        if (bidderName == null || bidderName.isBlank())
+            return Message.failure(request, "Tên người đặt giá là bắt buộc");
 
         User bidder = userDao.findByUsername(bidderName);
         if (bidder == null) {
@@ -219,7 +243,8 @@ public class Server {
         }
         boolean success = auctionService.placeBid(auction, bidder, new BigDecimal(amountText));
 
-        if (!success) return Message.failure(request, "Đặt giá thất bại (có thể giá của bạn thấp hơn giá hiện tại)");
+        if (!success)
+            return Message.failure(request, "Đặt giá thất bại (có thể giá của bạn thấp hơn giá hiện tại)");
 
         return Message.success(request, auctionPayload(auction));
     }
@@ -257,8 +282,7 @@ public class Server {
 
             boolean created = auctionService.createAuction(
                     itemType, name, description, startingPrice, bidStep,
-                    startTime, endTime, seller, attributes
-            );
+                    startTime, endTime, seller, attributes);
 
             if (!created) {
                 return Message.failure(request, "Không thể tạo phiên đấu giá. Kiểm tra kết nối DB.");
@@ -275,8 +299,7 @@ public class Server {
         return Message.success(request, Map.of(
                 "available", available,
                 "dbUrl", DBConnection.getConfiguredUrl(),
-                "dbUser", DBConnection.getConfiguredUser()
-        ));
+                "dbUser", DBConnection.getConfiguredUser()));
     }
 
     // ===== Payload builders =====
@@ -289,8 +312,7 @@ public class Server {
                 "email", user.getEmail(),
                 "role", user.getRole(),
                 "balance", user.getBalance(),
-                "active", user.isActive()
-        );
+                "active", user.isActive());
     }
 
     private Map<String, Object> auctionPayload(Auction auction) {
@@ -311,7 +333,8 @@ public class Server {
         payload.put("startTime", item.getStartTime().format(DATE_FORMATTER));
         payload.put("endTime", item.getEndTime().format(DATE_FORMATTER));
         payload.put("seller", userPayload(auction.getSeller()));
-        payload.put("highestBidder", auction.getHighestBidder() == null ? null : userPayload(auction.getHighestBidder()));
+        payload.put("highestBidder",
+                auction.getHighestBidder() == null ? null : userPayload(auction.getHighestBidder()));
         payload.put("item", itemPayload(item));
         payload.put("bidHistory", auction.getBidHistory().stream().map(this::bidPayload).collect(Collectors.toList()));
         return payload;
@@ -364,7 +387,8 @@ public class Server {
     // ===== Broadcast =====
 
     private void broadcastAuctionSnapshot() {
-        if (clientSessions.isEmpty()) return;
+        if (clientSessions.isEmpty())
+            return;
 
         Message snapshot = buildAuctionSyncMessage();
         String jsonLine = snapshot.toJson();
@@ -384,7 +408,8 @@ public class Server {
         List<Map<String, Object>> auctions = auctionService.getAllAuctions().stream()
                 .map(this::auctionPayload)
                 .collect(Collectors.toList());
-        return new Message(UUID.randomUUID().toString(), Message.Type.AUCTION_SYNC, Map.of("auctions", auctions), true, null);
+        return new Message(UUID.randomUUID().toString(), Message.Type.AUCTION_SYNC, Map.of("auctions", auctions), true,
+                null);
     }
 
     public static void main(String[] args) throws IOException {
@@ -405,12 +430,14 @@ public class Server {
 
         private synchronized void send(Message message) throws IOException {
             writer.println(message.toJson());
-            if (writer.checkError()) throw new IOException("Write failed");
+            if (writer.checkError())
+                throw new IOException("Write failed");
         }
 
         private synchronized void sendRaw(String jsonLine) throws IOException {
             writer.println(jsonLine);
-            if (writer.checkError()) throw new IOException("Write failed");
+            if (writer.checkError())
+                throw new IOException("Write failed");
         }
 
         private boolean matches(Socket candidate) {
