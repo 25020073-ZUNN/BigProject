@@ -16,8 +16,10 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
- * AuctionListController - Bộ điều khiển cho giao diện danh sách các phiên đấu giá.
- * Quản lý việc hiển thị dữ liệu lên TableView, tìm kiếm sản phẩm và chuyển hướng sang chi tiết.
+ * AuctionListController - Bộ điều khiển cho giao diện danh sách các phiên đấu
+ * giá.
+ * Quản lý việc hiển thị dữ liệu lên TableView, tìm kiếm sản phẩm và chuyển
+ * hướng sang chi tiết.
  */
 public class AuctionListController implements Initializable {
 
@@ -92,7 +94,7 @@ public class AuctionListController implements Initializable {
     @FXML
     public void handleSearch(ActionEvent event) {
         String keyword = txtSearch.getText().toLowerCase(); // Lấy từ khóa và chuyển thành chữ thường
-        
+
         // Nếu ô tìm kiếm trống, hiển thị lại toàn bộ danh sách ban đầu
         if (keyword.isEmpty()) {
             tableProducts.setItems(productList);

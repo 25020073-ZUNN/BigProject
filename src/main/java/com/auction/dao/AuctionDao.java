@@ -143,22 +143,30 @@ public class AuctionDao {
                 UPDATE auctions a
                 JOIN items i ON i.id = a.item_id
                 SET a.active = CASE
-                                   WHEN CURRENT_TIMESTAMP >= i.start_time AND CURRENT_TIMESTAMP < i.end_time THEN TRUE
+                                   WHEN ? >= i.start_time AND ? < i.end_time THEN TRUE
                                    ELSE FALSE
                                END,
                     a.finished = CASE
-                                     WHEN CURRENT_TIMESTAMP >= i.end_time THEN TRUE
+                                     WHEN ? >= i.end_time THEN TRUE
                                      ELSE FALSE
                                  END,
                     i.status = CASE
-                                   WHEN CURRENT_TIMESTAMP < i.start_time THEN 'OPEN'
-                                   WHEN CURRENT_TIMESTAMP >= i.start_time AND CURRENT_TIMESTAMP < i.end_time THEN 'RUNNING'
+                                   WHEN ? < i.start_time THEN 'OPEN'
+                                   WHEN ? >= i.start_time AND ? < i.end_time THEN 'RUNNING'
                                    ELSE 'FINISHED'
                                END
                 """;
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+            Timestamp currentJavaTime = Timestamp.valueOf(LocalDateTime.now());
+            stmt.setTimestamp(1, currentJavaTime);
+            stmt.setTimestamp(2, currentJavaTime);
+            stmt.setTimestamp(3, currentJavaTime);
+            stmt.setTimestamp(4, currentJavaTime);
+            stmt.setTimestamp(5, currentJavaTime);
+            stmt.setTimestamp(6, currentJavaTime);
+            
             stmt.executeUpdate();
             lastStateSyncAtMillis = now;
         } catch (SQLException e) {

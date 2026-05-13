@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.auction.controller.AuctionSummaryController"
+            prefWidth="1380"
+            prefHeight="920"
+            stylesheets="@style.css"
+            styleClass="root">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="18" styleClass="topbar">
+            <padding>
+                <Insets top="14" right="28" bottom="14" left="28"/>
+            </padding>
+            <VBox spacing="0">
+                <Label text="AUREX" styleClass="logo-main"/>
+                <Label text="AUCTION PLATFORM" styleClass="logo-sub"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Trang chủ" onAction="#goToHome" styleClass="nav-btn"/>
+            <Button text="Tài sản đấu giá" onAction="#goToAuctionList" styleClass="nav-btn-active"/>
+            <Button text="Phiên đấu giá" onAction="#goToSessions" styleClass="nav-btn"/>
+            <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn"/>
+            <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
+            <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
+            <content>
+                <VBox spacing="22" styleClass="page-section">
+                    <padding>
+                        <Insets top="28" right="34" bottom="32" left="34"/>
+                    </padding>
+
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="TỔNG KẾT PHIÊN ĐẤU GIÁ" styleClass="section-title-dark"/>
+                        <Label text="Phiên đấu giá đã kết thúc thành công." styleClass="auction-notice"/>
+                    </HBox>
+
+                    <HBox spacing="22">
+                        <!-- Cột Trái: Thông tin người chiến thắng & Top Bidders -->
+                        <VBox spacing="16" prefWidth="420" styleClass="detail-side-card">
+                            <padding>
+                                <Insets top="22" right="20" bottom="22" left="20"/>
+                            </padding>
+
+                            <VBox spacing="6">
+                                <Label fx:id="lblName" text="Tên tài sản" styleClass="hero-title-small" wrapText="true"/>
+                                <Label text="ĐÃ KẾT THÚC" styleClass="badge-live" style="-fx-background-color: #6c757d; -fx-text-fill: white;"/>
+                            </VBox>
+
+                            <VBox spacing="4">
+                                <Label text="Giá chốt (Final Price)" styleClass="field-label"/>
+                                <Label fx:id="lblFinalPrice" text="0 VND" styleClass="detail-price"/>
+                            </VBox>
+
+                            <HBox spacing="16">
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="Người chiến thắng (Winner)" styleClass="field-label"/>
+                                    <Label fx:id="lblWinner" text="Chưa xác định" styleClass="partner-text-strong" wrapText="true"/>
+                                </VBox>
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="Người bán" styleClass="field-label"/>
+                                    <Label fx:id="lblSeller" text="seller_name" styleClass="partner-text-strong" wrapText="true"/>
+                                </VBox>
+                            </HBox>
+
+                            <Separator/>
+
+                            <VBox spacing="10" VBox.vgrow="ALWAYS">
+                                <Label text="Bảng xếp hạng (Top 10 Bidders)" styleClass="partner-title"/>
+                                <ListView fx:id="lvTopBidders" prefHeight="350" VBox.vgrow="ALWAYS" styleClass="auction-history-list"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Cột Phải: Biểu đồ lịch sử giá -->
+                        <VBox spacing="18" HBox.hgrow="ALWAYS">
+                            <VBox spacing="14" styleClass="content-card">
+                                <padding>
+                                    <Insets top="22" right="24" bottom="22" left="24"/>
+                                </padding>
+                                <Label text="Diễn biến giá trong suốt phiên đấu giá" styleClass="partner-title"/>
+                                <LineChart fx:id="priceChart"
+                                           animated="true"
+                                           createSymbols="true"
+                                           legendVisible="false"
+                                           prefHeight="620"
+                                           styleClass="auction-chart">
+                                    <xAxis>
+                                        <NumberAxis fx:id="xAxis" label="Lượt đặt giá (Bid Order)"/>
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis fx:id="yAxis" label="Mức giá (VND)"/>
+                                    </yAxis>
+                                </LineChart>
+                            </VBox>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

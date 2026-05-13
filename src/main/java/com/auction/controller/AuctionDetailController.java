@@ -198,6 +198,20 @@ public class AuctionDetailController {
     }
 
 
+    /**
+     * Truyền thẳng Auction đã có sẵn vào controller.
+     * Dùng bởi SceneNavigator để tránh gọi lại server.
+     */
+    public void setAuctionData(Auction auction) {
+        if (auction != null) {
+            bindAuction(auction);
+        }
+    }
+
+    /**
+     * Fallback: tìm Auction từ server theo Item.
+     * Chỉ dùng khi không có sẵn đối tượng Auction.
+     */
     public void setItemData(Item item) {
         Auction auction = loadAuctionsFromServer().stream()
                 .filter(candidate -> candidate.getItem().getId().equals(item.getId()))
