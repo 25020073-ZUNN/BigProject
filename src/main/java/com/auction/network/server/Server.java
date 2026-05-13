@@ -147,6 +147,8 @@ public class Server {
                 case GET_AUCTIONS -> handleGetAuctions(request);
                 case PLACE_BID -> handlePlaceBid(request);
                 case CREATE_AUCTION -> handleCreateAuction(request);
+                case UPDATE_PROFILE -> handleUpdateProfile(request);
+                case DELETE_ACCOUNT -> handleDeleteAccount(request);
                 case DB_STATUS -> handleDatabaseStatus(request);
                 case AUCTION_SYNC -> Message.failure(request, "Client không được phép gửi AUCTION_SYNC");
                 case ERROR -> Message.failure(request, "Client gửi tin nhắn lỗi");
@@ -168,6 +170,37 @@ public class Server {
         return authService.login(username, password)
                 .map(user -> Message.success(request, userPayload(user)))
                 .orElseGet(() -> Message.failure(request, "Tên đăng nhập hoặc mật khẩu không đúng"));
+    }
+
+    private Message handleUpdateProfile(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String username = stringValue(payload.get("username"));
+        String fullName = stringValue(payload.get("fullName"));
+        String email = stringValue(payload.get("email"));
+
+        if (!ValidationUtil.isEmailValid(email)) {
+            return Message.failure(request, "Email không hợp lệ");
+        }
+
+        boolean success = userDao.updateProfile(username, fullName, email);
+        if (success) {
+            User updatedUser = userDao.findByUsername(username);
+            return Message.success(request, userPayload(updatedUser));
+        } else {
+            return Message.failure(request, "Cập nhật thông tin thất bại");
+        }
+    }
+
+    private Message handleDeleteAccount(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String username = stringValue(payload.get("username"));
+
+        boolean success = userDao.deleteAccount(username);
+        if (success) {
+            return Message.success(request, Map.of("success", true));
+        } else {
+            return Message.failure(request, "Xóa tài khoản thất bại");
+        }
     }
 
     private Message handleRegister(Message request) {

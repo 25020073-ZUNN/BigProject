@@ -298,7 +298,12 @@ public class HomeController {
 
     @FXML
     public void handleComingSoon(ActionEvent event) {
-        AlertHelper.showInformation("Tính năng sắp ra mắt", "Tính năng này hiện đang được hoàn thiện.");
+        AlertHelper.showInformation("Đang phát triển", "Tính năng này sẽ ra mắt trong bản cập nhật sau.");
+    }
+
+    @FXML
+    public void goToUserProfile(ActionEvent event) {
+        SceneNavigator.goToUserProfile(event);
     }
 
     @FXML

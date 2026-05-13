@@ -85,6 +85,10 @@ public final class SceneNavigator {
         switchScene(event, "auction-summary.fxml");
     }
 
+    public static void goToUserProfile(ActionEvent event) {
+        switchScene(event, "user-profile.fxml");
+    }
+
     /**
      * Điều hướng thông minh: tự động chọn màn hình phù hợp dựa trên trạng thái phiên.
      * - Finished → auction-summary.fxml

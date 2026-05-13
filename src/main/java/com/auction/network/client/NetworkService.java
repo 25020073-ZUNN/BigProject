@@ -100,6 +100,23 @@ public class NetworkService {
         return toUser(response.getPayload());
     }
 
+    public User updateProfile(String username, String fullName, String email) throws IOException {
+        Message response = send(Message.Type.UPDATE_PROFILE, Map.of(
+                "username", username,
+                "fullName", fullName,
+                "email", email
+        ));
+        ensureSuccess(response);
+        return toUser(response.getPayload());
+    }
+
+    public void deleteAccount(String username) throws IOException {
+        Message response = send(Message.Type.DELETE_ACCOUNT, Map.of(
+                "username", username
+        ));
+        ensureSuccess(response);
+    }
+
     public List<Map<String, Object>> getAuctions() throws IOException {
         Message response = send(Message.Type.GET_AUCTIONS, Map.of());
         ensureSuccess(response);
