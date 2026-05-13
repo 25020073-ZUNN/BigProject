@@ -8,6 +8,7 @@ import com.auction.network.Message;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,9 +17,9 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * NetworkService là một Singleton class cung cấp các dịch vụ giao tiếp mạng giữa Client và Server.
- * Lớp này duy trì một kết nối duy nhất và có luồng đọc riêng để nhận cả
- * phản hồi request/response lẫn broadcast bất đồng bộ từ server.
+ * NetworkService - Singleton giao tiếp mạng giữa Client và Server.
+ * Sử dụng giao thức JSON qua TCP. Luồng đọc riêng xử lý broadcast bất đồng bộ.
+ * Các phương thức public KHÔNG chặn luồng FX — gọi từ FxAsync.
  */
 public class NetworkService {
 
@@ -28,6 +29,7 @@ public class NetworkService {
     private static final NetworkService instance = new NetworkService();
 
     private ServerConnection sharedConnection;
+    private final Object connectionLock = new Object();
     private final Map<String, CompletableFuture<Message>> pendingResponses = new ConcurrentHashMap<>();
     private final Set<AuctionUpdateListener> auctionUpdateListeners = ConcurrentHashMap.newKeySet();
     private volatile List<Map<String, Object>> latestAuctionSnapshot = List.of();
@@ -37,19 +39,18 @@ public class NetworkService {
     }
 
     /**
-     * Lấy kết nối dùng chung, tự động khởi tạo nếu chưa có hoặc đã bị đóng.
+     * Lấy kết nối dùng chung, thread-safe. Tạo mới nếu cần.
      */
-    private synchronized ServerConnection getConnection() throws IOException {
-        if (sharedConnection == null || !sharedConnection.isConnected()) {
-            sharedConnection = new ServerConnection(DEFAULT_HOST, DEFAULT_PORT, this::handleIncomingMessage);
-            pendingResponses.clear();
+    private ServerConnection getConnection() throws IOException {
+        synchronized (connectionLock) {
+            if (sharedConnection == null || !sharedConnection.isConnected()) {
+                sharedConnection = new ServerConnection(DEFAULT_HOST, DEFAULT_PORT, this::handleIncomingMessage);
+                pendingResponses.clear();
+            }
+            return sharedConnection;
         }
-        return sharedConnection;
     }
 
-    /**
-     * Đóng kết nối (thường gọi khi thoát ứng dụng).
-     */
     public synchronized void closeConnection() {
         try {
             if (sharedConnection != null) {
@@ -71,13 +72,13 @@ public class NetworkService {
         }
     }
 
-    public Map<String, Object> getDatabaseStatus() throws IOException, ClassNotFoundException {
+    public Map<String, Object> getDatabaseStatus() throws IOException {
         Message response = send(Message.Type.DB_STATUS, Map.of());
         ensureSuccess(response);
         return response.getPayload();
     }
 
-    public User login(String username, String password) throws IOException, ClassNotFoundException {
+    public User login(String username, String password) throws IOException {
         Message response = send(Message.Type.LOGIN, Map.of(
                 "username", username,
                 "password", password
@@ -87,7 +88,7 @@ public class NetworkService {
     }
 
     public User register(String username, String fullName, String email, String password, String role)
-            throws IOException, ClassNotFoundException {
+            throws IOException {
         Message response = send(Message.Type.REGISTER, Map.of(
                 "username", username,
                 "fullName", fullName,
@@ -99,14 +100,14 @@ public class NetworkService {
         return toUser(response.getPayload());
     }
 
-    public List<Map<String, Object>> getAuctions() throws IOException, ClassNotFoundException {
+    public List<Map<String, Object>> getAuctions() throws IOException {
         Message response = send(Message.Type.GET_AUCTIONS, Map.of());
         ensureSuccess(response);
         return decodeAuctionSnapshot(response.getPayload().get("auctions"));
     }
 
     public Map<String, Object> placeBid(String itemId, String bidderUsername, String amount)
-            throws IOException, ClassNotFoundException {
+            throws IOException {
         Message response = send(Message.Type.PLACE_BID, Map.of(
                 "itemId", itemId,
                 "bidderUsername", bidderUsername,
@@ -117,28 +118,46 @@ public class NetworkService {
     }
 
     /**
-     * Gửi tin nhắn qua kết nối dùng chung.
+     * Gửi yêu cầu tạo phiên đấu giá mới tới Server.
      */
-    private synchronized Message send(Message.Type type, Map<String, Object> payload) throws IOException, ClassNotFoundException {
+    public void createAuction(String itemType, String name, String description,
+                              String startingPrice, String bidStep,
+                              String startTime, String endTime,
+                              String sellerUsername, Map<String, Object> attributes)
+            throws IOException {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("itemType", itemType);
+        payload.put("name", name);
+        payload.put("description", description);
+        payload.put("startingPrice", startingPrice);
+        payload.put("bidStep", bidStep);
+        payload.put("startTime", startTime);
+        payload.put("endTime", endTime);
+        payload.put("sellerUsername", sellerUsername);
+        payload.put("attributes", new HashMap<>(attributes));
+
+        Message response = send(Message.Type.CREATE_AUCTION, payload);
+        ensureSuccess(response);
+    }
+
+    /**
+     * Gửi message và chờ phản hồi. KHÔNG synchronized trên toàn bộ method —
+     * chỉ connection init là synchronized — để nhiều thread có thể gửi đồng thời.
+     */
+    private Message send(Message.Type type, Map<String, Object> payload) throws IOException {
         Message request = new Message(type, payload);
         CompletableFuture<Message> pendingResponse = new CompletableFuture<>();
         pendingResponses.put(request.getRequestId(), pendingResponse);
         try {
             getConnection().send(request);
             return pendingResponse.join();
-        } catch (IOException e) {
-            // Nếu lỗi, đóng kết nối cũ để lần sau tự động tạo lại cái mới
-            closeConnection();
-            throw e;
         } catch (CompletionException e) {
             Throwable cause = e.getCause();
-            if (cause instanceof ClassNotFoundException classNotFoundException) {
-                throw classNotFoundException;
-            }
-            if (cause instanceof IOException ioException) {
-                throw ioException;
-            }
+            if (cause instanceof IOException ioEx) throw ioEx;
             throw new IOException(cause == null ? "Server request failed" : cause.getMessage(), cause);
+        } catch (IOException e) {
+            closeConnection();
+            throw e;
         } finally {
             pendingResponses.remove(request.getRequestId());
         }
@@ -151,14 +170,11 @@ public class NetworkService {
     }
 
     public void addAuctionUpdateListener(AuctionUpdateListener listener) {
-        if (listener == null) {
-            return;
-        }
+        if (listener == null) return;
         auctionUpdateListeners.add(listener);
         try {
             getConnection();
-        } catch (IOException ignored) {
-        }
+        } catch (IOException ignored) {}
         List<Map<String, Object>> snapshot = latestAuctionSnapshot;
         if (!snapshot.isEmpty()) {
             for (Map<String, Object> auction : snapshot) {
@@ -193,7 +209,8 @@ public class NetworkService {
         user.setFullname(String.valueOf(payload.getOrDefault("fullName", username)));
         user.setActive(Boolean.parseBoolean(String.valueOf(payload.getOrDefault("active", true))));
 
-        long balance = Long.parseLong(String.valueOf(payload.getOrDefault("balance", 0L)));
+        Object rawBalance = payload.getOrDefault("balance", 0);
+        long balance = (rawBalance instanceof Number n) ? n.longValue() : Long.parseLong(String.valueOf(rawBalance));
         if (balance > 0) {
             user.deposit(balance);
         }
@@ -223,6 +240,7 @@ public class NetworkService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private List<Map<String, Object>> decodeAuctionSnapshot(Object auctionsPayload) {
         if (!(auctionsPayload instanceof List<?> rawList)) {
             return List.of();
@@ -231,7 +249,7 @@ public class NetworkService {
         List<Map<String, Object>> result = new ArrayList<>();
         for (Object element : rawList) {
             if (element instanceof Map<?, ?> rawMap) {
-                java.util.Map<String, Object> normalizedMap = new java.util.HashMap<>();
+                Map<String, Object> normalizedMap = new HashMap<>();
                 for (Map.Entry<?, ?> entry : rawMap.entrySet()) {
                     normalizedMap.put(String.valueOf(entry.getKey()), entry.getValue());
                 }
