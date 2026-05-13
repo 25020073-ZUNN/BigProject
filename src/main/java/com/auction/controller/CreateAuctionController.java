@@ -5,22 +5,18 @@ import com.auction.model.user.User;
 import com.auction.network.client.NetworkService;
 import com.auction.util.FxAsync;
 import com.auction.util.UserSession;
+import com.auction.util.SceneNavigator;
+import com.auction.util.AlertHelper;
+import com.auction.util.LoginStateHelper;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,67 +27,42 @@ import java.util.Map;
 
 /**
  * Controller cho màn hình tạo tài sản đấu giá thật.
- *
- * Ghi chú nghiệp vụ:
- * - Màn hình này không tạo "dữ liệu minh họa" trong RAM.
- * - Khi nhấn lưu, dữ liệu sẽ được xác thực rồi ghi thật vào MySQL.
- * - Mỗi danh mục tài sản sẽ yêu cầu thêm một nhóm thuộc tính riêng để DAO
- *   có thể dựng lại đúng subclass của `Item` sau này.
  */
 public class CreateAuctionController {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     private final NetworkService networkService = NetworkService.getInstance();
     private final UserDao userDao = new UserDao();
 
-    @FXML
-    private ComboBox<String> categoryComboBox;
-    @FXML
-    private ComboBox<String> sellerComboBox;
-    @FXML
-    private TextField nameField;
-    @FXML
-    private TextArea descriptionArea;
-    @FXML
-    private TextField startingPriceField;
-    @FXML
-    private TextField bidStepField;
-    @FXML
-    private TextField startTimeField;
-    @FXML
-    private TextField endTimeField;
-    @FXML
-    private TextField brandField;
-    @FXML
-    private TextField warrantyMonthsField;
-    @FXML
-    private TextField manufacturerField;
-    @FXML
-    private TextField productionYearField;
-    @FXML
-    private TextField mileageField;
-    @FXML
-    private TextField artistField;
-    @FXML
-    private TextField yearCreatedField;
-    @FXML
-    private Label hintLabel;
-    @FXML
-    private Button loginButton;
+    @FXML private ComboBox<String> categoryComboBox;
+    @FXML private ComboBox<String> sellerComboBox;
+    @FXML private TextField nameField;
+    @FXML private TextArea descriptionArea;
+    @FXML private TextField startingPriceField;
+    @FXML private TextField bidStepField;
+    @FXML private TextField startTimeField;
+    @FXML private TextField endTimeField;
+    @FXML private TextField brandField;
+    @FXML private TextField warrantyMonthsField;
+    @FXML private TextField manufacturerField;
+    @FXML private TextField productionYearField;
+    @FXML private TextField mileageField;
+    @FXML private TextField artistField;
+    @FXML private TextField yearCreatedField;
+    @FXML private Label hintLabel;
+    @FXML private Button loginButton;
 
     @FXML
     public void initialize() {
         categoryComboBox.setItems(FXCollections.observableArrayList("Electronics", "Vehicle", "Art"));
         categoryComboBox.setValue("Electronics");
 
-        updateLoginState();
+        LoginStateHelper.updateLoginButton(loginButton);
 
         List<String> sellers = userDao.findActiveSellers().stream()
-                .map(User::getUsername)
-                .toList();
+                .map(User::getUsername).toList();
         sellerComboBox.setItems(FXCollections.observableArrayList(sellers));
 
         if (UserSession.isLoggedIn() && "SELLER".equalsIgnoreCase(UserSession.getLoggedInUser().getRole())) {
@@ -106,38 +77,15 @@ public class CreateAuctionController {
         hintLabel.setText("Định dạng thời gian: yyyy-MM-dd HH:mm:ss. Bạn có thể đặt phiên kéo dài 3 tháng để làm mẫu.");
     }
 
-    private void updateLoginState() {
-        if (UserSession.isLoggedIn()) {
-            User user = UserSession.getLoggedInUser();
-            if (loginButton != null) {
-                loginButton.setText("Đăng xuất (" + user.getUsername() + ")");
-                loginButton.setOnAction(this::handleLogout);
-            }
-        } else {
-            if (loginButton != null) {
-                loginButton.setText("Đăng nhập");
-                loginButton.setOnAction(this::goToLogin);
-            }
-        }
-    }
-
     @FXML
-    public void handleLogout(ActionEvent event) {
-        UserSession.logout();
-        updateLoginState();
-        try {
-            goToHome(event);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    public void handleLogout(ActionEvent event) { LoginStateHelper.handleLogout(event); }
 
     @FXML
     public void handleCreateAuction(ActionEvent event) {
         try {
             String sellerUsername = sellerComboBox.getValue();
             if (sellerUsername == null || sellerUsername.isBlank()) {
-                showError("Vui lòng chọn người bán.");
+                AlertHelper.showError("Lỗi", "Vui lòng chọn người bán.");
                 return;
             }
 
@@ -160,25 +108,18 @@ public class CreateAuctionController {
                         );
                     },
                     () -> {
-                        showInformation("Tạo phiên thành công", "Tài sản và phiên đấu giá đã được lưu vào CSDL.");
+                        AlertHelper.showInformation("Tạo phiên thành công", "Tài sản và phiên đấu giá đã được lưu vào CSDL.");
                         clearFormForNextEntry();
                     },
-                    errorMsg -> showError("Không thể tạo phiên đấu giá: " + errorMsg)
+                    errorMsg -> AlertHelper.showError("Lỗi", "Không thể tạo phiên đấu giá: " + errorMsg)
             );
         } catch (IllegalArgumentException ex) {
-            showError(ex.getMessage());
+            AlertHelper.showError("Lỗi", ex.getMessage());
         }
     }
 
     private Map<String, Object> buildAttributes(String category) {
         Map<String, Object> attributes = new HashMap<>();
-
-        /*
-         * Ghi chú rất quan trọng:
-         * Mỗi danh mục được map sang một subclass `Item` khác nhau ở tầng domain.
-         * Vì vậy form phải gom đúng bộ thuộc tính cho từng loại.
-         * Nếu đẩy sai thuộc tính, ItemFactory sẽ không thể dựng đúng object.
-         */
         switch (category) {
             case "Electronics" -> {
                 attributes.put("brand", requireText(brandField.getText(), "Hãng điện tử"));
@@ -195,125 +136,46 @@ public class CreateAuctionController {
             }
             default -> throw new IllegalArgumentException("Danh mục tài sản không hợp lệ.");
         }
-
         return attributes;
     }
 
     private void clearFormForNextEntry() {
-        nameField.clear();
-        descriptionArea.clear();
-        startingPriceField.clear();
-        brandField.clear();
-        warrantyMonthsField.clear();
-        manufacturerField.clear();
-        productionYearField.clear();
-        mileageField.clear();
-        artistField.clear();
-        yearCreatedField.clear();
+        nameField.clear(); descriptionArea.clear(); startingPriceField.clear();
+        brandField.clear(); warrantyMonthsField.clear(); manufacturerField.clear();
+        productionYearField.clear(); mileageField.clear(); artistField.clear(); yearCreatedField.clear();
         startTimeField.setText(LocalDateTime.now().plusMinutes(5).format(DATE_TIME_FORMATTER));
         endTimeField.setText(LocalDateTime.now().plusMonths(3).format(DATE_TIME_FORMATTER));
         bidStepField.setText("500000");
     }
 
     private String requireText(String value, String fieldName) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " không được để trống.");
-        }
+        if (value == null || value.isBlank()) throw new IllegalArgumentException(fieldName + " không được để trống.");
         return value.trim();
     }
 
     private BigDecimal parseMoney(String rawValue, String fieldName) {
         String normalized = requireText(rawValue, fieldName).replaceAll("[^\\d]", "");
-        if (normalized.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " không hợp lệ.");
-        }
+        if (normalized.isBlank()) throw new IllegalArgumentException(fieldName + " không hợp lệ.");
         return new BigDecimal(normalized);
     }
 
     private int parseInteger(String rawValue, String fieldName) {
-        try {
-            return Integer.parseInt(requireText(rawValue, fieldName));
-        } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException(fieldName + " phải là số nguyên.");
-        }
+        try { return Integer.parseInt(requireText(rawValue, fieldName)); }
+        catch (NumberFormatException ex) { throw new IllegalArgumentException(fieldName + " phải là số nguyên."); }
     }
 
     private LocalDateTime parseDateTime(String rawValue, String fieldName) {
-        try {
-            return LocalDateTime.parse(requireText(rawValue, fieldName), DATE_TIME_FORMATTER);
-        } catch (DateTimeParseException ex) {
-            throw new IllegalArgumentException(fieldName + " phải theo định dạng yyyy-MM-dd HH:mm:ss.");
-        }
+        try { return LocalDateTime.parse(requireText(rawValue, fieldName), DATE_TIME_FORMATTER); }
+        catch (DateTimeParseException ex) { throw new IllegalArgumentException(fieldName + " phải theo định dạng yyyy-MM-dd HH:mm:ss."); }
     }
 
-    @FXML
-    public void goToHome(ActionEvent event) {
-        switchScene(event, "giaodien.fxml");
-    }
-
-    @FXML
-    public void goToAuctionList(ActionEvent event) {
-        switchScene(event, "auction-detail.fxml");
-    }
-
-    @FXML
-    public void goToProductDetail(ActionEvent event) {
-        switchScene(event, "product-detail.fxml");
-    }
-
-    @FXML
-    public void goToCreateAuction(ActionEvent event) {
-        switchScene(event, "create-auction.fxml");
-    }
-
-    @FXML
-    public void goToLogin(ActionEvent event) {
-        switchScene(event, "login.fxml");
-    }
-
-    @FXML
-    public void goToSessions(ActionEvent event) {
-        switchScene(event, "sessions.fxml");
-    }
-
-    @FXML
-    public void goToNews(ActionEvent event) {
-        switchScene(event, "news.fxml");
-    }
-
-    @FXML
-    public void goToContact(ActionEvent event) {
-        switchScene(event, "contact.fxml");
-    }
-
-    private void switchScene(ActionEvent event, String fxmlFile) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/" + fxmlFile));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene currentScene = stage.getScene();
-            if (currentScene == null) {
-                stage.setScene(new Scene(root, 1380, 920));
-            } else {
-                currentScene.setRoot(root);
-            }
-        } catch (IOException e) {
-            showError("Không thể tải giao diện: " + fxmlFile);
-        }
-    }
-
-    private void showInformation(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
-
-    private void showError(String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Lỗi");
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
+    // --- Điều hướng ---
+    @FXML public void goToHome(ActionEvent event) { SceneNavigator.goToHome(event); }
+    @FXML public void goToAuctionList(ActionEvent event) { SceneNavigator.goToAuctionList(event); }
+    @FXML public void goToProductDetail(ActionEvent event) { SceneNavigator.goToProductDetail(event); }
+    @FXML public void goToCreateAuction(ActionEvent event) { SceneNavigator.goToCreateAuction(event); }
+    @FXML public void goToLogin(ActionEvent event) { SceneNavigator.goToLogin(event); }
+    @FXML public void goToSessions(ActionEvent event) { SceneNavigator.goToSessions(event); }
+    @FXML public void goToNews(ActionEvent event) { SceneNavigator.goToNews(event); }
+    @FXML public void goToContact(ActionEvent event) { SceneNavigator.goToContact(event); }
 }

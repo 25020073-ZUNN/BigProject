@@ -11,6 +11,8 @@ import com.auction.network.client.NetworkService;
 import com.auction.service.AutoBidStrategy;
 import com.auction.util.FxAsync;
 import com.auction.util.UserSession;
+import com.auction.util.AlertHelper;
+import com.auction.util.PriceFormatter;
 import javafx.application.Platform;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -23,7 +25,6 @@ import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -35,8 +36,6 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -45,7 +44,6 @@ import java.util.Objects;
 
 public class AuctionDetailController {
 
-    private static final DecimalFormat PRICE_FORMAT = createPriceFormat();
     private static final BigDecimal MIN_INCREMENT_FLOOR = new BigDecimal("500000");
 
     private final NetworkService networkService = NetworkService.getInstance();
@@ -66,6 +64,7 @@ public class AuctionDetailController {
     private String currentAuctionId;
 
     private boolean autoBidEnabled;
+    private boolean autoBidInFlight;
     private BigDecimal autoBidMaximum;
     private BigDecimal autoBidStep;
 
@@ -274,6 +273,7 @@ public class AuctionDetailController {
     @FXML
     public void handleDisableAutoBid() {
         autoBidEnabled = false;
+        autoBidInFlight = false;
         autoBidMaximum = null;
         autoBidStep = null;
         lblAutoBidStatus.setText("Auto-bid chưa được kích hoạt.");
@@ -287,6 +287,7 @@ public class AuctionDetailController {
         lastRenderedBidCount = -1;
         lastRenderedPrice = null;
         autoBidEnabled = false;
+        autoBidInFlight = false;
         autoBidMaximum = null;
         autoBidStep = null;
         lastRenderedEndTime = auction.getItem().getEndTime();
@@ -390,7 +391,7 @@ public class AuctionDetailController {
     }
 
     private void maybeExecuteAutoBid() {
-        if (!autoBidEnabled || currentAuction == null || autoBidMaximum == null || autoBidStep == null) {
+        if (!autoBidEnabled || autoBidInFlight || currentAuction == null || autoBidMaximum == null || autoBidStep == null) {
             return;
         }
 
@@ -418,9 +419,12 @@ public class AuctionDetailController {
         String username = currentUser.getUsername();
         boolean usedMax = decision.usedMaximum();
 
+        autoBidInFlight = true;
+
         FxAsync.run(
                 () -> networkService.placeBid(itemId, username, bidAmount.toPlainString()),
                 result -> {
+                    autoBidInFlight = false;
                     String statusMsg = usedMax
                             ? "Auto-bid đã đặt mức tối đa: " + formatPrice(bidAmount) + "."
                             : "Auto-bid vừa nâng lên " + formatPrice(bidAmount) + ".";
@@ -428,7 +432,10 @@ public class AuctionDetailController {
                     publishNotification(statusMsg);
                     refreshAuctionState();
                 },
-                errorMsg -> publishNotification("Auto-bid lỗi: " + errorMsg)
+                errorMsg -> {
+                    autoBidInFlight = false;
+                    publishNotification("Auto-bid lỗi: " + errorMsg);
+                }
         );
     }
 
@@ -530,11 +537,11 @@ public class AuctionDetailController {
     }
 
     private String formatInputSuggestion(BigDecimal amount) {
-        return PRICE_FORMAT.format(amount);
+        return PriceFormatter.formatNumber(amount);
     }
 
     private String formatPrice(BigDecimal amount) {
-        return PRICE_FORMAT.format(amount) + " VND";
+        return PriceFormatter.formatPrice(amount);
     }
 
     private String maskLeader(User user) {
@@ -575,18 +582,6 @@ public class AuctionDetailController {
     }
 
     private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Lỗi");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    private static DecimalFormat createPriceFormat() {
-        DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance();
-        symbols.setGroupingSeparator(',');
-        DecimalFormat format = new DecimalFormat("#,##0", symbols);
-        format.setGroupingUsed(true);
-        return format;
+        AlertHelper.showError("Lỗi", message);
     }
 }

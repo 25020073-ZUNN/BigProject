@@ -5,18 +5,11 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -28,13 +21,16 @@ import com.auction.network.client.AuctionUpdateListener;
 import com.auction.model.user.User;
 import com.auction.util.UserSession;
 import com.auction.util.FxAsync;
+import com.auction.util.SceneNavigator;
+import com.auction.util.AlertHelper;
+import com.auction.util.LoginStateHelper;
+import com.auction.util.PriceFormatter;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ArrayList;
+import java.io.IOException;
 
 /**
  * HomeController - Bộ điều khiển chính cho giao diện người dùng.
@@ -43,63 +39,34 @@ import java.util.ArrayList;
 public class HomeController {
 
     // --- Các thành phần UI được ánh xạ từ FXML ---
-    
-    @FXML
-    private Label clockLabel; // Nhãn hiển thị đồng hồ thời gian thực
 
-    @FXML
-    private TextField searchField; // Ô nhập liệu tìm kiếm tài sản
-
-    @FXML
-    private Button loginButton; // Nút đăng nhập/đăng xuất trên thanh điều hướng
-
-    @FXML
-    private Button mainLoginButton; // Nút chào mừng người dùng (hiển thị khi đã đăng nhập)
-
-    @FXML
-    private javafx.scene.layout.VBox loginPanel; // Bảng điều khiển đăng nhập (bên trái giao diện chính)
-    
-    @FXML
-    private javafx.scene.layout.VBox userPanel; // Bảng thông tin người dùng (hiển thị sau khi đăng nhập)
-    
-    @FXML
-    private Label userNameLabel; // Nhãn hiển thị tên người dùng
-    
-    @FXML
-    private Label userRoleLabel; // Nhãn hiển thị vai trò (Người dùng/Admin)
-    
-    @FXML
-    private Label userBalanceLabel; // Nhãn hiển thị số dư tài khoản
+    @FXML private Label clockLabel;
+    @FXML private TextField searchField;
+    @FXML private Button loginButton;
+    @FXML private Button mainLoginButton;
+    @FXML private javafx.scene.layout.VBox loginPanel;
+    @FXML private javafx.scene.layout.VBox userPanel;
+    @FXML private Label userNameLabel;
+    @FXML private Label userRoleLabel;
+    @FXML private Label userBalanceLabel;
 
     // --- Các trường dữ liệu cho Đăng nhập ---
-    @FXML
-    private TextField usernameField;
-    @FXML
-    private PasswordField passwordField;
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
 
     // --- Các trường dữ liệu cho Đăng ký ---
-    @FXML
-    private TextField fullNameField;
-    @FXML
-    private TextField regUsernameField;
-    @FXML
-    private TextField phoneField;
-    @FXML
-    private TextField emailField;
-    @FXML
-    private TextField addressField;
-    @FXML
-    private ComboBox<String> accountTypeComboBox;
-    @FXML
-    private PasswordField regPasswordField;
-    @FXML
-    private PasswordField confirmPasswordField;
+    @FXML private TextField fullNameField;
+    @FXML private TextField regUsernameField;
+    @FXML private TextField phoneField;
+    @FXML private TextField emailField;
+    @FXML private TextField addressField;
+    @FXML private ComboBox<String> accountTypeComboBox;
+    @FXML private PasswordField regPasswordField;
+    @FXML private PasswordField confirmPasswordField;
 
     // --- Các thành phần cho Chi tiết tài sản và Đặt giá ---
-    @FXML
-    private TextField bidAmountField; // Ô nhập số tiền đặt giá
-    @FXML
-    private Label detailItemNameLabel; // Nhãn tên tài sản đang xem chi tiết
+    @FXML private TextField bidAmountField;
+    @FXML private Label detailItemNameLabel;
 
     // Dịch vụ mạng để giao tiếp với Server
     private final NetworkService networkService = NetworkService.getInstance();
@@ -115,55 +82,35 @@ public class HomeController {
         }
     });
 
-    /**
-     * Phương thức khởi tạo tự động được gọi bởi JavaFX sau khi FXML được tải.
-     */
     @FXML
     public void initialize() {
-        // Cập nhật trạng thái đăng nhập (Hiển thị thông tin người dùng nếu đã đăng nhập)
         updateLoginState();
-        
-        // Khởi tạo đồng hồ nếu thành phần clockLabel tồn tại
-        if (clockLabel != null) {
-            initClock();
-        }
-
+        if (clockLabel != null) initClock();
         if (accountTypeComboBox != null) {
             accountTypeComboBox.getItems().setAll("BIDDER", "SELLER");
             accountTypeComboBox.setValue("BIDDER");
         }
-
         networkService.addAuctionUpdateListener(auctionUpdateListener);
         registerListenerLifecycle();
     }
 
     /**
      * Cập nhật giao diện dựa trên trạng thái đăng nhập của người dùng.
-     * Ẩn/hiện các bảng điều khiển và thay đổi văn bản trên các nút.
      */
     private void updateLoginState() {
+        LoginStateHelper.updateLoginButton(loginButton);
+
         if (UserSession.isLoggedIn()) {
             User user = UserSession.getLoggedInUser();
-            
-            // Cập nhật nút đăng nhập trên Header thành nút đăng xuất
-            if (loginButton != null) {
-                loginButton.setText("Đăng xuất (" + user.getUsername() + ")");
-                loginButton.setOnAction(this::handleLogout);
-            }
-            
-            // Cập nhật nút chào mừng
             if (mainLoginButton != null) {
                 mainLoginButton.setText("Chào mừng, " + user.getUsername());
-                mainLoginButton.setOnAction(e -> showInformation("Hồ sơ", "Chào mừng " + user.getUsername() + " đến với hệ thống!"));
+                mainLoginButton.setOnAction(e -> AlertHelper.showInformation("Hồ sơ", "Chào mừng " + user.getUsername() + " đến với hệ thống!"));
             }
-
-            // Cập nhật bảng thông tin người dùng (áp dụng cho file giaodien.fxml)
             if (loginPanel != null && userPanel != null) {
                 loginPanel.setVisible(false);
                 loginPanel.setManaged(false);
                 userPanel.setVisible(true);
                 userPanel.setManaged(true);
-                
                 if (userNameLabel != null) userNameLabel.setText(user.getUsername());
                 if (userRoleLabel != null) userRoleLabel.setText(user.getRole());
                 if (userBalanceLabel != null) {
@@ -172,11 +119,6 @@ public class HomeController {
                 }
             }
         } else {
-            // Thiết lập trạng thái mặc định khi chưa đăng nhập
-            if (loginButton != null) {
-                loginButton.setText("Đăng nhập");
-                loginButton.setOnAction(this::goToLogin);
-            }
             if (loginPanel != null && userPanel != null) {
                 loginPanel.setVisible(true);
                 loginPanel.setManaged(true);
@@ -186,54 +128,18 @@ public class HomeController {
         }
     }
 
-    /**
-     * Xử lý sự kiện đăng xuất.
-     */
     @FXML
     public void handleLogout(ActionEvent event) {
-        UserSession.logout();
-        showInformation("Đăng xuất thành công", "Hẹn gặp lại bạn!");
-        
-        // Quay về trang chủ sau khi đăng xuất để làm mới giao diện
-        try {
-            goToHome(event);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        LoginStateHelper.handleLogout(event);
     }
 
-    /**
-     * Hiển thị thông báo dạng Information.
-     */
-    private void showInformation(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
-
-    /**
-     * Hiển thị thông báo lỗi dạng Error.
-     */
-    private void showError(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
-
-    /**
-     * Xử lý sự kiện khi người dùng nhấn nút Đăng nhập.
-     */
     @FXML
     public void handleLogin(ActionEvent event) {
         String username = usernameField != null ? usernameField.getText() : "";
         String password = passwordField != null ? passwordField.getText() : "";
 
         if (username.isEmpty() || password.isEmpty()) {
-            showError("Lỗi đăng nhập", "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.");
+            AlertHelper.showError("Lỗi đăng nhập", "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.");
             return;
         }
 
@@ -241,16 +147,13 @@ public class HomeController {
                 () -> networkService.login(username, password),
                 user -> {
                     UserSession.login(user);
-                    showInformation("Đăng nhập thành công", "Chào mừng " + user.getUsername() + " quay trở lại!");
-                    goToHome(event);
+                    AlertHelper.showInformation("Đăng nhập thành công", "Chào mừng " + user.getUsername() + " quay trở lại!");
+                    SceneNavigator.goToHome(event);
                 },
-                errorMsg -> showError("Lỗi đăng nhập", "Không thể đăng nhập: " + errorMsg)
+                errorMsg -> AlertHelper.showError("Lỗi đăng nhập", "Không thể đăng nhập: " + errorMsg)
         );
     }
 
-    /**
-     * Xử lý sự kiện khi người dùng nhấn nút Đăng ký.
-     */
     @FXML
     public void handleRegister(ActionEvent event) {
         String fullName = fullNameField.getText();
@@ -261,35 +164,32 @@ public class HomeController {
         String confirmPassword = confirmPasswordField.getText();
 
         if (fullName.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            showError("Lỗi đăng ký", "Vui lòng điền đầy đủ các thông tin bắt buộc.");
+            AlertHelper.showError("Lỗi đăng ký", "Vui lòng điền đầy đủ các thông tin bắt buộc.");
             return;
         }
         if (role == null || role.isBlank()) {
-            showError("Lỗi đăng ký", "Vui lòng chọn loại tài khoản.");
+            AlertHelper.showError("Lỗi đăng ký", "Vui lòng chọn loại tài khoản.");
             return;
         }
         if (!password.equals(confirmPassword)) {
-            showError("Lỗi đăng ký", "Mật khẩu xác nhận không khớp.");
+            AlertHelper.showError("Lỗi đăng ký", "Mật khẩu xác nhận không khớp.");
             return;
         }
 
         FxAsync.run(
                 () -> networkService.register(username, fullName, email, password, role),
                 user -> {
-                    showInformation("Đăng ký thành công", "Tài khoản đã được tạo. Vui lòng đăng nhập.");
-                    goToLogin(event);
+                    AlertHelper.showInformation("Đăng ký thành công", "Tài khoản đã được tạo. Vui lòng đăng nhập.");
+                    SceneNavigator.goToLogin(event);
                 },
-                errorMsg -> showError("Lỗi đăng ký", "Không thể đăng ký: " + errorMsg)
+                errorMsg -> AlertHelper.showError("Lỗi đăng ký", "Không thể đăng ký: " + errorMsg)
         );
     }
 
-    /**
-     * Xử lý sự kiện đặt giá cho tài sản.
-     */
     @FXML
     public void handleBid(ActionEvent event) {
         if (!UserSession.isLoggedIn()) {
-            showError("Chưa đăng nhập", "Bạn cần đăng nhập trước khi đặt giá.");
+            AlertHelper.showError("Chưa đăng nhập", "Bạn cần đăng nhập trước khi đặt giá.");
             return;
         }
 
@@ -305,16 +205,13 @@ public class HomeController {
                             amount
                     );
                 },
-                result -> showInformation("Đặt giá thành công",
+                result -> AlertHelper.showInformation("Đặt giá thành công",
                         "Bạn đã đặt giá cho " + result.get("itemName")
-                        + "\nGiá hiện tại mới: " + formatCurrency(String.valueOf(result.get("currentPrice"))) + " VND"),
-                errorMsg -> showError("Đặt giá thất bại", errorMsg)
+                        + "\nGiá hiện tại mới: " + PriceFormatter.formatCurrency(String.valueOf(result.get("currentPrice"))) + " VND"),
+                errorMsg -> AlertHelper.showError("Đặt giá thất bại", errorMsg)
         );
     }
 
-    /**
-     * Xử lý tìm kiếm tài sản đấu giá dựa trên từ khóa.
-     */
     @FXML
     public void handleSearch(ActionEvent event) {
         String query = searchField != null ? searchField.getText().trim().toLowerCase() : "";
@@ -333,118 +230,55 @@ public class HomeController {
                             ? "Không có tài sản nào khớp."
                             : filtered.stream()
                             .limit(5)
-                            .map(a -> "- " + a.get("itemName") + " | " + formatCurrency(String.valueOf(a.get("currentPrice"))) + " VND")
+                            .map(a -> "- " + a.get("itemName") + " | " + PriceFormatter.formatCurrency(String.valueOf(a.get("currentPrice"))) + " VND")
                             .reduce((a, b) -> a + "\n" + b)
                             .orElse("");
-                    showInformation("Kết quả tìm kiếm", "Tìm thấy " + filtered.size() + " tài sản.\n" + summary);
+                    AlertHelper.showInformation("Kết quả tìm kiếm", "Tìm thấy " + filtered.size() + " tài sản.\n" + summary);
                 },
-                errorMsg -> showError("Lỗi tìm kiếm", "Không thể lấy dữ liệu: " + errorMsg)
+                errorMsg -> AlertHelper.showError("Lỗi tìm kiếm", "Không thể lấy dữ liệu: " + errorMsg)
         );
     }
 
-    /**
-     * Xử lý sự kiện "Theo dõi" tài sản.
-     */
-    @FXML
-    public void handleFollow(ActionEvent event) {
-        showInformation("Theo dõi", "Tài sản này đã được thêm vào danh sách quan tâm của bạn.");
-    }
+    @FXML public void handleFollow(ActionEvent event) { AlertHelper.showInformation("Theo dõi", "Tài sản này đã được thêm vào danh sách quan tâm."); }
+    @FXML public void handleComingSoon(ActionEvent event) { AlertHelper.showInformation("Tính năng sắp ra mắt", "Tính năng này hiện đang được hoàn thiện."); }
+    @FXML public void handleSubscribe(ActionEvent event) { AlertHelper.showInformation("Đăng ký thành công", "Chúng tôi sẽ gửi bản tin qua email."); }
 
-    /**
-     * Thông báo cho các tính năng chưa hoàn thiện.
-     */
-    @FXML
-    public void handleComingSoon(ActionEvent event) {
-        showInformation("Tính năng sắp ra mắt", "Cảm ơn bạn quan tâm! Tính năng này hiện đang được hoàn thiện.");
-    }
+    // --- Logic nội bộ ---
 
-    /**
-     * Xử lý đăng ký nhận bản tin qua email.
-     */
-    @FXML
-    public void handleSubscribe(ActionEvent event) {
-        showInformation("Đăng ký thành công", "Chúng tôi sẽ gửi các bản tin đấu giá mới nhất qua email của bạn.");
-    }
-
-    /**
-     * Xác định tài sản mà người dùng đang muốn tương tác (đặt giá).
-     * Ưu tiên tài sản đang hiển thị chi tiết hoặc tài sản khớp với từ khóa tìm kiếm.
-     */
     private Map<String, Object> resolveTargetAuction(List<Map<String, Object>> auctions) {
-        if (auctions.isEmpty()) {
-            return null;
-        }
-
-        // Kiểm tra xem người dùng có đang xem trang chi tiết một sản phẩm cụ thể không
+        if (auctions.isEmpty()) return null;
         if (detailItemNameLabel != null && detailItemNameLabel.getText() != null && !detailItemNameLabel.getText().isBlank()) {
             String detailName = detailItemNameLabel.getText().trim().toLowerCase();
             Map<String, Object> matched = auctions.stream()
-                    .filter(auction -> String.valueOf(auction.getOrDefault("itemName", "")).trim().toLowerCase().contains(detailName)
-                            || detailName.contains(String.valueOf(auction.getOrDefault("itemName", "")).trim().toLowerCase()))
-                    .findFirst()
-                    .orElse(null);
-            if (matched != null) {
-                return matched;
-            }
+                    .filter(a -> String.valueOf(a.getOrDefault("itemName", "")).trim().toLowerCase().contains(detailName)
+                            || detailName.contains(String.valueOf(a.getOrDefault("itemName", "")).trim().toLowerCase()))
+                    .findFirst().orElse(null);
+            if (matched != null) return matched;
         }
-
-        // Kiểm tra theo từ khóa trong ô tìm kiếm
         if (searchField != null && searchField.getText() != null && !searchField.getText().isBlank()) {
             String query = searchField.getText().trim().toLowerCase();
             Map<String, Object> matched = auctions.stream()
-                    .filter(auction -> String.valueOf(auction.getOrDefault("itemName", "")).toLowerCase().contains(query))
-                    .findFirst()
-                    .orElse(null);
-            if (matched != null) {
-                return matched;
-            }
+                    .filter(a -> String.valueOf(a.getOrDefault("itemName", "")).toLowerCase().contains(query))
+                    .findFirst().orElse(null);
+            if (matched != null) return matched;
         }
-
-        // Mặc định chọn tài sản đầu tiên nếu không xác định được
         return auctions.get(0);
     }
 
-    /**
-     * Lấy số tiền đặt giá hợp lệ.
-     */
     private String resolveBidAmount(Map<String, Object> auction) {
-        // Nếu người dùng có nhập vào ô số tiền
         if (bidAmountField != null && bidAmountField.getText() != null && !bidAmountField.getText().isBlank()) {
-            return normalizeAmount(bidAmountField.getText());
+            String normalized = bidAmountField.getText().replaceAll("[^\\d]", "");
+            if (normalized.isBlank()) throw new IllegalArgumentException("Số tiền đặt giá không hợp lệ.");
+            return normalized;
         }
-
-        // Nếu không nhập, mặc định đặt giá bằng Giá hiện tại + 50,000,000 VND
         BigDecimal currentPrice = new BigDecimal(String.valueOf(auction.get("currentPrice")));
-        BigDecimal nextPrice = currentPrice.add(new BigDecimal("50000000"));
-        return nextPrice.toPlainString();
+        return currentPrice.add(new BigDecimal("50000000")).toPlainString();
     }
 
-    /**
-     * Chuẩn hóa chuỗi tiền tệ (loại bỏ ký tự không phải số).
-     */
-    private String normalizeAmount(String text) {
-        String normalized = text.replaceAll("[^\\d]", "");
-        if (normalized.isBlank()) {
-            throw new IllegalArgumentException("Số tiền đặt giá không hợp lệ.");
-        }
-        return normalized;
-    }
-
-    /**
-     * Định dạng số tiền sang kiểu tiền tệ Việt Nam (VD: 1.000.000).
-     */
-    private String formatCurrency(String amount) {
-        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
-        return formatter.format(new BigDecimal(amount));
-    }
-
-    private List<Map<String, Object>> getKnownAuctions() throws IOException, ClassNotFoundException {
+    private List<Map<String, Object>> getKnownAuctions() throws IOException {
         synchronized (latestAuctions) {
-            if (!latestAuctions.isEmpty()) {
-                return new ArrayList<>(latestAuctions);
-            }
+            if (!latestAuctions.isEmpty()) return new ArrayList<>(latestAuctions);
         }
-
         List<Map<String, Object>> auctions = networkService.getAuctions();
         synchronized (latestAuctions) {
             latestAuctions.clear();
@@ -455,107 +289,34 @@ public class HomeController {
 
     private int findAuctionIndex(String auctionId) {
         for (int i = 0; i < latestAuctions.size(); i++) {
-            Map<String, Object> current = latestAuctions.get(i);
-            if (auctionId.equals(String.valueOf(current.get("auctionId")))) {
-                return i;
-            }
+            if (auctionId.equals(String.valueOf(latestAuctions.get(i).get("auctionId")))) return i;
         }
         return -1;
     }
 
     private void registerListenerLifecycle() {
-        if (loginButton == null) {
-            return;
-        }
-        loginButton.sceneProperty().addListener((observable, oldScene, newScene) -> {
-            if (oldScene != null && newScene == null) {
-                networkService.removeAuctionUpdateListener(auctionUpdateListener);
-            }
+        if (loginButton == null) return;
+        loginButton.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (oldScene != null && newScene == null) networkService.removeAuctionUpdateListener(auctionUpdateListener);
         });
     }
 
-    /**
-     * Khởi tạo đồng hồ hiển thị trên giao diện, cập nhật mỗi giây.
-     */
     private void initClock() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss\ndd/MM/yyyy");
-        Timeline clock = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
-            clockLabel.setText(LocalDateTime.now().format(formatter));
-        }));
+        Timeline clock = new Timeline(new KeyFrame(Duration.seconds(1), e -> clockLabel.setText(LocalDateTime.now().format(formatter))));
         clock.setCycleCount(Animation.INDEFINITE);
         clock.play();
-
-        // Cập nhật giá trị ban đầu
         clockLabel.setText(LocalDateTime.now().format(formatter));
     }
 
-    /**
-     * Phương thức tiện ích để chuyển đổi giữa các màn hình (Scenes).
-     */
-    private void switchScene(ActionEvent event, String fxmlFile) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/" + fxmlFile));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene currentScene = stage.getScene();
-
-            if (currentScene == null) {
-                stage.setScene(new Scene(root, 1380, 920));
-            } else {
-                currentScene.setRoot(root);
-            }
-
-            stage.setMinWidth(1280);
-            stage.setMinHeight(820);
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Lỗi chuyển trang", "Không thể tải giao diện: " + fxmlFile);
-        }
-    }
-
-    // --- Các phương thức điều hướng (Navigation) ---
-
-    @FXML
-    public void goToHome(ActionEvent event) {
-        switchScene(event, "giaodien.fxml");
-    }
-
-    @FXML
-    public void goToAuctionList(ActionEvent event) {
-        switchScene(event, "auction-detail.fxml");
-    }
-
-    @FXML
-    public void goToLogin(ActionEvent event) {
-        switchScene(event, "login.fxml");
-    }
-
-    @FXML
-    public void goToRegister(ActionEvent event) {
-        switchScene(event, "register.fxml");
-    }
-
-    @FXML
-    public void goToProductDetail(ActionEvent event) {
-        switchScene(event, "product-detail.fxml");
-    }
-
-    @FXML
-    public void goToSessions(ActionEvent event) {
-        switchScene(event, "sessions.fxml");
-    }
-
-    @FXML
-    public void goToNews(ActionEvent event) {
-        switchScene(event, "news.fxml");
-    }
-
-    @FXML
-    public void goToContact(ActionEvent event) {
-        switchScene(event, "contact.fxml");
-    }
-
-    @FXML
-    public void goToCreateAuction(ActionEvent event) {
-        switchScene(event, "create-auction.fxml");
-    }
+    // --- Điều hướng (delegate tới SceneNavigator) ---
+    @FXML public void goToHome(ActionEvent event) { SceneNavigator.goToHome(event); }
+    @FXML public void goToAuctionList(ActionEvent event) { SceneNavigator.goToAuctionList(event); }
+    @FXML public void goToLogin(ActionEvent event) { SceneNavigator.goToLogin(event); }
+    @FXML public void goToRegister(ActionEvent event) { SceneNavigator.goToRegister(event); }
+    @FXML public void goToProductDetail(ActionEvent event) { SceneNavigator.goToProductDetail(event); }
+    @FXML public void goToSessions(ActionEvent event) { SceneNavigator.goToSessions(event); }
+    @FXML public void goToNews(ActionEvent event) { SceneNavigator.goToNews(event); }
+    @FXML public void goToContact(ActionEvent event) { SceneNavigator.goToContact(event); }
+    @FXML public void goToCreateAuction(ActionEvent event) { SceneNavigator.goToCreateAuction(event); }
 }

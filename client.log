@@ -1,0 +1,86 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.auction:auction-ui >-----------------------
+[INFO] Building auction-ui 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[WARNING] 6 problems were encountered while building the effective model for org.openjfx:javafx-controls:jar:21.0.2 during dependency collection step for project (use -X to see details)
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ auction-ui ---
+[INFO] Deleting /home/hecker/BigProject/target
+[INFO] 
+[INFO] >>> javafx:0.0.8:run (default-cli) > process-classes @ auction-ui >>>
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ auction-ui ---
+[INFO] Copying 14 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ auction-ui ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 43 source files with javac [debug release 17] to target/classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[117,20] cannot find symbol
+  symbol:   variable AuctionPayloadMapper
+  location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[233,13] cannot find symbol
+  symbol:   class FXMLLoader
+  location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[233,37] cannot find symbol
+  symbol:   class FXMLLoader
+  location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[234,13] cannot find symbol
+  symbol:   class Parent
+  location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[239,13] cannot find symbol
+  symbol:   class Stage
+  location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[239,28] cannot find symbol
+  symbol:   class Stage
+  location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[240,13] cannot find symbol
+  symbol:   class Scene
+  location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[242,36] cannot find symbol
+  symbol:   class Scene
+  location: class com.auction.controller.SessionCatalogController
+[INFO] 8 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  7.712 s
+[INFO] Finished at: 2026-05-13T13:39:09+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project auction-ui: Compilation failure: Compilation failure: 
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[117,20] cannot find symbol
+[ERROR]   symbol:   variable AuctionPayloadMapper
+[ERROR]   location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[233,13] cannot find symbol
+[ERROR]   symbol:   class FXMLLoader
+[ERROR]   location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[233,37] cannot find symbol
+[ERROR]   symbol:   class FXMLLoader
+[ERROR]   location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[234,13] cannot find symbol
+[ERROR]   symbol:   class Parent
+[ERROR]   location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[239,13] cannot find symbol
+[ERROR]   symbol:   class Stage
+[ERROR]   location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[239,28] cannot find symbol
+[ERROR]   symbol:   class Stage
+[ERROR]   location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[240,13] cannot find symbol
+[ERROR]   symbol:   class Scene
+[ERROR]   location: class com.auction.controller.SessionCatalogController
+[ERROR] /home/hecker/BigProject/src/main/java/com/auction/controller/SessionCatalogController.java:[242,36] cannot find symbol
+[ERROR]   symbol:   class Scene
+[ERROR]   location: class com.auction.controller.SessionCatalogController
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

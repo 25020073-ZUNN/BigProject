@@ -26,9 +26,14 @@ public final class AuctionPayloadMapper {
     public static List<Auction> toAuctions(List<Map<String, Object>> payloads) {
         List<Auction> auctions = new ArrayList<>();
         for (Map<String, Object> payload : payloads) {
-            Auction auction = toAuction(payload);
-            if (auction != null) {
-                auctions.add(auction);
+            try {
+                Auction auction = toAuction(payload);
+                if (auction != null) {
+                    auctions.add(auction);
+                }
+            } catch (Exception e) {
+                System.err.println("[MAPPER] Lỗi parse auction: " + payload);
+                e.printStackTrace();
             }
         }
         return auctions;
