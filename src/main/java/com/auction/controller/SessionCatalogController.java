@@ -1,20 +1,22 @@
 package com.auction.controller;
 
 import com.auction.model.Auction;
-import com.auction.model.user.User;
-import com.auction.network.client.AuctionPayloadMapper;
 import com.auction.network.client.AuctionUpdateListener;
 import com.auction.network.client.NetworkService;
 import com.auction.util.UserSession;
+import com.auction.util.SceneNavigator;
+import com.auction.util.AlertHelper;
+import com.auction.util.LoginStateHelper;
+import com.auction.util.PriceFormatter;
+import com.auction.network.client.AuctionPayloadMapper;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -23,13 +25,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -47,8 +45,6 @@ import java.util.stream.Collectors;
  * Ngoài ra, phần tìm kiếm và bộ lọc đều chạy trên snapshot thật từ server.
  */
 public class SessionCatalogController {
-
-    private static final DecimalFormat PRICE_FORMAT = createPriceFormat();
 
     private final NetworkService networkService = NetworkService.getInstance();
     private final AuctionUpdateListener auctionUpdateListener = auctionData -> Platform.runLater(this::renderSessions);
@@ -71,40 +67,17 @@ public class SessionCatalogController {
         statusFilter.setItems(FXCollections.observableArrayList("Tất cả", "Đang diễn ra", "Sắp diễn ra", "Đã kết thúc"));
         statusFilter.setValue("Tất cả");
 
-        updateLoginState();
+        LoginStateHelper.updateLoginButton(loginButton);
 
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> renderSessions());
-        statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> renderSessions());
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderSessions));
+        statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderSessions));
 
         registerObserverLifecycle();
         networkService.addAuctionUpdateListener(auctionUpdateListener);
     }
 
-    private void updateLoginState() {
-        if (UserSession.isLoggedIn()) {
-            User user = UserSession.getLoggedInUser();
-            if (loginButton != null) {
-                loginButton.setText("Đăng xuất (" + user.getUsername() + ")");
-                loginButton.setOnAction(this::handleLogout);
-            }
-        } else {
-            if (loginButton != null) {
-                loginButton.setText("Đăng nhập");
-                loginButton.setOnAction(this::goToLogin);
-            }
-        }
-    }
-
     @FXML
-    public void handleLogout(ActionEvent event) {
-        UserSession.logout();
-        updateLoginState();
-        try {
-            goToHome(event);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    public void handleLogout(ActionEvent event) { LoginStateHelper.handleLogout(event); }
 
     @FXML
     public void handleSearch(ActionEvent event) {
@@ -276,75 +249,18 @@ public class SessionCatalogController {
                 scene.setRoot(root);
             }
         } catch (IOException e) {
-            showError("Không thể mở chi tiết phiên đấu giá.");
+            AlertHelper.showError("Lỗi", "Không thể mở chi tiết phiên đấu giá.");
         }
     }
 
     private String formatPrice(BigDecimal amount) {
-        if (amount == null) {
-            return "0 VND";
-        }
-        return PRICE_FORMAT.format(amount) + " VND";
+        return PriceFormatter.formatPrice(amount);
     }
 
-    private static DecimalFormat createPriceFormat() {
-        DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance();
-        symbols.setGroupingSeparator(',');
-        DecimalFormat format = new DecimalFormat("#,##0", symbols);
-        format.setGroupingUsed(true);
-        return format;
-    }
-
-    @FXML
-    public void goToHome(ActionEvent event) {
-        switchScene(event, "giaodien.fxml");
-    }
-
-    @FXML
-    public void goToAuctionList(ActionEvent event) {
-        switchScene(event, "auction-detail.fxml");
-    }
-
-    @FXML
-    public void goToSessions(ActionEvent event) {
-        switchScene(event, "sessions.fxml");
-    }
-
-    @FXML
-    public void goToNews(ActionEvent event) {
-        switchScene(event, "news.fxml");
-    }
-
-    @FXML
-    public void goToContact(ActionEvent event) {
-        switchScene(event, "contact.fxml");
-    }
-
-    @FXML
-    public void goToLogin(ActionEvent event) {
-        switchScene(event, "login.fxml");
-    }
-
-    private void switchScene(ActionEvent event, String fxmlFile) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/" + fxmlFile));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene currentScene = stage.getScene();
-            if (currentScene == null) {
-                stage.setScene(new Scene(root, 1380, 920));
-            } else {
-                currentScene.setRoot(root);
-            }
-        } catch (IOException e) {
-            showError("Không thể tải giao diện: " + fxmlFile);
-        }
-    }
-
-    private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Lỗi");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
+    @FXML public void goToHome(ActionEvent event) { SceneNavigator.goToHome(event); }
+    @FXML public void goToAuctionList(ActionEvent event) { SceneNavigator.goToAuctionList(event); }
+    @FXML public void goToSessions(ActionEvent event) { SceneNavigator.goToSessions(event); }
+    @FXML public void goToNews(ActionEvent event) { SceneNavigator.goToNews(event); }
+    @FXML public void goToContact(ActionEvent event) { SceneNavigator.goToContact(event); }
+    @FXML public void goToLogin(ActionEvent event) { SceneNavigator.goToLogin(event); }
 }

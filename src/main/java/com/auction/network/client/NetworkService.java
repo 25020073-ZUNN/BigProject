@@ -234,8 +234,10 @@ public class NetworkService {
 
     private void notifyAuctionListeners(List<Map<String, Object>> auctions) {
         for (AuctionUpdateListener listener : auctionUpdateListeners) {
-            for (Map<String, Object> auction : auctions) {
-                listener.onAuctionUpdated(auction);
+            // Thông báo một lần cho mỗi listener với snapshot đầu tiên,
+            // không gọi N lần cho N auction (gây dư thừa Platform.runLater)
+            if (!auctions.isEmpty()) {
+                listener.onAuctionUpdated(auctions.get(0));
             }
         }
     }

@@ -1,0 +1,2 @@
+Error: LinkageError occurred while loading main class com.auction.network.server.Server
+	java.lang.ClassFormatError: Truncated class file
