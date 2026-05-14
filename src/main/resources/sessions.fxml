@@ -41,9 +41,10 @@
                 <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
             </HBox>
 
+            <!-- Hero: Tiêu đề trang phiên đấu giá -->
             <VBox spacing="12" styleClass="page-hero-small">
                 <padding>
-                    <Insets top="24" right="42" bottom="24" left="42"/>
+                    <Insets top="28" right="48" bottom="28" left="48"/>
                 </padding>
                 <Label text="Danh sách phiên đấu giá thật" styleClass="hero-title-small"/>
                 <Label text="Theo dõi phiên sắp diễn ra, đang diễn ra và đã kết thúc bằng dữ liệu thật."
@@ -55,9 +56,9 @@
     <center>
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
             <content>
-                <VBox spacing="24" styleClass="page-section">
+                <VBox spacing="28" styleClass="page-section">
                     <padding>
-                        <Insets top="24" right="42" bottom="32" left="42"/>
+                        <Insets top="28" right="48" bottom="36" left="48"/>
                     </padding>
 
                     <VBox spacing="16" styleClass="filter-box">

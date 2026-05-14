@@ -13,30 +13,30 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="920" prefWidth="1380" styleClass="root" stylesheets="@style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.HomeController">
+<BorderPane prefHeight="920" prefWidth="1380" styleClass="root" stylesheets="@style.css"
+            xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.auction.controller.HomeController">
     <top>
         <VBox>
-            <HBox alignment="CENTER_LEFT" spacing="18" styleClass="topbar">
-                <padding>
-                    <Insets bottom="14" left="28" right="28" top="14" />
-                </padding>
+            <HBox alignment="CENTER_LEFT" spacing="20" styleClass="topbar">
+                <padding><Insets bottom="12" left="36" right="36" top="12"/></padding>
 
                 <VBox spacing="0">
-                    <Label styleClass="logo-main" text="AUREX" />
-                    <Label styleClass="logo-sub" text="AUCTION PLATFORM" />
+                    <Label styleClass="logo-main" text="AUREX"/>
+                    <Label styleClass="logo-sub" text="AUCTION PLATFORM"/>
                 </VBox>
 
-                <Region HBox.hgrow="ALWAYS" />
+                <Region HBox.hgrow="ALWAYS"/>
 
-                <Button onAction="#goToHome" styleClass="nav-btn-active" text="Trang chủ" />
-                <Button onAction="#goToAuctionList" styleClass="nav-btn" text="Tài sản đấu giá" />
-                <Button onAction="#goToSessions" styleClass="nav-btn" text="Phiên đấu giá" />
-                <Button onAction="#goToNews" styleClass="nav-btn" text="Tin tức" />
-                <Button onAction="#goToContact" styleClass="nav-btn" text="Liên hệ" />
+                <Button onAction="#goToHome" styleClass="nav-btn-active" text="Trang chủ"/>
+                <Button onAction="#goToAuctionList" styleClass="nav-btn" text="Tài sản đấu giá"/>
+                <Button onAction="#goToSessions" styleClass="nav-btn" text="Phiên đấu giá"/>
+                <Button onAction="#goToNews" styleClass="nav-btn" text="Tin tức"/>
+                <Button onAction="#goToContact" styleClass="nav-btn" text="Liên hệ"/>
 
-                <Label fx:id="clockLabel" styleClass="clock-label" text="08:30:12&#10;07/04/2026" />
-
-                <Button fx:id="loginButton" onAction="#goToLogin" styleClass="login-btn" text="Đăng nhập" />
+                <Region prefWidth="8"/>
+                <Label fx:id="clockLabel" styleClass="clock-label" text="08:30:12&#10;07/04/2026"/>
+                <Button fx:id="loginButton" onAction="#goToLogin" styleClass="login-btn" text="Đăng nhập"/>
             </HBox>
         </VBox>
     </top>
@@ -44,335 +44,338 @@
     <center>
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
             <content>
-                <VBox spacing="30">
+                <VBox spacing="0">
 
-                    <!-- HERO -->
-                    <HBox spacing="26" styleClass="hero-section">
-                        <padding>
-                            <Insets bottom="36" left="42" right="42" top="36" />
-                        </padding>
+                    <!-- ═══════════════════ HERO SECTION ═══════════════════ -->
+                    <HBox spacing="32" styleClass="hero-section">
+                        <padding><Insets bottom="56" left="56" right="56" top="56"/></padding>
 
-                        <VBox prefWidth="520" spacing="18">
-                            <Label styleClass="hero-small" text="NỀN TẢNG ĐẤU GIÁ THẾ HỆ MỚI" />
+                        <VBox prefWidth="540" spacing="20" style="-fx-alignment: center-left;">
+                            <Label styleClass="hero-small" text="🏛  NỀN TẢNG ĐẤU GIÁ THẾ HỆ MỚI"/>
 
-                            <Label styleClass="hero-title" text="Đấu giá&#10;theo phong cách hiện đại&#10;và cao cấp hơn" wrapText="true" />
+                            <Label styleClass="hero-title"
+                                   text="Đấu giá trực tuyến&#10;minh bạch, hiện đại&#10;và chuyên nghiệp"
+                                   wrapText="true"/>
 
-                            <Label styleClass="hero-desc" text="WEB ĐƯỢC BUILD BỞI  - Team6." wrapText="true" />
+                            <Label styleClass="hero-desc"
+                                   text="Nền tảng đấu giá số hàng đầu Việt Nam — Quản lý tài sản, phiên đấu giá và người tham gia một cách dễ dàng. Được xây dựng bởi Team 6."
+                                   wrapText="true"/>
 
-                            <HBox spacing="12">
-                                <Button onAction="#goToAuctionList" styleClass="primary-btn" text="Khám phá ngay" />
-                                <Button onAction="#goToSessions" styleClass="secondary-btn" text="Xem phiên đấu giá" />
+                            <HBox spacing="14" style="-fx-padding: 8 0 0 0;">
+                                <Button onAction="#goToAuctionList" styleClass="primary-btn" text="🔍  Khám phá ngay"/>
+                                <Button onAction="#goToSessions" styleClass="secondary-btn" text="📋  Xem phiên đấu giá"/>
                             </HBox>
 
-                            <HBox spacing="18">
-                                <VBox prefWidth="150" styleClass="mini-info-card">
-                                    <padding>
-                                        <Insets bottom="12" left="12" right="12" top="12" />
-                                    </padding>
-                                    <Label styleClass="mini-info-number" text="2.4K+" />
-                                    <Label styleClass="mini-info-text" text="Phiên đang mở" />
+                            <HBox spacing="16" style="-fx-padding: 12 0 0 0;">
+                                <VBox prefWidth="160" styleClass="mini-info-card">
+                                    <padding><Insets bottom="16" left="16" right="16" top="16"/></padding>
+                                    <Label styleClass="mini-info-number" text="2.4K+"/>
+                                    <Label styleClass="mini-info-text" text="Phiên đang mở"/>
                                 </VBox>
 
-                                <VBox prefWidth="150" styleClass="mini-info-card">
-                                    <padding>
-                                        <Insets bottom="12" left="12" right="12" top="12" />
-                                    </padding>
-                                    <Label styleClass="mini-info-number" text="99.9%" />
-                                    <Label styleClass="mini-info-text" text="Ổn định hệ thống" />
+                                <VBox prefWidth="160" styleClass="mini-info-card">
+                                    <padding><Insets bottom="16" left="16" right="16" top="16"/></padding>
+                                    <Label styleClass="mini-info-number" text="99.9%"/>
+                                    <Label styleClass="mini-info-text" text="Hệ thống ổn định"/>
                                 </VBox>
 
-                                <VBox prefWidth="150" styleClass="mini-info-card">
-                                    <padding>
-                                        <Insets bottom="12" left="12" right="12" top="12" />
-                                    </padding>
-                                    <Label styleClass="mini-info-number" text="24/7" />
-                                    <Label styleClass="mini-info-text" text="Theo dõi dữ liệu" />
+                                <VBox prefWidth="160" styleClass="mini-info-card">
+                                    <padding><Insets bottom="16" left="16" right="16" top="16"/></padding>
+                                    <Label styleClass="mini-info-number" text="24/7"/>
+                                    <Label styleClass="mini-info-text" text="Hỗ trợ liên tục"/>
                                 </VBox>
                             </HBox>
                         </VBox>
 
-                        <AnchorPane prefHeight="340" prefWidth="520" styleClass="hero-banner">
+                        <!-- Banner bên phải -->
+                        <AnchorPane prefHeight="380" prefWidth="420" styleClass="hero-banner" HBox.hgrow="NEVER">
                             <children>
-                                <VBox layoutX="34" layoutY="34" spacing="12">
-                                    <Label styleClass="banner-chip" text="AUREX AUCTION" />
-                                    <Label styleClass="banner-title" text="ĐẤU GIÁ SỐ&#10;TRẢI NGHIỆM SANG HƠN" />
-                                    <Label styleClass="banner-desc" text="Quản lý tài sản - phiên đấu giá - người tham gia" />
+                                <VBox layoutX="32" layoutY="32" spacing="14">
+                                    <Label styleClass="banner-chip" text="✨  AUREX AUCTION"/>
+                                    <Label styleClass="banner-title" text="ĐẤU GIÁ SỐ&#10;TRẢI NGHIỆM&#10;CHUYÊN NGHIỆP"/>
+                                    <Label styleClass="banner-desc" text="Quản lý tài sản — phiên đấu giá — người tham gia"/>
                                 </VBox>
-
-                                <HBox layoutX="36" layoutY="265" spacing="10">
-                                    <Button styleClass="store-btn" text="App Store" />
-                                    <Button styleClass="store-btn" text="Google Play" />
+                                <HBox layoutX="32" layoutY="300" spacing="10">
+                                    <Button styleClass="store-btn" text="📱  App Store"/>
+                                    <Button styleClass="store-btn" text="▶  Google Play"/>
                                 </HBox>
                             </children>
                         </AnchorPane>
 
-                        <VBox fx:id="loginPanel" prefWidth="250" spacing="14" styleClass="login-panel">
-                            <padding>
-                                <Insets bottom="18" left="18" right="18" top="18" />
-                            </padding>
+                        <!-- Panel đăng nhập / thông tin user -->
+                        <VBox fx:id="loginPanel" prefWidth="280" spacing="16" styleClass="login-panel">
+                            <padding><Insets bottom="22" left="22" right="22" top="22"/></padding>
 
-                            <Label styleClass="login-panel-title" text="Đăng nhập nhanh" />
-                            <Label styleClass="login-panel-text" text="Truy cập tài khoản để theo dõi phiên và lịch sử tham gia." wrapText="true" />
+                            <Label styleClass="login-panel-title" text="Đăng nhập nhanh"/>
+                            <Label styleClass="login-panel-text"
+                                   text="Truy cập tài khoản để theo dõi phiên và lịch sử tham gia." wrapText="true"/>
 
-                            <TextField promptText="Email hoặc tên đăng nhập" styleClass="mail-field" />
-                            <TextField promptText="Mật khẩu" styleClass="mail-field" />
+                            <TextField promptText="Email hoặc tên đăng nhập" styleClass="mail-field"/>
+                            <TextField promptText="Mật khẩu" styleClass="mail-field"/>
 
-                            <Button fx:id="mainLoginButton" maxWidth="1.7976931348623157E308" onAction="#goToLogin" styleClass="primary-btn" text="Đăng nhập hệ thống" />                            <Button maxWidth="1.7976931348623157E308" onAction="#goToRegister" styleClass="secondary-btn" text="Tạo tài khoản mới" />
+                            <Button fx:id="mainLoginButton" maxWidth="1.7976931348623157E308"
+                                    onAction="#goToLogin" styleClass="primary-btn" text="Đăng nhập hệ thống"/>
+                            <Button maxWidth="1.7976931348623157E308"
+                                    onAction="#goToRegister" styleClass="secondary-btn" text="Tạo tài khoản mới"/>
 
-                            <Separator />
+                            <Separator/>
 
-                            <Label styleClass="login-panel-note" text="• Theo dõi tài sản yêu thích&#10;• Nhận thông báo phiên mới&#10;• Quản lý hồ sơ tham gia" wrapText="true" />
+                            <Label styleClass="login-panel-note"
+                                   text="✓  Theo dõi tài sản yêu thích&#10;✓  Nhận thông báo phiên mới&#10;✓  Quản lý hồ sơ tham gia"
+                                   wrapText="true"/>
                         </VBox>
 
-                        <VBox fx:id="userPanel" managed="false" prefWidth="250" spacing="14" styleClass="login-panel" visible="false">
-                            <padding>
-                                <Insets bottom="18" left="18" right="18" top="18" />
-                            </padding>
+                        <VBox fx:id="userPanel" managed="false" prefWidth="280" spacing="16"
+                              styleClass="login-panel" visible="false">
+                            <padding><Insets bottom="22" left="22" right="22" top="22"/></padding>
 
-                            <Label styleClass="login-panel-title" text="Thông tin tài khoản" />
-                            
+                            <Label styleClass="login-panel-title" text="Thông tin tài khoản"/>
+
                             <VBox spacing="8" styleClass="user-info-box">
                                 <HBox alignment="CENTER_LEFT" spacing="10">
-                                    <Label minWidth="80" styleClass="login-panel-note" text="Người dùng:" />
-                                    <Label fx:id="userNameLabel" style="-fx-font-weight: bold;" styleClass="login-panel-text" text="---" />
+                                    <Label minWidth="80" styleClass="login-panel-note" text="👤  Người dùng:"/>
+                                    <Label fx:id="userNameLabel" style="-fx-font-weight: bold;"
+                                           styleClass="login-panel-text" text="---"/>
                                 </HBox>
                                 <HBox alignment="CENTER_LEFT" spacing="10">
-                                    <Label minWidth="80" styleClass="login-panel-note" text="Vai trò:" />
-                                    <Label fx:id="userRoleLabel" styleClass="login-panel-text" text="---" />
+                                    <Label minWidth="80" styleClass="login-panel-note" text="🏷  Vai trò:"/>
+                                    <Label fx:id="userRoleLabel" styleClass="login-panel-text" text="---"/>
                                 </HBox>
                                 <HBox alignment="CENTER_LEFT" spacing="10">
-                                    <Label minWidth="80" styleClass="login-panel-note" text="Số dư:" />
-                                    <Label fx:id="userBalanceLabel" style="-fx-text-fill: #2ecc71; -fx-font-weight: bold;" styleClass="login-panel-text" text="0 VND" />
+                                    <Label minWidth="80" styleClass="login-panel-note" text="💰  Số dư:"/>
+                                    <Label fx:id="userBalanceLabel"
+                                           style="-fx-text-fill: #107c10; -fx-font-weight: bold;"
+                                           styleClass="login-panel-text" text="0 VND"/>
                                 </HBox>
                             </VBox>
 
-                            <Separator />
+                            <Separator/>
 
-                            <Button maxWidth="1.7976931348623157E308" onAction="#goToUserProfile" styleClass="primary-btn" text="Quản lý hồ sơ" />
-                            <Button maxWidth="1.7976931348623157E308" onAction="#handleComingSoon" styleClass="secondary-btn" text="Lịch sử đấu giá" />
-                            <Button maxWidth="1.7976931348623157E308" onAction="#handleLogout" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" styleClass="secondary-btn" text="Đăng xuất" />
+                            <Button maxWidth="1.7976931348623157E308" onAction="#goToUserProfile"
+                                    styleClass="primary-btn" text="Quản lý hồ sơ"/>
+                            <Button maxWidth="1.7976931348623157E308" onAction="#handleComingSoon"
+                                    styleClass="secondary-btn" text="Lịch sử đấu giá"/>
+                            <Button maxWidth="1.7976931348623157E308" onAction="#handleLogout"
+                                    style="-fx-background-color: #d13438; -fx-text-fill: white;"
+                                    styleClass="secondary-btn" text="Đăng xuất"/>
                         </VBox>
                     </HBox>
 
-                    <!-- STATS -->
-                    <HBox spacing="20" styleClass="stats-wrap">
-                        <padding>
-                            <Insets bottom="0" left="42" right="42" top="0" />
-                        </padding>
+                    <!-- ═══════════════════ STATS ═══════════════════ -->
+                    <HBox spacing="20" style="-fx-background-color: #ffffff;">
+                        <padding><Insets bottom="32" left="56" right="56" top="32"/></padding>
 
-                        <VBox prefWidth="300" styleClass="stat-card">
-                            <padding><Insets bottom="18" left="18" right="18" top="18" /></padding>
-                            <Label styleClass="stat-number" text="2,450+" />
-                            <Label styleClass="stat-text" text="Tài sản đang mở đấu giá" />
+                        <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                            <padding><Insets bottom="22" left="22" right="22" top="22"/></padding>
+                            <Label styleClass="stat-number" text="2,450+"/>
+                            <Label styleClass="stat-text" text="Tài sản đang mở đấu giá"/>
                         </VBox>
 
-                        <VBox prefWidth="300" styleClass="stat-card">
-                            <padding><Insets bottom="18" left="18" right="18" top="18" /></padding>
-                            <Label styleClass="stat-number" text="35,000+" />
-                            <Label styleClass="stat-text" text="Người dùng tham gia hệ thống" />
+                        <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                            <padding><Insets bottom="22" left="22" right="22" top="22"/></padding>
+                            <Label styleClass="stat-number" text="35,000+"/>
+                            <Label styleClass="stat-text" text="Người dùng tham gia"/>
                         </VBox>
 
-                        <VBox prefWidth="300" styleClass="stat-card">
-                            <padding><Insets bottom="18" left="18" right="18" top="18" /></padding>
-                            <Label styleClass="stat-number" text="1,280+" />
-                            <Label styleClass="stat-text" text="Phiên đấu giá hoàn tất" />
+                        <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                            <padding><Insets bottom="22" left="22" right="22" top="22"/></padding>
+                            <Label styleClass="stat-number" text="1,280+"/>
+                            <Label styleClass="stat-text" text="Phiên đấu giá hoàn tất"/>
                         </VBox>
 
-                        <VBox prefWidth="300" styleClass="stat-card">
-                            <padding><Insets bottom="18" left="18" right="18" top="18" /></padding>
-                            <Label styleClass="stat-number" text="99.9%" />
-                            <Label styleClass="stat-text" text="Tỷ lệ hệ thống hoạt động ổn định" />
+                        <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                            <padding><Insets bottom="22" left="22" right="22" top="22"/></padding>
+                            <Label styleClass="stat-number" text="99.9%"/>
+                            <Label styleClass="stat-text" text="Tỷ lệ hoạt động ổn định"/>
                         </VBox>
                     </HBox>
 
-                    <!-- AUCTIONS -->
-                    <VBox spacing="18" styleClass="dark-section">
-                        <padding>
-                            <Insets bottom="36" left="42" right="42" top="36" />
-                        </padding>
+                    <!-- ═══════════════════ AUCTIONS ═══════════════════ -->
+                    <VBox spacing="24" styleClass="dark-section">
+                        <padding><Insets bottom="48" left="56" right="56" top="48"/></padding>
 
                         <HBox alignment="CENTER_LEFT">
-                            <Label styleClass="section-title" text="Tài sản sắp được đấu giá" />
-                            <Region HBox.hgrow="ALWAYS" />
-                            <Button onAction="#goToAuctionList" styleClass="secondary-btn" text="Xem tất cả" />
+                            <Label styleClass="section-title" text="🔥  Tài sản sắp được đấu giá"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button onAction="#goToAuctionList" styleClass="secondary-btn" text="Xem tất cả  →"/>
                         </HBox>
 
                         <FlowPane hgap="20" prefWrapLength="1260" vgap="20">
-
-                            <VBox prefWidth="290" spacing="12" styleClass="auction-card">
-                                <AnchorPane prefHeight="150" styleClass="thumb thumb-1">
-                                    <children>
-                                        <Label layoutX="14" layoutY="12" styleClass="badge-vip" text="ART" />
-                                    </children>
+                            <VBox prefWidth="290" spacing="14" styleClass="auction-card">
+                                <AnchorPane prefHeight="160" styleClass="thumb thumb-1">
+                                    <children><Label layoutX="14" layoutY="12" styleClass="badge-vip" text="🎨  ART"/></children>
                                 </AnchorPane>
-                                <VBox spacing="8">
-                                    <Label styleClass="card-title" text="Tác phẩm nghệ thuật: Bức tranh Phố Phái" />
-                                    <Label styleClass="card-sub" text="Thời gian đấu giá: 07/04/2026 13:00:00" wrapText="true" />
-                                    <Label styleClass="card-price" text="Giá khởi điểm: 1,250,000,000 VNĐ" wrapText="true" />
+                                <VBox spacing="6">
+                                    <Label styleClass="card-title" text="Tác phẩm nghệ thuật: Bức tranh Phố Phái"/>
+                                    <Label styleClass="card-sub" text="⏰  07/04/2026 13:00:00" wrapText="true"/>
+                                    <Label styleClass="card-price" text="💰  1,250,000,000 VNĐ" wrapText="true"/>
                                 </VBox>
-                                <Button onAction="#goToProductDetail" styleClass="small-btn" text="Chi tiết" />
+                                <Button onAction="#goToProductDetail" styleClass="small-btn" text="Chi tiết  →"/>
                             </VBox>
 
-                            <VBox prefWidth="290" spacing="12" styleClass="auction-card">
-                                <AnchorPane prefHeight="150" styleClass="thumb thumb-2">
-                                    <children>
-                                        <Label layoutX="14" layoutY="12" styleClass="badge-hot" text="VEHICLE" />
-                                    </children>
+                            <VBox prefWidth="290" spacing="14" styleClass="auction-card">
+                                <AnchorPane prefHeight="160" styleClass="thumb thumb-2">
+                                    <children><Label layoutX="14" layoutY="12" styleClass="badge-hot" text="🚗  VEHICLE"/></children>
                                 </AnchorPane>
-                                <VBox spacing="8">
-                                    <Label styleClass="card-title" text="Xe ô tô Mercedes-Benz S450 Luxury" />
-                                    <Label styleClass="card-sub" text="Thời gian đấu giá: 08/04/2026 09:30:00" wrapText="true" />
-                                    <Label styleClass="card-price" text="Giá khởi điểm: 2,500,000,000 VNĐ" wrapText="true" />
+                                <VBox spacing="6">
+                                    <Label styleClass="card-title" text="Mercedes-Benz S450 Luxury 2024"/>
+                                    <Label styleClass="card-sub" text="⏰  08/04/2026 09:30:00" wrapText="true"/>
+                                    <Label styleClass="card-price" text="💰  2,500,000,000 VNĐ" wrapText="true"/>
                                 </VBox>
-                                <Button onAction="#goToProductDetail" styleClass="small-btn" text="Chi tiết" />
+                                <Button onAction="#goToProductDetail" styleClass="small-btn" text="Chi tiết  →"/>
                             </VBox>
 
-                            <VBox prefWidth="290" spacing="12" styleClass="auction-card">
-                                <AnchorPane prefHeight="150" styleClass="thumb thumb-3">
-                                    <children>
-                                        <Label layoutX="14" layoutY="12" styleClass="badge-live" text="ELECTRONICS" />
-                                    </children>
+                            <VBox prefWidth="290" spacing="14" styleClass="auction-card">
+                                <AnchorPane prefHeight="160" styleClass="thumb thumb-3">
+                                    <children><Label layoutX="14" layoutY="12" styleClass="badge-live" text="💻  ELECTRONICS"/></children>
                                 </AnchorPane>
-                                <VBox spacing="8">
-                                    <Label styleClass="card-title" text="Hệ thống máy chủ Server Dell PowerEdge" />
-                                    <Label styleClass="card-sub" text="Thời gian đấu giá: 07/04/2026 14:00:00" wrapText="true" />
-                                    <Label styleClass="card-price" text="Giá khởi điểm: 850,000,000 VNĐ" wrapText="true" />
+                                <VBox spacing="6">
+                                    <Label styleClass="card-title" text="Hệ thống Server Dell PowerEdge R750"/>
+                                    <Label styleClass="card-sub" text="⏰  07/04/2026 14:00:00" wrapText="true"/>
+                                    <Label styleClass="card-price" text="💰  850,000,000 VNĐ" wrapText="true"/>
                                 </VBox>
-                                <Button onAction="#goToProductDetail" styleClass="small-btn" text="Chi tiết" />
+                                <Button onAction="#goToProductDetail" styleClass="small-btn" text="Chi tiết  →"/>
                             </VBox>
 
-                            <VBox prefWidth="290" spacing="12" styleClass="auction-card">
-                                <AnchorPane prefHeight="150" styleClass="thumb thumb-4">
-                                    <children>
-                                        <Label layoutX="14" layoutY="12" styleClass="badge-new" text="VEHICLE" />
-                                    </children>
+                            <VBox prefWidth="290" spacing="14" styleClass="auction-card">
+                                <AnchorPane prefHeight="160" styleClass="thumb thumb-4">
+                                    <children><Label layoutX="14" layoutY="12" styleClass="badge-new" text="🏍  VEHICLE"/></children>
                                 </AnchorPane>
-                                <VBox spacing="8">
-                                    <Label styleClass="card-title" text="Xe mô tô Ducati Panigale V4 Speciale" />
-                                    <Label styleClass="card-sub" text="Thời gian đấu giá: 09/04/2026 14:00:00" wrapText="true" />
-                                    <Label styleClass="card-price" text="Giá khởi điểm: 1,850,000,000 VNĐ" wrapText="true" />
+                                <VBox spacing="6">
+                                    <Label styleClass="card-title" text="Ducati Panigale V4 Speciale 2024"/>
+                                    <Label styleClass="card-sub" text="⏰  09/04/2026 14:00:00" wrapText="true"/>
+                                    <Label styleClass="card-price" text="💰  1,850,000,000 VNĐ" wrapText="true"/>
                                 </VBox>
-                                <Button onAction="#goToProductDetail" styleClass="small-btn" text="Chi tiết" />
+                                <Button onAction="#goToProductDetail" styleClass="small-btn" text="Chi tiết  →"/>
                             </VBox>
-
                         </FlowPane>
                     </VBox>
 
-                    <!-- NEWS -->
-                    <VBox spacing="18">
-                        <padding>
-                            <Insets bottom="8" left="42" right="42" top="8" />
-                        </padding>
+                    <!-- ═══════════════════ NEWS ═══════════════════ -->
+                    <VBox spacing="24" style="-fx-background-color: #ffffff;">
+                        <padding><Insets bottom="40" left="56" right="56" top="40"/></padding>
 
                         <HBox alignment="CENTER_LEFT">
-                            <Label styleClass="section-title-dark" text="Tin tức &amp; thông báo" />
-                            <Region HBox.hgrow="ALWAYS" />
-                            <Button onAction="#goToNews" styleClass="secondary-btn" text="Xem thêm" />
+                            <Label styleClass="section-title-dark" text="📰  Tin tức &amp; thông báo"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button onAction="#goToNews" styleClass="secondary-btn" text="Xem thêm  →"/>
                         </HBox>
 
-                        <HBox spacing="20">
-                            <VBox prefWidth="400" spacing="12" styleClass="news-card">
-                                <AnchorPane prefHeight="165" styleClass="news-thumb news-thumb-1" />
-                                <Label styleClass="news-title" text="Cập nhật quy trình tham gia đấu giá trực tuyến năm 2026" wrapText="true" />
-                                <Label styleClass="news-text" text="Nền tảng cập nhật luồng xác thực và ký quỹ để giúp người dùng thao tác nhanh hơn." wrapText="true" />
+                        <HBox spacing="22">
+                            <VBox prefWidth="400" spacing="14" styleClass="news-card" HBox.hgrow="ALWAYS">
+                                <AnchorPane prefHeight="175" styleClass="news-thumb news-thumb-1"/>
+                                <VBox spacing="6">
+                                    <padding><Insets bottom="16" left="16" right="16" top="4"/></padding>
+                                    <Label styleClass="news-title"
+                                           text="Cập nhật quy trình tham gia đấu giá trực tuyến năm 2026" wrapText="true"/>
+                                    <Label styleClass="news-text"
+                                           text="Nền tảng cập nhật luồng xác thực và ký quỹ để giúp người dùng thao tác nhanh hơn." wrapText="true"/>
+                                </VBox>
                             </VBox>
 
-                            <VBox prefWidth="400" spacing="12" styleClass="news-card">
-                                <AnchorPane prefHeight="165" styleClass="news-thumb news-thumb-2" />
-                                <Label styleClass="news-title" text="Mở thêm danh mục tài sản thanh lý cho doanh nghiệp" wrapText="true" />
-                                <Label styleClass="news-text" text="Hệ thống bổ sung nhóm tài sản mới, tăng số lượng phiên đấu giá trong quý II." wrapText="true" />
+                            <VBox prefWidth="400" spacing="14" styleClass="news-card" HBox.hgrow="ALWAYS">
+                                <AnchorPane prefHeight="175" styleClass="news-thumb news-thumb-2"/>
+                                <VBox spacing="6">
+                                    <padding><Insets bottom="16" left="16" right="16" top="4"/></padding>
+                                    <Label styleClass="news-title"
+                                           text="Mở thêm danh mục tài sản thanh lý cho doanh nghiệp" wrapText="true"/>
+                                    <Label styleClass="news-text"
+                                           text="Hệ thống bổ sung nhóm tài sản mới, tăng số lượng phiên đấu giá trong quý II." wrapText="true"/>
+                                </VBox>
                             </VBox>
 
-                            <VBox prefWidth="400" spacing="12" styleClass="news-card">
-                                <AnchorPane prefHeight="165" styleClass="news-thumb news-thumb-3" />
-                                <Label styleClass="news-title" text="Ra mắt giao diện theo dõi phiên đấu giá trên thiết bị di động" wrapText="true" />
-                                <Label styleClass="news-text" text="Bản demo tập trung trải nghiệm theo dõi trạng thái, mức giá và thời gian còn lại." wrapText="true" />
-                            </VBox>
-                        </HBox>
-                    </VBox>
-
-                    <!-- PARTNERS -->
-                    <VBox spacing="18">
-                        <padding>
-                            <Insets bottom="10" left="42" right="42" top="10" />
-                        </padding>
-
-                        <Label styleClass="section-title-dark" text="Khách hàng và đối tác tiêu biểu" />
-
-                        <HBox spacing="20">
-                            <VBox prefWidth="300" styleClass="partner-card">
-                                <padding><Insets bottom="22" left="20" right="20" top="22" /></padding>
-                                <Label styleClass="partner-title" text="Ngân hàng số" />
-                                <Label styleClass="partner-text" text="Tích hợp thanh toán, ký quỹ và bảo lãnh đấu giá." wrapText="true" />
-                            </VBox>
-
-                            <VBox prefWidth="300" styleClass="partner-card">
-                                <padding><Insets bottom="22" left="20" right="20" top="22" /></padding>
-                                <Label styleClass="partner-title" text="Doanh nghiệp thẩm định" />
-                                <Label styleClass="partner-text" text="Hỗ trợ hồ sơ tài sản, thông tin pháp lý và định giá." wrapText="true" />
-                            </VBox>
-
-                            <VBox prefWidth="300" styleClass="partner-card">
-                                <padding><Insets bottom="22" left="20" right="20" top="22" /></padding>
-                                <Label styleClass="partner-title" text="Tổ chức công" />
-                                <Label styleClass="partner-text" text="Đăng tải và quản lý phiên đấu giá minh bạch hơn." wrapText="true" />
-                            </VBox>
-
-                            <VBox prefWidth="300" styleClass="partner-card">
-                                <padding><Insets bottom="22" left="20" right="20" top="22" /></padding>
-                                <Label styleClass="partner-title" text="Khách hàng doanh nghiệp" />
-                                <Label styleClass="partner-text" text="Quản trị tài sản thanh lý bằng giao diện hiện đại, dễ theo dõi." wrapText="true" />
+                            <VBox prefWidth="400" spacing="14" styleClass="news-card" HBox.hgrow="ALWAYS">
+                                <AnchorPane prefHeight="175" styleClass="news-thumb news-thumb-3"/>
+                                <VBox spacing="6">
+                                    <padding><Insets bottom="16" left="16" right="16" top="4"/></padding>
+                                    <Label styleClass="news-title"
+                                           text="Ra mắt giao diện theo dõi phiên đấu giá trên di động" wrapText="true"/>
+                                    <Label styleClass="news-text"
+                                           text="Bản demo tập trung trải nghiệm theo dõi trạng thái, mức giá và thời gian." wrapText="true"/>
+                                </VBox>
                             </VBox>
                         </HBox>
                     </VBox>
 
-                    <!-- NEWSLETTER -->
-                    <HBox spacing="24" styleClass="newsletter-box">
-                        <padding>
-                            <Insets bottom="28" left="42" right="42" top="28" />
-                        </padding>
+                    <!-- ═══════════════════ PARTNERS ═══════════════════ -->
+                    <VBox spacing="22">
+                        <padding><Insets bottom="36" left="56" right="56" top="36"/></padding>
 
-                        <VBox prefWidth="700" spacing="10">
-                            <Label styleClass="newsletter-title" text="Nhận thông báo phiên đấu giá mới" />
-                            <Label styleClass="newsletter-text" text="Đăng ký email để nhận lịch phiên đấu giá, tài sản mới và cập nhật từ nền tảng." wrapText="true" />
+                        <Label styleClass="section-title-dark" text="🤝  Đối tác tiêu biểu"/>
+
+                        <HBox spacing="20">
+                            <VBox HBox.hgrow="ALWAYS" styleClass="partner-card">
+                                <padding><Insets bottom="24" left="22" right="22" top="24"/></padding>
+                                <Label styleClass="partner-title" text="🏦  Ngân hàng số"/>
+                                <Label styleClass="partner-text"
+                                       text="Tích hợp thanh toán, ký quỹ và bảo lãnh đấu giá." wrapText="true"/>
+                            </VBox>
+                            <VBox HBox.hgrow="ALWAYS" styleClass="partner-card">
+                                <padding><Insets bottom="24" left="22" right="22" top="24"/></padding>
+                                <Label styleClass="partner-title" text="📋  Doanh nghiệp thẩm định"/>
+                                <Label styleClass="partner-text"
+                                       text="Hỗ trợ hồ sơ tài sản, thông tin pháp lý và định giá." wrapText="true"/>
+                            </VBox>
+                            <VBox HBox.hgrow="ALWAYS" styleClass="partner-card">
+                                <padding><Insets bottom="24" left="22" right="22" top="24"/></padding>
+                                <Label styleClass="partner-title" text="🏛  Tổ chức công"/>
+                                <Label styleClass="partner-text"
+                                       text="Đăng tải và quản lý phiên đấu giá minh bạch hơn." wrapText="true"/>
+                            </VBox>
+                            <VBox HBox.hgrow="ALWAYS" styleClass="partner-card">
+                                <padding><Insets bottom="24" left="22" right="22" top="24"/></padding>
+                                <Label styleClass="partner-title" text="🏢  Khách hàng doanh nghiệp"/>
+                                <Label styleClass="partner-text"
+                                       text="Quản trị tài sản thanh lý bằng giao diện hiện đại." wrapText="true"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- ═══════════════════ NEWSLETTER ═══════════════════ -->
+                    <HBox spacing="28" styleClass="newsletter-box" alignment="CENTER_LEFT">
+                        <padding><Insets bottom="36" left="56" right="56" top="36"/></padding>
+
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Label styleClass="newsletter-title" text="📬  Nhận thông báo phiên đấu giá mới"/>
+                            <Label styleClass="newsletter-text"
+                                   text="Đăng ký email để nhận lịch phiên đấu giá, tài sản mới và cập nhật từ nền tảng."
+                                   wrapText="true"/>
                         </VBox>
 
-                        <Region HBox.hgrow="ALWAYS" />
-
-                        <TextField prefWidth="280" promptText="Nhập email của bạn" styleClass="mail-field" />
-                        <Button styleClass="primary-btn" text="Đăng ký" />
+                        <TextField prefWidth="300" promptText="Nhập email của bạn" styleClass="mail-field"/>
+                        <Button styleClass="primary-btn" text="Đăng ký"/>
                     </HBox>
 
-                    <!-- FOOTER -->
-                    <VBox spacing="18" styleClass="footer">
-                        <padding>
-                            <Insets bottom="26" left="42" right="42" top="32" />
-                        </padding>
+                    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+                    <VBox spacing="22" styleClass="footer">
+                        <padding><Insets bottom="30" left="56" right="56" top="40"/></padding>
 
                         <HBox spacing="60">
-                            <VBox prefWidth="280" spacing="10">
-                                <Label styleClass="footer-title" text="Công ty đấu giá hợp danh Aurex" />
-                                <Label styleClass="footer-text" text="Mã số doanh nghiệp: 08058420&#10;Hotline: 1900 9999&#10;Email: info@aurexauction.vn" wrapText="true" />
+                            <VBox prefWidth="300" spacing="10">
+                                <Label styleClass="footer-title" text="Công ty đấu giá hợp danh Aurex"/>
+                                <Label styleClass="footer-text"
+                                       text="Mã số doanh nghiệp: 08058420&#10;Hotline: 1900 9999&#10;Email: info@aurexauction.vn"
+                                       wrapText="true"/>
                             </VBox>
-
                             <VBox prefWidth="220" spacing="10">
-                                <Label styleClass="footer-title" text="Về chúng tôi" />
-                                <Label styleClass="footer-text" text="Giới thiệu&#10;Quy chế hoạt động&#10;Hướng dẫn sử dụng" wrapText="true" />
+                                <Label styleClass="footer-title" text="Về chúng tôi"/>
+                                <Label styleClass="footer-text"
+                                       text="Giới thiệu&#10;Quy chế hoạt động&#10;Hướng dẫn sử dụng" wrapText="true"/>
                             </VBox>
-
                             <VBox prefWidth="220" spacing="10">
-                                <Label styleClass="footer-title" text="Chính sách" />
-                                <Label styleClass="footer-text" text="Bảo mật&#10;Điều khoản sử dụng&#10;Quy định đấu giá" wrapText="true" />
+                                <Label styleClass="footer-title" text="Chính sách"/>
+                                <Label styleClass="footer-text"
+                                       text="Bảo mật&#10;Điều khoản sử dụng&#10;Quy định đấu giá" wrapText="true"/>
                             </VBox>
-
                             <VBox prefWidth="260" spacing="10">
-                                <Label styleClass="footer-title" text="Liên hệ nhanh" />
-                                <Label styleClass="footer-text" text="Địa chỉ: Hà Nội&#10;Giờ làm việc: 08:00 - 17:30" wrapText="true" />
+                                <Label styleClass="footer-title" text="Liên hệ"/>
+                                <Label styleClass="footer-text"
+                                       text="📍  Hà Nội&#10;🕐  08:00 - 17:30" wrapText="true"/>
                             </VBox>
                         </HBox>
 
-                        <Separator styleClass="footer-separator" />
-                        <Label styleClass="copyright" text="Copyright 2026 © Aurex Auction" />
+                        <Separator styleClass="footer-separator"/>
+                        <Label styleClass="copyright" text="Copyright 2026 © Aurex Auction. All rights reserved."/>
                     </VBox>
 
                 </VBox>

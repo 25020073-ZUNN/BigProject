@@ -45,9 +45,9 @@
     </top>
 
     <center>
-        <VBox spacing="22" styleClass="page-section">
+        <VBox spacing="26" styleClass="page-section">
             <padding>
-                <Insets top="30" right="42" bottom="30" left="42"/>
+                <Insets top="34" right="48" bottom="34" left="48"/>
             </padding>
 
             <VBox spacing="10">
@@ -57,9 +57,9 @@
             </VBox>
 
             <HBox spacing="24">
-                <VBox prefWidth="860" spacing="20" styleClass="register-panel">
+                <VBox prefWidth="860" spacing="24" styleClass="register-panel">
                     <padding>
-                        <Insets top="26" right="26" bottom="26" left="26"/>
+                        <Insets top="30" right="30" bottom="30" left="30"/>
                     </padding>
 
                     <Label text="Thông tin đăng ký" styleClass="login-panel-title"/>

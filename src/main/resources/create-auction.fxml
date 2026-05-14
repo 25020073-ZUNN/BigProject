@@ -46,7 +46,7 @@
             <content>
                 <VBox spacing="24" styleClass="page-section">
                     <padding>
-                        <Insets top="28" right="40" bottom="36" left="40"/>
+                        <Insets top="32" right="48" bottom="40" left="48"/>
                     </padding>
 
                     <VBox spacing="8">
@@ -55,9 +55,10 @@
                     </VBox>
 
                     <HBox spacing="24">
-                        <VBox spacing="18" styleClass="register-panel" prefWidth="900">
+                        <!-- Form chính: Nhập thông tin tài sản và phiên đấu giá -->
+                        <VBox spacing="22" styleClass="register-panel" prefWidth="900">
                             <padding>
-                                <Insets top="24" right="24" bottom="24" left="24"/>
+                                <Insets top="28" right="28" bottom="28" left="28"/>
                             </padding>
 
                             <Label text="Thông tin cơ bản" styleClass="partner-title"/>

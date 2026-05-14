@@ -52,9 +52,10 @@
             <content>
                 <VBox spacing="30">
                     <!-- HERO SECTION FOR NEWS -->
-                    <VBox spacing="10" styleClass="page-hero-small">
+                    <!-- HERO: Tiêu đề trang tin tức -->
+                    <VBox spacing="12" styleClass="page-hero-small">
                         <padding>
-                            <Insets top="40" right="42" bottom="40" left="42"/>
+                            <Insets top="44" right="48" bottom="44" left="48"/>
                         </padding>
                         <Label text="TIN TỨC &amp; THÔNG BÁO" styleClass="hero-small"/>
                         <Label text="Cập nhật những thông tin mới nhất từ Aurex" styleClass="hero-title"/>
@@ -62,9 +63,10 @@
                     </VBox>
 
                     <!-- MAIN NEWS CONTENT -->
+                    <!-- NỘI DUNG CHÍNH: Bài viết + Sidebar -->
                     <HBox spacing="30">
                         <padding>
-                            <Insets top="0" right="42" bottom="30" left="42"/>
+                            <Insets top="0" right="48" bottom="36" left="48"/>
                         </padding>
 
                         <!-- NEWS LIST -->
@@ -207,9 +209,10 @@
                     </HBox>
 
                     <!-- FOOTER REUSED -->
-                    <VBox spacing="18" styleClass="footer">
+                    <!-- FOOTER -->
+                    <VBox spacing="22" styleClass="footer">
                         <padding>
-                            <Insets top="32" right="42" bottom="26" left="42"/>
+                            <Insets top="36" right="48" bottom="30" left="48"/>
                         </padding>
                         <HBox spacing="60">
                             <VBox spacing="10" prefWidth="280">

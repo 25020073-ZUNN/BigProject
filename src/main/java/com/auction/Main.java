@@ -10,7 +10,8 @@ import javafx.stage.Stage;
 
 /**
  * Lớp Main - Điểm vào chính của ứng dụng.
- * Khởi tạo giao diện đồ họa (JavaFX), Server nội bộ và kiểm tra kết nối cơ sở dữ liệu.
+ * Khởi tạo giao diện đồ họa (JavaFX), Server nội bộ và kiểm tra kết nối cơ sở
+ * dữ liệu.
  */
 public class Main extends Application {
 
@@ -20,14 +21,14 @@ public class Main extends Application {
     public void start(Stage stage) throws Exception {
         // 1. Khởi động Server nhúng (ĐÃ TẮT ĐỂ CHẠY THỦ CÔNG)
         // startEmbeddedServer();
-        
+
         // 2. Kiểm tra và in thông tin cấu hình Database ra console
         logDatabaseConfiguration();
 
         // 3. Nạp giao diện chính từ file FXML
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/giaodien.fxml"));
         Scene scene = new Scene(loader.load());
-        
+
         // 4. Thiết lập các thông số cho cửa sổ ứng dụng
         stage.setTitle("HỆ THỐNG ĐẤU GIÁ - NHÓM 6 UET");
         stage.setScene(scene);
@@ -72,12 +73,12 @@ public class Main extends Application {
     private void logDatabaseConfiguration() {
         System.out.println("[DB] URL cấu hình: " + DBConnection.getConfiguredUrl());
         System.out.println("[DB] Tài khoản DB: " + DBConnection.getConfiguredUser());
-        
+
         // Kiểm tra xem thực tế có kết nối được đến MySQL không
         if (AuthService.getInstance().isDatabaseAvailable()) {
-            System.out.println("[DB] Trạng thái: ĐÃ KẾT NỐI");
+            System.out.println("[DB] Trạng thái: CONNECTED");
         } else {
-            System.out.println("[DB] Trạng thái: KHÔNG KHẢ DỤNG (Vui lòng kiểm tra Docker/MySQL)");
+            System.out.println("[DB] Trạng thái: DISCONNECTED (Vui lòng kiểm tra Docker/MySQL)");
         }
     }
 

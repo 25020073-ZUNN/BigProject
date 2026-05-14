@@ -51,7 +51,7 @@ public class AuctionDao {
         String sql = """
                 SELECT a.id AS auction_id,
                        a.seller_id AS auction_seller_id,
-                       a.highest_bidder_id,
+                       a.highest_bidder_id AS auction_highest_bidder_id,
                        a.starting_price AS auction_starting_price,
                        a.current_price AS auction_current_price,
                        a.active,
@@ -64,7 +64,7 @@ public class AuctionDao {
                        seller.role AS seller_role,
                        seller.balance AS seller_balance,
                        seller.active AS seller_active,
-                       highest.id AS highest_bidder_id_ref,
+                       highest.id AS highest_bidder_id,
                        highest.username AS highest_bidder_username,
                        highest.full_name AS highest_bidder_full_name,
                        highest.email AS highest_bidder_email,
@@ -103,8 +103,12 @@ public class AuctionDao {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                Auction auction = mapAuction(rs);
-                auctionsById.put(auction.getId(), auction);
+                try {
+                    Auction auction = mapAuction(rs);
+                    auctionsById.put(auction.getId(), auction);
+                } catch (Exception e) {
+                    System.err.println("[AuctionDao] Lỗi khi nạp phiên đấu giá: " + e.getMessage());
+                }
             }
 
             if (!auctionsById.isEmpty()) {
@@ -424,7 +428,7 @@ public class AuctionDao {
         auction.setFinished(rs.getBoolean("finished"));
         auction.setMinimumBidStep(BigDecimal.valueOf(rs.getLong("bid_step")));
 
-        String highestBidderId = rs.getString("highest_bidder_id_ref");
+        String highestBidderId = rs.getString("highest_bidder_id");
         if (highestBidderId != null && !highestBidderId.isBlank()) {
             auction.setHighestBidder(mapUser(rs, "highest_bidder_"));
         }

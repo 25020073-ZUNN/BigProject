@@ -1,0 +1,22 @@
+2026-05-08 10:24:46 [INFO] com.auction.util.LoggingConfig - Logging configured at C:\Users\Admin\Documents\BigProject\logs
+2026-05-08 10:24:46 [INFO] com.auction.Main - [DB] Configured URL: jdbc:mysql://localhost:3307/auction_db
+2026-05-08 10:24:46 [INFO] com.auction.Main - [DB] Configured user: root
+2026-05-08 10:24:46 [INFO] com.auction.network.server.Server - Auction server started on port 5050
+2026-05-08 10:24:47 [INFO] com.auction.Main - [DB] Connection status: CONNECTED
+2026-05-08 10:24:47 [WARNING] javafx.css - CSS Error parsing file:/C:/Users/Admin/Documents/BigProject/target/classes/style.css: Expected 'url("<uri-string>")' while parsing '-fx-background-image' at [142,26]
+2026-05-08 10:24:47 [WARNING] javafx.css - CSS Error parsing file:/C:/Users/Admin/Documents/BigProject/target/classes/style.css: Expected 'url("<uri-string>")' while parsing '-fx-background-image' at [236,26]
+2026-05-08 10:24:47 [WARNING] javafx.css - CSS Error parsing file:/C:/Users/Admin/Documents/BigProject/target/classes/style.css: Expected 'url("<uri-string>")' while parsing '-fx-background-image' at [242,26]
+2026-05-08 10:24:47 [WARNING] javafx.css - CSS Error parsing file:/C:/Users/Admin/Documents/BigProject/target/classes/style.css: Expected 'url("<uri-string>")' while parsing '-fx-background-image' at [248,26]
+2026-05-08 10:24:49 [WARNING] javafx.css - Error loading image: https://images.unsplash.com/photo-1551288049-bbbda5366391?w=300&q=80
+2026-05-08 10:25:00 [SEVERE] com.auction.Main - Embedded server failed
+java.net.SocketException: Socket closed
+	at java.base/sun.nio.ch.NioSocketImpl.endAccept(NioSocketImpl.java:685)
+	at java.base/sun.nio.ch.NioSocketImpl.accept(NioSocketImpl.java:758)
+	at java.base/java.net.ServerSocket.implAccept(ServerSocket.java:593)
+	at java.base/java.net.ServerSocket.platformImplAccept(ServerSocket.java:560)
+	at java.base/java.net.ServerSocket.implAccept(ServerSocket.java:536)
+	at java.base/java.net.ServerSocket.implAccept(ServerSocket.java:482)
+	at java.base/java.net.ServerSocket.accept(ServerSocket.java:441)
+	at com.auction.network.server.Server.start(Server.java:66)
+	at com.auction.Main.lambda$startEmbeddedServer$0(Main.java:48)
+	at java.base/java.lang.Thread.run(Thread.java:1474)

@@ -53,9 +53,10 @@
                 <VBox spacing="30">
 
                     <!-- HERO SECTION -->
-                    <VBox spacing="10" styleClass="page-hero-small">
+                    <!-- HERO: Tiêu đề trang liên hệ -->
+                    <VBox spacing="12" styleClass="page-hero-small">
                         <padding>
-                            <Insets top="40" right="42" bottom="40" left="42"/>
+                            <Insets top="44" right="48" bottom="44" left="48"/>
                         </padding>
                         <Label text="LIÊN HỆ VỚI CHÚNG TÔI" styleClass="hero-small"/>
                         <Label text="Hỗ trợ &amp; Phản hồi khách hàng" styleClass="hero-title"/>
@@ -64,9 +65,10 @@
                     </VBox>
 
                     <!-- MAIN CONTENT -->
+                    <!-- NỘI DUNG CHÍNH: Form liên hệ + Thông tin -->
                     <HBox spacing="30">
                         <padding>
-                            <Insets top="0" right="42" bottom="40" left="42"/>
+                            <Insets top="0" right="48" bottom="44" left="48"/>
                         </padding>
 
                         <!-- LEFT: CONTACT FORM -->
@@ -188,9 +190,10 @@
                     </HBox>
 
                     <!-- FOOTER -->
-                    <VBox spacing="18" styleClass="footer">
+                    <!-- FOOTER -->
+                    <VBox spacing="22" styleClass="footer">
                         <padding>
-                            <Insets top="32" right="42" bottom="26" left="42"/>
+                            <Insets top="36" right="48" bottom="30" left="48"/>
                         </padding>
 
                         <HBox spacing="60">
