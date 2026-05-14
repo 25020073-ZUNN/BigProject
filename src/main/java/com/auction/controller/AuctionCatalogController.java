@@ -255,7 +255,8 @@ public class AuctionCatalogController {
 
     private void openAuctionDetail(Auction auction) {
         Stage stage = (Stage) searchField.getScene().getWindow();
-        SceneNavigator.navigateToAuctionDetailOrSummary(stage, auction);
+        // Điều hướng tới trang chi tiết tài sản (trung gian) thay vì vào thẳng phòng đấu giá
+        SceneNavigator.navigateToAssetDetail(stage, auction);
     }
 
     private String formatPrice(BigDecimal amount) {

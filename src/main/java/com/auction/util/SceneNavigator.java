@@ -13,6 +13,7 @@ import javafx.util.Duration;
 import java.io.IOException;
 
 import com.auction.model.Auction;
+import com.auction.controller.AssetDetailController;
 import com.auction.controller.AuctionDetailController;
 import com.auction.controller.AuctionSummaryController;
 
@@ -48,7 +49,6 @@ public final class SceneNavigator {
             stage.setMinWidth(1280);
             stage.setMinHeight(820);
 
-            // Fade-in cực nhanh — không gây lag, vẫn mượt
             FadeTransition ft = new FadeTransition(Duration.millis(FADE_MS), root);
             ft.setFromValue(0);
             ft.setToValue(1);
@@ -73,7 +73,39 @@ public final class SceneNavigator {
     public static void goToUserProfile(ActionEvent event) { switchScene(event, "user-profile.fxml"); }
 
     /**
+     * Điều hướng tới trang chi tiết tài sản (asset-detail.fxml).
+     * Đây là trang trung gian hiển thị thông tin tổng quan + countdown,
+     * trước khi người dùng vào phòng đấu giá hoặc xem tổng kết.
+     *
+     * Luồng: AuctionCatalog → AssetDetail → ProductDetail/AuctionSummary
+     */
+    public static void navigateToAssetDetail(Stage stage, Auction auction) {
+        if (auction == null) return;
+        try {
+            FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource("/asset-detail.fxml"));
+            Parent root = loader.load();
+
+            AssetDetailController ctrl = loader.getController();
+            ctrl.setAuctionData(auction);
+
+            root.setOpacity(0);
+            applyRoot(stage, root);
+
+            FadeTransition ft = new FadeTransition(Duration.millis(FADE_MS), root);
+            ft.setFromValue(0);
+            ft.setToValue(1);
+            ft.setInterpolator(Interpolator.EASE_IN);
+            ft.play();
+        } catch (IOException e) {
+            e.printStackTrace();
+            AlertHelper.showError("Lỗi chuyển trang", "Không thể tải trang chi tiết tài sản.");
+        }
+    }
+
+    /**
      * Điều hướng thông minh dựa trên trạng thái phiên đấu giá.
+     * Running → product-detail.fxml (đấu giá realtime)
+     * Finished → auction-summary.fxml (tổng kết)
      */
     public static void navigateToAuctionDetailOrSummary(Stage stage, Auction auction) {
         if (auction == null) return;

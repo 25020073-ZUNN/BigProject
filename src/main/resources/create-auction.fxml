@@ -22,9 +22,9 @@
             styleClass="root">
 
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="18" styleClass="topbar">
+        <HBox alignment="CENTER_LEFT" spacing="20" styleClass="topbar">
             <padding>
-                <Insets top="14" right="28" bottom="14" left="28"/>
+                <Insets top="12" right="36" bottom="12" left="36"/>
             </padding>
             <VBox spacing="0">
                 <Label text="AUREX" styleClass="logo-main"/>
@@ -33,8 +33,7 @@
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="Trang chủ" onAction="#goToHome" styleClass="nav-btn"/>
             <Button text="Tài sản đấu giá" onAction="#goToAuctionList" styleClass="nav-btn"/>
-            <Button text="Chi tiết phiên" onAction="#goToProductDetail" styleClass="nav-btn"/>
-            <Button text="Tạo phiên" onAction="#goToCreateAuction" styleClass="nav-btn-active"/>
+            <Button text="Phiên đấu giá" onAction="#goToSessions" styleClass="nav-btn"/>
             <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn"/>
             <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
             <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>

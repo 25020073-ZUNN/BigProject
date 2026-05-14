@@ -25,7 +25,7 @@
     <top>
         <HBox alignment="CENTER_LEFT" spacing="18" styleClass="topbar">
             <padding>
-                <Insets top="14" right="28" bottom="14" left="28"/>
+                <Insets top="12" right="36" bottom="12" left="36"/>
             </padding>
             <VBox spacing="0">
                 <Label text="AUREX" styleClass="logo-main"/>
@@ -46,7 +46,7 @@
             <content>
                 <VBox spacing="22" styleClass="page-section">
                     <padding>
-                        <Insets top="32" right="40" bottom="36" left="40"/>
+                        <Insets top="28" right="48" bottom="36" left="48"/>
                     </padding>
 
                     <!-- Tiêu đề + Trạng thái đồng bộ -->
