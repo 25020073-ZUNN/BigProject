@@ -91,7 +91,11 @@
 
                 <VBox spacing="8">
                     <Label text="Mật khẩu" styleClass="field-label"/>
-                    <PasswordField fx:id="passwordField" promptText="Nhập mật khẩu" styleClass="mail-field"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <PasswordField fx:id="passwordField" promptText="Nhập mật khẩu" styleClass="mail-field" HBox.hgrow="ALWAYS"/>
+                        <TextField fx:id="visiblePasswordField" promptText="Nhập mật khẩu" styleClass="mail-field" visible="false" managed="false" HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="togglePasswordButton" text="👁" styleClass="password-eye-btn"/>
+                    </HBox>
                 </VBox>
 
                 <HBox alignment="CENTER_LEFT">

@@ -1,18 +1,12 @@
 package com.auction.controller;
 
 import com.auction.model.Auction;
+import com.auction.network.client.AuctionPayloadMapper;
 import com.auction.network.client.AuctionUpdateListener;
 import com.auction.network.client.NetworkService;
-import com.auction.util.UserSession;
-import com.auction.util.SceneNavigator;
-import com.auction.util.AlertHelper;
 import com.auction.util.LoginStateHelper;
 import com.auction.util.PriceFormatter;
-import com.auction.network.client.AuctionPayloadMapper;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import com.auction.util.SceneNavigator;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -21,30 +15,23 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-/**
- * Controller cho màn hình "Phiên đấu giá".
- *
- * Màn hình này tập trung vào trạng thái thời gian của từng phiên:
- * - Sắp diễn ra
- * - Đang diễn ra
- * - Đã kết thúc
- *
- * Ngoài ra, phần tìm kiếm và bộ lọc đều chạy trên snapshot thật từ server.
- */
 public class SessionCatalogController {
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final NetworkService networkService = NetworkService.getInstance();
     private final AuctionUpdateListener auctionUpdateListener = auctionData -> Platform.runLater(this::renderSessions);
@@ -54,11 +41,11 @@ public class SessionCatalogController {
     @FXML
     private ComboBox<String> statusFilter;
     @FXML
-    private VBox runningSessionsContainer;
+    private FlowPane runningSessionsContainer;
     @FXML
-    private VBox upcomingSessionsContainer;
+    private FlowPane upcomingSessionsContainer;
     @FXML
-    private VBox finishedSessionsContainer;
+    private FlowPane finishedSessionsContainer;
     @FXML
     private Button loginButton;
 
@@ -77,7 +64,9 @@ public class SessionCatalogController {
     }
 
     @FXML
-    public void handleLogout(ActionEvent event) { LoginStateHelper.handleLogout(event); }
+    public void handleLogout(ActionEvent event) {
+        LoginStateHelper.handleLogout(event);
+    }
 
     @FXML
     public void handleSearch(ActionEvent event) {
@@ -94,9 +83,18 @@ public class SessionCatalogController {
 
     private void renderSessions() {
         List<Auction> filteredAuctions = filterAuctions(loadAuctionsFromServer());
-        List<Auction> running = filteredAuctions.stream().filter(auction -> "Đang diễn ra".equals(resolveStatusLabel(auction))).collect(Collectors.toList());
-        List<Auction> upcoming = filteredAuctions.stream().filter(auction -> "Sắp diễn ra".equals(resolveStatusLabel(auction))).collect(Collectors.toList());
-        List<Auction> finished = filteredAuctions.stream().filter(auction -> "Đã kết thúc".equals(resolveStatusLabel(auction))).collect(Collectors.toList());
+        List<Auction> running = filteredAuctions.stream()
+                .filter(auction -> "Đang diễn ra".equals(resolveStatusLabel(auction)))
+                .sorted(Comparator.comparing(auction -> auction.getItem().getEndTime()))
+                .collect(Collectors.toList());
+        List<Auction> upcoming = filteredAuctions.stream()
+                .filter(auction -> "Sắp diễn ra".equals(resolveStatusLabel(auction)))
+                .sorted(Comparator.comparing(auction -> auction.getItem().getStartTime()))
+                .collect(Collectors.toList());
+        List<Auction> finished = filteredAuctions.stream()
+                .filter(auction -> "Đã kết thúc".equals(resolveStatusLabel(auction)))
+                .sorted(Comparator.comparing((Auction auction) -> auction.getItem().getEndTime()).reversed())
+                .collect(Collectors.toList());
 
         renderSection(runningSessionsContainer, running, "Không có phiên đang diễn ra.");
         renderSection(upcomingSessionsContainer, upcoming, "Không có phiên sắp diễn ra.");
@@ -135,7 +133,7 @@ public class SessionCatalogController {
                 || auction.getSeller().getUsername().toLowerCase(Locale.ROOT).contains(keyword);
     }
 
-    private void renderSection(VBox container, List<Auction> auctions, String emptyMessage) {
+    private void renderSection(FlowPane container, List<Auction> auctions, String emptyMessage) {
         container.getChildren().clear();
         if (auctions.isEmpty()) {
             container.getChildren().add(createEmptyState(emptyMessage));
@@ -143,45 +141,58 @@ public class SessionCatalogController {
         }
 
         for (Auction auction : auctions) {
-            container.getChildren().add(createSessionRow(auction));
+            container.getChildren().add(createSessionCard(auction));
         }
     }
 
-    private VBox createSessionRow(Auction auction) {
-        VBox row = new VBox(10);
-        row.getStyleClass().add("session-data-card");
+    private VBox createSessionCard(Auction auction) {
+        VBox card = new VBox(12);
+        card.getStyleClass().add("catalog-product-card");
 
-        Label codeLabel = new Label("Mã phiên: " + auction.getId());
-        codeLabel.getStyleClass().add("hero-small");
+        Label imageBox = new Label(resolveImageText(auction));
+        imageBox.getStyleClass().add("catalog-product-image");
+        imageBox.setMaxWidth(Double.MAX_VALUE);
+
+        Label statusBadge = new Label(resolveStatusLabel(auction));
+        statusBadge.getStyleClass().add(resolveStatusBadgeClass(auction));
+
+        Label categoryBadge = new Label(auction.getItem().getCategory());
+        categoryBadge.getStyleClass().add("badge-soft");
+        HBox badgeRow = new HBox(8, statusBadge, categoryBadge);
 
         Label titleLabel = new Label(auction.getItem().getName());
-        titleLabel.getStyleClass().add("news-title");
+        titleLabel.getStyleClass().add("catalog-product-title");
         titleLabel.setWrapText(true);
+        titleLabel.setMinHeight(72);
 
-        Label sellerLabel = new Label("Người bán: " + auction.getSeller().getUsername());
-        sellerLabel.getStyleClass().add("muted-text");
+        Label currentPriceRow = createCatalogInfoRow(auction.isFinished() ? "Giá chốt:" : "Giá hiện tại:", formatPrice(auction.getCurrentPrice()));
+        Label stepRow = createCatalogInfoRow("Bước giá:", formatPrice(auction.getMinimumBidStep()));
+        Label timeRow = createCatalogInfoRow("Thời gian tổ chức:", auction.getItem().getStartTime().format(DATE_TIME_FORMATTER));
+        Label stateRow = createCatalogInfoRow("Trạng thái:", buildTimeMessage(auction));
+        Label bidRow = createCatalogInfoRow("Lượt đặt giá:", String.valueOf(auction.getBidHistory().size()));
 
-        Label statusLabel = new Label(resolveStatusLabel(auction) + " | " + buildTimeMessage(auction));
-        statusLabel.getStyleClass().add("partner-text-strong");
-        statusLabel.setWrapText(true);
-
-        Label priceLabel = new Label("Giá hiện tại: " + formatPrice(auction.getCurrentPrice()));
-        priceLabel.getStyleClass().add("mini-info-number");
-
-        Label stepLabel = new Label("Bước giá: " + formatPrice(auction.getMinimumBidStep()));
-        stepLabel.getStyleClass().add("partner-text");
-
-        javafx.scene.control.Button detailButton = new javafx.scene.control.Button("Mở phiên");
-        detailButton.getStyleClass().add("small-btn");
+        Button detailButton = new Button(auction.isFinished() ? "Xem tổng kết" : "Mở phiên");
+        detailButton.getStyleClass().add("catalog-card-btn");
+        detailButton.setMaxWidth(Double.MAX_VALUE);
         detailButton.setOnAction(event -> openAuctionDetail(auction));
 
-        HBox footer = new HBox(12);
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        footer.getChildren().addAll(priceLabel, stepLabel, spacer, detailButton);
+        card.getChildren().addAll(imageBox, badgeRow, titleLabel, currentPriceRow, stepRow, timeRow, stateRow, bidRow, detailButton);
+        return card;
+    }
 
-        row.getChildren().addAll(codeLabel, titleLabel, sellerLabel, statusLabel, footer);
+    private Label createCatalogInfoRow(String label, String value) {
+        Label row = new Label(label + "  " + value);
+        row.getStyleClass().add("catalog-info-row");
+        row.setWrapText(true);
         return row;
+    }
+
+    private String resolveImageText(Auction auction) {
+        return switch (auction.getItem().getCategory()) {
+            case "Vehicle" -> "VEHICLE";
+            case "Art" -> "ART";
+            default -> "AUREX";
+        };
     }
 
     private VBox createEmptyState(String message) {
@@ -204,17 +215,20 @@ public class SessionCatalogController {
         return "Đã kết thúc";
     }
 
+    private String resolveStatusBadgeClass(Auction auction) {
+        String status = resolveStatusLabel(auction);
+        return switch (status) {
+            case "Đang diễn ra" -> "badge-live";
+            case "Sắp diễn ra" -> "badge-new";
+            default -> "badge-hot";
+        };
+    }
+
     private String buildTimeMessage(Auction auction) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime start = auction.getItem().getStartTime();
         LocalDateTime end = auction.getItem().getEndTime();
 
-        /*
-         * Ghi chú quan trọng:
-         * Màn hình phiên đấu giá phải giải thích thời gian theo ngữ nghĩa trạng thái,
-         * không chỉ hiển thị timestamp thô. Người dùng cần nhìn vào là biết còn bao lâu,
-         * sắp mở khi nào, hay đã kết thúc từ lúc nào.
-         */
         if (now.isBefore(start)) {
             return "Mở sau " + formatDuration(now, start);
         }
@@ -235,7 +249,6 @@ public class SessionCatalogController {
 
     private void openAuctionDetail(Auction auction) {
         Stage stage = (Stage) searchField.getScene().getWindow();
-        // Điều hướng tới trang chi tiết tài sản (trung gian) thay vì vào thẳng phòng đấu giá
         SceneNavigator.navigateToAssetDetail(stage, auction);
     }
 

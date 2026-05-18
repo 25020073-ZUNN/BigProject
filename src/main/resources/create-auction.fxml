@@ -63,11 +63,9 @@
                             <Label text="Thông tin cơ bản" styleClass="partner-title"/>
 
                             <GridPane hgap="18" vgap="16">
-                                <Label text="Người bán" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-label"/>
-                                <ComboBox fx:id="sellerComboBox" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="mail-field" prefWidth="260"/>
 
-                                <Label text="Danh mục" GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="field-label"/>
-                                <ComboBox fx:id="categoryComboBox" GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="mail-field" prefWidth="260"/>
+                                <Label text="Danh mục" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-label"/>
+                                <ComboBox fx:id="categoryComboBox" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="mail-field" prefWidth="260"/>
 
                                 <Label text="Tên tài sản" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="field-label"/>
                                 <TextField fx:id="nameField" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="mail-field" promptText="Ví dụ: Honda Vision 2023"/>
@@ -88,30 +86,43 @@
                             <Label text="Mô tả tài sản" styleClass="field-label"/>
                             <TextArea fx:id="descriptionArea" prefRowCount="6" wrapText="true" styleClass="mail-field" promptText="Mô tả chi tiết tài sản, nguồn gốc, tình trạng..."/>
 
-                            <Label text="Thuộc tính theo danh mục" styleClass="partner-title"/>
+                            <Label text="Thông tin theo danh mục" styleClass="partner-title"/>
 
-                            <GridPane hgap="18" vgap="16">
-                                <Label text="Hãng điện tử" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-label"/>
-                                <TextField fx:id="brandField" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="mail-field" promptText="Apple, Samsung..."/>
+                            <VBox fx:id="electronicsFields" spacing="14">
+                                <Label text="Điện tử" styleClass="field-label"/>
+                                <GridPane hgap="18" vgap="16">
+                                    <Label text="Hãng điện tử" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-label"/>
+                                    <TextField fx:id="brandField" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="mail-field" promptText="Apple, Samsung..."/>
 
-                                <Label text="Số tháng bảo hành" GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="field-label"/>
-                                <TextField fx:id="warrantyMonthsField" GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="mail-field" promptText="12"/>
+                                    <Label text="Số tháng bảo hành" GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="field-label"/>
+                                    <TextField fx:id="warrantyMonthsField" GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="mail-field" promptText="12"/>
+                                </GridPane>
+                            </VBox>
 
-                                <Label text="Hãng xe" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="field-label"/>
-                                <TextField fx:id="manufacturerField" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="mail-field" promptText="Honda, Toyota..."/>
+                            <VBox fx:id="vehicleFields" spacing="14">
+                                <Label text="Phương tiện" styleClass="field-label"/>
+                                <GridPane hgap="18" vgap="16">
+                                    <Label text="Hãng xe" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-label"/>
+                                    <TextField fx:id="manufacturerField" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="mail-field" promptText="Honda, Toyota..."/>
 
-                                <Label text="Năm sản xuất" GridPane.columnIndex="1" GridPane.rowIndex="2" styleClass="field-label"/>
-                                <TextField fx:id="productionYearField" GridPane.columnIndex="1" GridPane.rowIndex="3" styleClass="mail-field" promptText="2023"/>
+                                    <Label text="Năm sản xuất" GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="field-label"/>
+                                    <TextField fx:id="productionYearField" GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="mail-field" promptText="2023"/>
 
-                                <Label text="Số km đã đi" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="field-label"/>
-                                <TextField fx:id="mileageField" GridPane.columnIndex="0" GridPane.rowIndex="5" styleClass="mail-field" promptText="12000"/>
+                                    <Label text="Số km đã đi" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="field-label"/>
+                                    <TextField fx:id="mileageField" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="mail-field" promptText="12000"/>
+                                </GridPane>
+                            </VBox>
 
-                                <Label text="Tên tác giả" GridPane.columnIndex="1" GridPane.rowIndex="4" styleClass="field-label"/>
-                                <TextField fx:id="artistField" GridPane.columnIndex="1" GridPane.rowIndex="5" styleClass="mail-field" promptText="Bùi Xuân Phái"/>
+                            <VBox fx:id="artFields" spacing="14">
+                                <Label text="Tác phẩm nghệ thuật" styleClass="field-label"/>
+                                <GridPane hgap="18" vgap="16">
+                                    <Label text="Tên tác giả" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-label"/>
+                                    <TextField fx:id="artistField" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="mail-field" promptText="Bùi Xuân Phái"/>
 
-                                <Label text="Năm sáng tác" GridPane.columnIndex="0" GridPane.rowIndex="6" styleClass="field-label"/>
-                                <TextField fx:id="yearCreatedField" GridPane.columnIndex="0" GridPane.rowIndex="7" styleClass="mail-field" promptText="1978"/>
-                            </GridPane>
+                                    <Label text="Năm sáng tác" GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="field-label"/>
+                                    <TextField fx:id="yearCreatedField" GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="mail-field" promptText="1978"/>
+                                </GridPane>
+                            </VBox>
 
                             <HBox spacing="12">
                                 <Button text="Lưu phiên đấu giá" onAction="#handleCreateAuction" styleClass="primary-btn"/>

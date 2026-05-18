@@ -245,6 +245,8 @@ public class AuctionDao {
      * cùng đọc một `current_price` cũ rồi đều ghi đè lên nhau.
      */
     public boolean placeBid(Auction auction, User bidder, BigDecimal amount) {
+        synchronizeAuctionStates();
+
         String lockAuctionSql = """
                 SELECT a.current_price, a.seller_id, a.finished, a.active, i.bid_step, i.end_time
                 FROM auctions a

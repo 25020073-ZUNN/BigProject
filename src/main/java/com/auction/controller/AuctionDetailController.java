@@ -13,6 +13,7 @@ import com.auction.util.FxAsync;
 import com.auction.util.UserSession;
 import com.auction.util.AlertHelper;
 import com.auction.util.PriceFormatter;
+import com.auction.util.SceneNavigator;
 import javafx.application.Platform;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -67,6 +68,7 @@ public class AuctionDetailController {
     private boolean autoBidInFlight;
     private BigDecimal autoBidMaximum;
     private BigDecimal autoBidStep;
+    private boolean navigatingToSummary;
 
     @FXML
     private Label lblName;
@@ -336,6 +338,11 @@ public class AuctionDetailController {
         lblBidHint.setText("Giá đặt tiếp theo tối thiểu: "
                 + formatPrice(currentAuction.getCurrentPrice().add(resolveMinimumIncrement())) + ".");
 
+        if (currentAuction.isFinished()) {
+            navigateToSummary();
+            return;
+        }
+
         int currentBidCount = currentAuction.getBidHistory().size();
         BigDecimal currentPrice = currentAuction.getCurrentPrice();
         if (currentBidCount != lastRenderedBidCount || !Objects.equals(currentPrice, lastRenderedPrice)) {
@@ -459,15 +466,41 @@ public class AuctionDetailController {
 
         countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
             updateTimeLabel(endTime);
-            if (LocalDateTime.now().isAfter(endTime) && currentAuction != null && !currentAuction.isFinished()) {
-                currentAuction.closeAuction();
-                refreshAuctionState();
-                stopCountdown();
+            if (!LocalDateTime.now().isBefore(endTime) && currentAuction != null) {
+                Auction latestAuction = findAuctionById(currentAuctionId);
+                if (latestAuction != null) {
+                    currentAuction = latestAuction;
+                }
+                if (!currentAuction.isFinished()) {
+                    currentAuction.closeAuction();
+                }
                 publishNotification("Phiên đấu giá đã kết thúc.");
+                navigateToSummary();
             }
         }));
         countdownTimeline.setCycleCount(Timeline.INDEFINITE);
         countdownTimeline.play();
+    }
+
+    private void navigateToSummary() {
+        if (navigatingToSummary || currentAuction == null || lblName == null || lblName.getScene() == null) {
+            return;
+        }
+
+        navigatingToSummary = true;
+        stopCountdown();
+        networkService.removeAuctionUpdateListener(auctionUpdateListener);
+
+        Auction latestAuction = findAuctionById(currentAuctionId);
+        if (latestAuction != null) {
+            currentAuction = latestAuction;
+            if (!currentAuction.isFinished()) {
+                currentAuction.closeAuction();
+            }
+        }
+
+        Stage stage = (Stage) lblName.getScene().getWindow();
+        SceneNavigator.navigateToAuctionDetailOrSummary(stage, currentAuction);
     }
 
     private void stopCountdown() {

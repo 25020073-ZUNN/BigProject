@@ -7,6 +7,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -70,18 +71,22 @@
                             <TextField fx:id="searchField" promptText="Tìm theo tên tài sản, mã tài sản, mã phiên, người bán..." HBox.hgrow="ALWAYS" styleClass="mail-field"/>
                             <ComboBox fx:id="categoryFilter" promptText="Danh mục" prefWidth="180" styleClass="mail-field"/>
                             <ComboBox fx:id="statusFilter" promptText="Trạng thái" prefWidth="180" styleClass="mail-field"/>
+                            <ComboBox fx:id="sortFilter" promptText="Sắp xếp" prefWidth="210" styleClass="mail-field"/>
                             <Button text="Tìm kiếm" onAction="#handleSearch" styleClass="primary-btn"/>
                             <Button text="Thêm tài sản đấu giá" onAction="#goToCreateAuction" styleClass="secondary-btn"/>
                         </HBox>
 
                         <HBox alignment="CENTER_LEFT">
-                            <Label fx:id="resultCountLabel" text="0 tài sản phù hợp" styleClass="section-subtitle-bold"/>
-                            <Region HBox.hgrow="ALWAYS"/>
                             <Label text="Dữ liệu đang đọc trực tiếp từ DB" styleClass="auction-notice"/>
                         </HBox>
                     </VBox>
 
-                    <VBox fx:id="auctionListContainer" spacing="16"/>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="☷" styleClass="catalog-icon"/>
+                        <Label fx:id="resultCountLabel" text="Hiển thị 0 sản phẩm" styleClass="section-title-dark"/>
+                    </HBox>
+
+                    <FlowPane fx:id="auctionListContainer" hgap="22" vgap="24" prefWrapLength="1180"/>
                 </VBox>
             </content>
         </ScrollPane>

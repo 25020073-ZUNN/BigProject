@@ -5,32 +5,26 @@ import com.auction.model.item.Item;
 import com.auction.network.client.AuctionPayloadMapper;
 import com.auction.network.client.AuctionUpdateListener;
 import com.auction.network.client.NetworkService;
-import com.auction.util.UserSession;
 import com.auction.util.SceneNavigator;
-import com.auction.util.AlertHelper;
 import com.auction.util.LoginStateHelper;
 import com.auction.util.PriceFormatter;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.application.Platform;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -58,9 +52,11 @@ public class AuctionCatalogController {
     @FXML
     private ComboBox<String> statusFilter;
     @FXML
+    private ComboBox<String> sortFilter;
+    @FXML
     private Label resultCountLabel;
     @FXML
-    private VBox auctionListContainer;
+    private FlowPane auctionListContainer;
     @FXML
     private Button loginButton;
 
@@ -73,10 +69,18 @@ public class AuctionCatalogController {
 
         statusFilter.setItems(FXCollections.observableArrayList("Tất cả", "Sắp diễn ra", "Đang diễn ra", "Đã kết thúc"));
         statusFilter.setValue("Tất cả");
+        sortFilter.setItems(FXCollections.observableArrayList(
+                "Ưu tiên phiên đang diễn ra",
+                "Sắp kết thúc trước",
+                "Mới tạo/sắp mở trước",
+                "Giá cao trước"
+        ));
+        sortFilter.setValue("Ưu tiên phiên đang diễn ra");
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderAuctions));
         categoryFilter.valueProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderAuctions));
         statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderAuctions));
+        sortFilter.valueProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderAuctions));
 
         registerObserverLifecycle();
         networkService.addAuctionUpdateListener(auctionUpdateListener);
@@ -91,9 +95,9 @@ public class AuctionCatalogController {
     }
 
     private void renderAuctions() {
-        List<Auction> filteredAuctions = filterAuctions(loadAuctionsFromServer());
+        List<Auction> filteredAuctions = sortAuctions(filterAuctions(loadAuctionsFromServer()));
 
-        resultCountLabel.setText(filteredAuctions.size() + " tài sản phù hợp");
+        resultCountLabel.setText("Hiển thị " + filteredAuctions.size() + " sản phẩm");
         auctionListContainer.getChildren().clear();
 
         if (filteredAuctions.isEmpty()) {
@@ -129,6 +133,29 @@ public class AuctionCatalogController {
                 .filter(auction -> matchesCategory(auction, category))
                 .filter(auction -> matchesStatus(auction, status))
                 .collect(Collectors.toList());
+    }
+
+    private List<Auction> sortAuctions(List<Auction> auctions) {
+        String sort = sortFilter == null ? null : sortFilter.getValue();
+        Comparator<Auction> comparator = switch (sort == null ? "" : sort) {
+            case "Sắp kết thúc trước" -> Comparator
+                    .comparing((Auction auction) -> auction.isFinished())
+                    .thenComparing(auction -> auction.getItem().getEndTime());
+            case "Mới tạo/sắp mở trước" -> Comparator.comparing((Auction auction) -> auction.getItem().getStartTime());
+            case "Giá cao trước" -> Comparator.comparing(Auction::getCurrentPrice).reversed();
+            default -> Comparator
+                    .comparingInt(this::statusPriority)
+                    .thenComparing(auction -> auction.getItem().getEndTime());
+        };
+        return auctions.stream().sorted(comparator).collect(Collectors.toList());
+    }
+
+    private int statusPriority(Auction auction) {
+        return switch (resolveStatusLabel(auction)) {
+            case "Đang diễn ra" -> 0;
+            case "Sắp diễn ra" -> 1;
+            default -> 2;
+        };
     }
 
     private List<Auction> loadAuctionsFromServer() {
@@ -168,50 +195,59 @@ public class AuctionCatalogController {
 
     private VBox createAuctionCard(Auction auction) {
         VBox card = new VBox(12);
-        card.getStyleClass().add("auction-data-card");
+        card.getStyleClass().add("catalog-product-card");
+
+        Label titleLabel = new Label(auction.getItem().getName());
+        titleLabel.getStyleClass().add("catalog-product-title");
+        titleLabel.setWrapText(true);
+        titleLabel.setMinHeight(72);
+
+        Label imageBox = new Label(resolveImageText(auction));
+        imageBox.getStyleClass().add("catalog-product-image");
+        imageBox.setMaxWidth(Double.MAX_VALUE);
 
         Label statusBadge = new Label(resolveStatusLabel(auction));
         statusBadge.getStyleClass().add(resolveStatusBadgeClass(auction));
 
-        Label titleLabel = new Label(auction.getItem().getName());
-        titleLabel.getStyleClass().add("news-title");
-        titleLabel.setWrapText(true);
+        Label categoryBadge = new Label(auction.getItem().getCategory());
+        categoryBadge.getStyleClass().add("badge-soft");
 
-        Label descriptionLabel = new Label(auction.getItem().getDescription());
-        descriptionLabel.getStyleClass().add("partner-text");
-        descriptionLabel.setWrapText(true);
+        HBox badgeRow = new HBox(8, statusBadge, categoryBadge);
 
-        Label categoryLabel = new Label("Danh mục: " + auction.getItem().getCategory());
-        categoryLabel.getStyleClass().add("partner-text-strong");
+        Label startingPriceRow = createCatalogInfoRow("Giá khởi điểm:", formatPrice(auction.getStartingPrice()));
+        Label currentPriceRow = createCatalogInfoRow(auction.isFinished() ? "Giá chốt:" : "Giá hiện tại:", formatPrice(auction.getCurrentPrice()));
+        Label timeRow = createCatalogInfoRow("Thời gian tổ chức:", auction.getItem().getStartTime().format(DATE_TIME_FORMATTER));
+        Label sellerRow = createCatalogInfoRow("Người bán:", auction.getSeller().getUsername());
 
-        Label sellerLabel = new Label("Người bán: " + auction.getSeller().getUsername());
-        sellerLabel.getStyleClass().add("muted-text");
-
-        Label timeLabel = new Label(
-                "Bắt đầu: " + auction.getItem().getStartTime().format(DATE_TIME_FORMATTER)
-                        + " | Kết thúc: " + auction.getItem().getEndTime().format(DATE_TIME_FORMATTER)
-        );
-        timeLabel.getStyleClass().add("muted-text");
-        timeLabel.setWrapText(true);
-
-        Label priceLabel = new Label("Giá hiện tại: " + formatPrice(auction.getCurrentPrice()));
-        priceLabel.getStyleClass().add("mini-info-number");
-
-        Label stepLabel = new Label("Bước giá: " + formatPrice(auction.getMinimumBidStep()));
-        stepLabel.getStyleClass().add("partner-text");
-
-        Button detailButton = new Button("Xem chi tiết");
-        detailButton.getStyleClass().add("small-btn");
+        Button detailButton = new Button(auction.isFinished() ? "Xem tổng kết" : "Xem chi tiết");
+        detailButton.getStyleClass().add("catalog-card-btn");
+        detailButton.setMaxWidth(Double.MAX_VALUE);
         detailButton.setOnAction(event -> openAuctionDetail(auction));
 
-        HBox footer = new HBox(12);
-        footer.setFillHeight(true);
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        footer.getChildren().addAll(priceLabel, spacer, detailButton);
-
-        card.getChildren().addAll(statusBadge, titleLabel, categoryLabel, descriptionLabel, sellerLabel, timeLabel, stepLabel, footer);
+        card.getChildren().addAll(imageBox, badgeRow, titleLabel, startingPriceRow, currentPriceRow, timeRow, sellerRow, detailButton);
         return card;
+    }
+
+    private Label createCatalogInfoRow(String label, String value) {
+        Label row = new Label(label + "  " + value);
+        row.getStyleClass().add("catalog-info-row");
+        row.setWrapText(true);
+        return row;
+    }
+
+    private String resolveImageText(Auction auction) {
+        return switch (auction.getItem().getCategory()) {
+            case "Vehicle" -> "VEHICLE";
+            case "Art" -> "ART";
+            default -> "AUREX";
+        };
+    }
+
+    private String shortId(String id) {
+        if (id == null || id.length() <= 8) {
+            return id == null ? "" : id;
+        }
+        return id.substring(0, 8);
     }
 
     private VBox createEmptyState() {
@@ -235,7 +271,7 @@ public class AuctionCatalogController {
 
     private String resolveStatusLabel(Auction auction) {
         LocalDateTime now = LocalDateTime.now();
-        if (!now.isAfter(auction.getItem().getStartTime()) && now.isBefore(auction.getItem().getStartTime())) {
+        if (now.isBefore(auction.getItem().getStartTime())) {
             return "Sắp diễn ra";
         }
         if (now.isBefore(auction.getItem().getEndTime()) && !auction.isFinished()) {

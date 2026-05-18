@@ -3,6 +3,7 @@ package com.auction.dao;
 import com.auction.config.DBConnection;
 import com.auction.model.user.Admin;
 import com.auction.model.user.Bidder;
+import com.auction.model.user.RegisteredUser;
 import com.auction.model.user.Seller;
 import com.auction.model.user.User;
 
@@ -274,6 +275,8 @@ public class UserDao {
         User user;
         if ("ADMIN".equals(normalizedRole)) {
             user = new Admin(username, email, passwordHash, "SYSTEM_ADMIN");
+        } else if ("USER".equals(normalizedRole)) {
+            user = new RegisteredUser(username, email, passwordHash);
         } else if ("SELLER".equals(normalizedRole)) {
             user = new Seller(username, email, passwordHash);
         } else {

@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     full_name VARCHAR(150) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'USER',
     balance BIGINT NOT NULL DEFAULT 0,
     active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS users (
 INSERT INTO users (id, username, full_name, email, password, role, balance, active)
 VALUES
     ('admin-001', 'admin', 'Administrator', 'admin@auction.com', '1216985755', 'ADMIN', 100000000, TRUE),
-    ('seller-001', 'seller1', 'Seller One', 'seller1@example.com', '1216985755', 'SELLER', 5000000, TRUE),
-    ('bidder-001', 'bidder1', 'Bidder One', 'bidder1@example.com', '1216985755', 'BIDDER', 2000000, TRUE)
+    ('user-001', 'user1', 'User One', 'user1@example.com', '1216985755', 'USER', 5000000, TRUE),
+    ('user-002', 'user2', 'User Two', 'user2@example.com', '1216985755', 'USER', 2000000, TRUE)
 ON DUPLICATE KEY UPDATE
     full_name = VALUES(full_name),
     email = VALUES(email),
@@ -62,7 +62,8 @@ CREATE TABLE IF NOT EXISTS auctions (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_auctions_item FOREIGN KEY (item_id) REFERENCES items(id),
     CONSTRAINT fk_auctions_seller FOREIGN KEY (seller_id) REFERENCES users(id),
-    CONSTRAINT fk_auctions_highest_bidder FOREIGN KEY (highest_bidder_id) REFERENCES users(id)
+    CONSTRAINT fk_auctions_highest_bidder FOREIGN KEY (highest_bidder_id) REFERENCES users(id),
+    CONSTRAINT chk_auctions_highest_bidder_not_seller CHECK (highest_bidder_id IS NULL OR highest_bidder_id <> seller_id)
 );
 
 CREATE TABLE IF NOT EXISTS bid_transactions (

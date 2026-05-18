@@ -7,6 +7,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -78,17 +79,17 @@
                             <Label text="Phiên đang diễn ra" styleClass="section-title-dark"/>
                             <Label text="LIVE" styleClass="badge-live"/>
                         </HBox>
-                        <VBox fx:id="runningSessionsContainer" spacing="14"/>
+                        <FlowPane fx:id="runningSessionsContainer" hgap="22" vgap="24" prefWrapLength="1180"/>
                     </VBox>
 
                     <VBox spacing="14">
                         <Label text="Phiên sắp diễn ra" styleClass="section-title-dark"/>
-                        <VBox fx:id="upcomingSessionsContainer" spacing="14"/>
+                        <FlowPane fx:id="upcomingSessionsContainer" hgap="22" vgap="24" prefWrapLength="1180"/>
                     </VBox>
 
                     <VBox spacing="14">
                         <Label text="Phiên đã kết thúc" styleClass="section-title-dark"/>
-                        <VBox fx:id="finishedSessionsContainer" spacing="14"/>
+                        <FlowPane fx:id="finishedSessionsContainer" hgap="22" vgap="24" prefWrapLength="1180"/>
                     </VBox>
                 </VBox>
             </content>

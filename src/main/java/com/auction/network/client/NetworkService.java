@@ -2,6 +2,7 @@ package com.auction.network.client;
 
 import com.auction.model.user.Admin;
 import com.auction.model.user.Bidder;
+import com.auction.model.user.RegisteredUser;
 import com.auction.model.user.Seller;
 import com.auction.model.user.User;
 import com.auction.network.Message;
@@ -87,14 +88,13 @@ public class NetworkService {
         return toUser(response.getPayload());
     }
 
-    public User register(String username, String fullName, String email, String password, String role)
+    public User register(String username, String fullName, String email, String password)
             throws IOException {
         Message response = send(Message.Type.REGISTER, Map.of(
                 "username", username,
                 "fullName", fullName,
                 "email", email,
-                "password", password,
-                "role", role
+                "password", password
         ));
         ensureSuccess(response);
         return toUser(response.getPayload());
@@ -216,6 +216,8 @@ public class NetworkService {
         User user;
         if ("ADMIN".equalsIgnoreCase(role)) {
             user = new Admin(username, email, "", "STANDARD");
+        } else if ("USER".equalsIgnoreCase(role)) {
+            user = new RegisteredUser(username, email, "");
         } else if ("SELLER".equalsIgnoreCase(role)) {
             user = new Seller(username, email, "");
         } else {

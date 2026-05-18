@@ -8,8 +8,7 @@ import com.auction.model.item.Art;
 import com.auction.model.item.Electronics;
 import com.auction.model.item.Item;
 import com.auction.model.item.Vehicle;
-import com.auction.model.user.Bidder;
-import com.auction.model.user.Seller;
+import com.auction.model.user.RegisteredUser;
 import com.auction.model.user.User;
 import com.auction.network.Message;
 import com.auction.service.AuctionService;
@@ -209,7 +208,6 @@ public class Server {
         String fullName = stringValue(payload.get("fullName"));
         String email = stringValue(payload.get("email"));
         String password = stringValue(payload.get("password"));
-        String role = stringValue(payload.get("role"));
 
         if (username == null || username.isBlank() || email == null || email.isBlank() || password == null
                 || password.isBlank()) {
@@ -226,18 +224,8 @@ public class Server {
             return Message.failure(request, "Mật khẩu quá yếu (cần ít nhất 8 ký tự, có chữ hoa, chữ thường và số)");
         }
 
-        if (role == null || role.isBlank()) {
-            role = "BIDDER";
-        }
-
-        User user;
-        if ("SELLER".equalsIgnoreCase(role)) {
-            user = new Seller(username, fullName == null || fullName.isBlank() ? username : fullName, email,
-                    String.valueOf(password.hashCode()));
-        } else {
-            user = new Bidder(username, fullName == null || fullName.isBlank() ? username : fullName, email,
-                    String.valueOf(password.hashCode()));
-        }
+        User user = new RegisteredUser(username, fullName == null || fullName.isBlank() ? username : fullName, email,
+                String.valueOf(password.hashCode()));
 
         boolean created = authService.register(user);
         if (!created) {
@@ -260,6 +248,7 @@ public class Server {
         String bidderName = stringValue(payload.get("bidderUsername"));
         String amountText = stringValue(payload.get("amount"));
 
+        auctionService.refreshAuctions();
         Auction auction = auctionService.getAllAuctions().stream()
                 .filter(current -> current.getItem().getId().equals(itemId))
                 .findFirst()
@@ -274,6 +263,10 @@ public class Server {
         if (bidder == null) {
             return Message.failure(request, "Người đặt giá chưa tồn tại trong cơ sở dữ liệu");
         }
+        if (bidder.getId().equals(auction.getSeller().getId())) {
+            return Message.failure(request, "Bạn không thể đấu giá sản phẩm do chính mình đăng bán");
+        }
+
         boolean success = auctionService.placeBid(auction, bidder, new BigDecimal(amountText));
 
         if (!success)

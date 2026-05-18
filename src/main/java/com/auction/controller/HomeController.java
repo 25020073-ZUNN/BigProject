@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.ComboBox;
 import javafx.application.Platform;
 import com.auction.network.client.NetworkService;
 import com.auction.network.client.AuctionUpdateListener;
@@ -66,6 +65,10 @@ public class HomeController {
     private TextField usernameField;
     @FXML
     private PasswordField passwordField;
+    @FXML
+    private TextField visiblePasswordField;
+    @FXML
+    private Button togglePasswordButton;
 
     // --- Các trường dữ liệu cho Đăng ký ---
     @FXML
@@ -77,13 +80,17 @@ public class HomeController {
     @FXML
     private TextField emailField;
     @FXML
-    private TextField addressField;
-    @FXML
-    private ComboBox<String> accountTypeComboBox;
-    @FXML
     private PasswordField regPasswordField;
     @FXML
+    private TextField visibleRegPasswordField;
+    @FXML
+    private Button toggleRegPasswordButton;
+    @FXML
     private PasswordField confirmPasswordField;
+    @FXML
+    private TextField visibleConfirmPasswordField;
+    @FXML
+    private Button toggleConfirmPasswordButton;
 
     // --- Các thành phần cho Chi tiết tài sản và Đặt giá ---
     @FXML
@@ -110,12 +117,38 @@ public class HomeController {
         updateLoginState();
         if (clockLabel != null)
             initClock();
-        if (accountTypeComboBox != null) {
-            accountTypeComboBox.getItems().setAll("BIDDER", "SELLER");
-            accountTypeComboBox.setValue("BIDDER");
-        }
+        setupPasswordToggles();
         networkService.addAuctionUpdateListener(auctionUpdateListener);
         registerListenerLifecycle();
+    }
+
+    private void setupPasswordToggles() {
+        setupPasswordToggle(passwordField, visiblePasswordField, togglePasswordButton);
+        setupPasswordToggle(regPasswordField, visibleRegPasswordField, toggleRegPasswordButton);
+        setupPasswordToggle(confirmPasswordField, visibleConfirmPasswordField, toggleConfirmPasswordButton);
+    }
+
+    private void setupPasswordToggle(PasswordField hiddenField, TextField visibleField, Button toggleButton) {
+        if (hiddenField == null || visibleField == null || toggleButton == null) {
+            return;
+        }
+
+        visibleField.textProperty().bindBidirectional(hiddenField.textProperty());
+        setPasswordVisible(hiddenField, visibleField, toggleButton, false);
+        toggleButton.setOnAction(event -> setPasswordVisible(
+                hiddenField,
+                visibleField,
+                toggleButton,
+                !visibleField.isVisible()
+        ));
+    }
+
+    private void setPasswordVisible(PasswordField hiddenField, TextField visibleField, Button toggleButton, boolean visible) {
+        hiddenField.setVisible(!visible);
+        hiddenField.setManaged(!visible);
+        visibleField.setVisible(visible);
+        visibleField.setManaged(visible);
+        toggleButton.setText(visible ? "🙈" : "👁");
     }
 
     /**
@@ -192,16 +225,11 @@ public class HomeController {
         String fullName = fullNameField.getText();
         String username = regUsernameField.getText();
         String email = emailField.getText();
-        String role = accountTypeComboBox != null ? accountTypeComboBox.getValue() : "BIDDER";
         String password = regPasswordField.getText();
         String confirmPassword = confirmPasswordField.getText();
 
         if (fullName.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty()) {
             AlertHelper.showError("Lỗi đăng ký", "Vui lòng điền đầy đủ các thông tin bắt buộc.");
-            return;
-        }
-        if (role == null || role.isBlank()) {
-            AlertHelper.showError("Lỗi đăng ký", "Vui lòng chọn loại tài khoản.");
             return;
         }
         if (!password.equals(confirmPassword)) {
@@ -226,7 +254,7 @@ public class HomeController {
         }
 
         FxAsync.run(
-                () -> networkService.register(username, fullName, email, password, role),
+                () -> networkService.register(username, fullName, email, password),
                 user -> {
                     AlertHelper.showInformation("Đăng ký thành công", "Tài khoản đã được tạo. Vui lòng đăng nhập.");
                     SceneNavigator.goToLogin(event);

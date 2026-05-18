@@ -1,7 +1,5 @@
 package com.auction.controller;
 
-import com.auction.dao.UserDao;
-import com.auction.model.user.User;
 import com.auction.network.client.NetworkService;
 import com.auction.util.FxAsync;
 import com.auction.util.UserSession;
@@ -16,13 +14,13 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,10 +32,8 @@ public class CreateAuctionController {
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     private final NetworkService networkService = NetworkService.getInstance();
-    private final UserDao userDao = new UserDao();
 
     @FXML private ComboBox<String> categoryComboBox;
-    @FXML private ComboBox<String> sellerComboBox;
     @FXML private TextField nameField;
     @FXML private TextArea descriptionArea;
     @FXML private TextField startingPriceField;
@@ -51,6 +47,9 @@ public class CreateAuctionController {
     @FXML private TextField mileageField;
     @FXML private TextField artistField;
     @FXML private TextField yearCreatedField;
+    @FXML private VBox electronicsFields;
+    @FXML private VBox vehicleFields;
+    @FXML private VBox artFields;
     @FXML private Label hintLabel;
     @FXML private Button loginButton;
 
@@ -58,23 +57,15 @@ public class CreateAuctionController {
     public void initialize() {
         categoryComboBox.setItems(FXCollections.observableArrayList("Electronics", "Vehicle", "Art"));
         categoryComboBox.setValue("Electronics");
+        categoryComboBox.valueProperty().addListener((obs, oldValue, newValue) -> updateCategoryFields(newValue));
 
         LoginStateHelper.updateLoginButton(loginButton);
-
-        List<String> sellers = userDao.findActiveSellers().stream()
-                .map(User::getUsername).toList();
-        sellerComboBox.setItems(FXCollections.observableArrayList(sellers));
-
-        if (UserSession.isLoggedIn() && "SELLER".equalsIgnoreCase(UserSession.getLoggedInUser().getRole())) {
-            sellerComboBox.setValue(UserSession.getLoggedInUser().getUsername());
-        } else if (!sellers.isEmpty()) {
-            sellerComboBox.setValue(sellers.get(0));
-        }
 
         startTimeField.setText(LocalDateTime.now().plusMinutes(5).format(DATE_TIME_FORMATTER));
         endTimeField.setText(LocalDateTime.now().plusMonths(3).format(DATE_TIME_FORMATTER));
         bidStepField.setText("500000");
         hintLabel.setText("Định dạng thời gian: yyyy-MM-dd HH:mm:ss. Bạn có thể đặt phiên kéo dài 3 tháng để làm mẫu.");
+        updateCategoryFields(categoryComboBox.getValue());
     }
 
     @FXML
@@ -83,9 +74,9 @@ public class CreateAuctionController {
     @FXML
     public void handleCreateAuction(ActionEvent event) {
         try {
-            String sellerUsername = sellerComboBox.getValue();
+            String sellerUsername = UserSession.isLoggedIn() ? UserSession.getLoggedInUser().getUsername() : null;
             if (sellerUsername == null || sellerUsername.isBlank()) {
-                AlertHelper.showError("Lỗi", "Vui lòng chọn người bán.");
+                AlertHelper.showError("Lỗi", "Vui lòng đăng nhập để đăng bán sản phẩm.");
                 return;
             }
 
@@ -137,6 +128,18 @@ public class CreateAuctionController {
             default -> throw new IllegalArgumentException("Danh mục tài sản không hợp lệ.");
         }
         return attributes;
+    }
+
+    private void updateCategoryFields(String category) {
+        setSectionVisible(electronicsFields, "Electronics".equals(category));
+        setSectionVisible(vehicleFields, "Vehicle".equals(category));
+        setSectionVisible(artFields, "Art".equals(category));
+    }
+
+    private void setSectionVisible(VBox section, boolean visible) {
+        if (section == null) return;
+        section.setVisible(visible);
+        section.setManaged(visible);
     }
 
     private void clearFormForNextEntry() {
