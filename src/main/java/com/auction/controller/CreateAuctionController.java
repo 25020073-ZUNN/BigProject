@@ -15,7 +15,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -51,7 +53,10 @@ public class CreateAuctionController {
     @FXML private VBox vehicleFields;
     @FXML private VBox artFields;
     @FXML private Label hintLabel;
+    @FXML private Label selectedImageLabel;
     @FXML private Button loginButton;
+
+    private String selectedImageUrl;
 
     @FXML
     public void initialize() {
@@ -72,6 +77,25 @@ public class CreateAuctionController {
     public void handleLogout(ActionEvent event) { LoginStateHelper.handleLogout(event); }
 
     @FXML
+    public void handleChooseImage(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Chon anh san pham");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Image files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp", "*.webp")
+        );
+
+        File selectedFile = fileChooser.showOpenDialog(((Button) event.getSource()).getScene().getWindow());
+        if (selectedFile == null) {
+            return;
+        }
+
+        selectedImageUrl = selectedFile.toURI().toString();
+        if (selectedImageLabel != null) {
+            selectedImageLabel.setText(selectedFile.getName());
+        }
+    }
+
+    @FXML
     public void handleCreateAuction(ActionEvent event) {
         try {
             String sellerUsername = UserSession.isLoggedIn() ? UserSession.getLoggedInUser().getUsername() : null;
@@ -88,6 +112,9 @@ public class CreateAuctionController {
             LocalDateTime startTime = parseDateTime(startTimeField.getText(), "Thời gian bắt đầu");
             LocalDateTime endTime = parseDateTime(endTimeField.getText(), "Thời gian kết thúc");
             Map<String, Object> attributes = buildAttributes(category);
+            if (selectedImageUrl != null && !selectedImageUrl.isBlank()) {
+                attributes.put("imageUrl", selectedImageUrl);
+            }
 
             FxAsync.run(
                     () -> {
@@ -149,6 +176,10 @@ public class CreateAuctionController {
         startTimeField.setText(LocalDateTime.now().plusMinutes(5).format(DATE_TIME_FORMATTER));
         endTimeField.setText(LocalDateTime.now().plusMonths(3).format(DATE_TIME_FORMATTER));
         bidStepField.setText("500000");
+        selectedImageUrl = null;
+        if (selectedImageLabel != null) {
+            selectedImageLabel.setText("Chua chon anh");
+        }
     }
 
     private String requireText(String value, String fieldName) {

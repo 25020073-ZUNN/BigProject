@@ -20,6 +20,8 @@ public abstract class Item extends Entity {
     protected ItemStatus status; // Trạng thái của mặt hàng (MỞ, ĐÓNG, ĐÃ BÁN, ...)
     protected String sellerId; // ID của người bán mặt hàng này
 
+    protected String imageUrl;
+
     public Item(String name, String description, BigDecimal startingPrice,
                 LocalDateTime startTime, LocalDateTime endTime, String sellerId) {
         super();
@@ -63,8 +65,11 @@ public abstract class Item extends Entity {
     public ItemStatus getStatus() { return status; }
     public String getSellerId() { return sellerId; }
 
+    public String getImageUrl() { return imageUrl; }
+
     public void setStatus(ItemStatus status) { this.status = status; }
     public void setCurrentPrice(BigDecimal currentPrice) { this.currentPrice = currentPrice; }
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
     public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

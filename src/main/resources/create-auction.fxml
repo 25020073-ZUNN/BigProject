@@ -81,6 +81,12 @@
 
                                 <Label text="Thời gian kết thúc" GridPane.columnIndex="0" GridPane.rowIndex="6" styleClass="field-label"/>
                                 <TextField fx:id="endTimeField" GridPane.columnIndex="0" GridPane.rowIndex="7" styleClass="mail-field" promptText="2026-08-11 19:00:00"/>
+
+                                <Label text="Anh san pham" GridPane.columnIndex="1" GridPane.rowIndex="6" styleClass="field-label"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="7">
+                                    <Button text="Chon anh" onAction="#handleChooseImage" styleClass="secondary-btn"/>
+                                    <Label fx:id="selectedImageLabel" text="Chua chon anh" styleClass="partner-text"/>
+                                </HBox>
                             </GridPane>
 
                             <Label text="Mô tả tài sản" styleClass="field-label"/>

@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -73,8 +74,9 @@
                         <VBox spacing="24" HBox.hgrow="ALWAYS">
 
                             <!-- Hình ảnh tài sản -->
-                            <VBox alignment="CENTER" prefHeight="360" styleClass="content-card"
+                            <VBox alignment="CENTER" prefHeight="460" minHeight="460" styleClass="content-card"
                                   style="-fx-background-color: linear-gradient(to bottom right, #f0f7ff, #e8e8e8); -fx-background-radius: 16;">
+                                <ImageView fx:id="itemImageView" fitWidth="860" fitHeight="420" preserveRatio="true" smooth="true"/>
                                 <Label text="🖼" style="-fx-font-size: 80;"/>
                                 <Label text="Hình ảnh tài sản" styleClass="muted-text"/>
                             </VBox>

@@ -89,7 +89,8 @@ public class AuctionDao {
                        i.production_year,
                        i.mileage,
                        i.artist,
-                       i.year_created
+                       i.year_created,
+                       i.image_url
                 FROM auctions a
                 JOIN items i ON i.id = a.item_id
                 JOIN users seller ON seller.id = a.seller_id
@@ -194,8 +195,8 @@ public class AuctionDao {
                 INSERT INTO items(
                     id, seller_id, name, description, category,
                     starting_price, current_price, bid_step, start_time, end_time, status,
-                    brand, warranty_months, manufacturer, production_year, mileage, artist, year_created
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    brand, warranty_months, manufacturer, production_year, mileage, artist, year_created, image_url
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         String insertAuctionSql = """
@@ -472,6 +473,7 @@ public class AuctionDao {
         item.setId(rs.getString("item_id"));
         item.setCurrentPrice(BigDecimal.valueOf(rs.getLong("item_current_price")));
         item.setStatus(parseItemStatus(rs.getString("status")));
+        item.setImageUrl(rs.getString("image_url"));
         return item;
     }
 
@@ -517,6 +519,7 @@ public class AuctionDao {
         setNullableInteger(stmt, 16, (Integer) detailValues.get("mileage"));
         stmt.setString(17, (String) detailValues.get("artist"));
         setNullableInteger(stmt, 18, (Integer) detailValues.get("yearCreated"));
+        stmt.setString(19, item.getImageUrl());
     }
 
     private Map<String, Object> extractItemDetails(Item item) {

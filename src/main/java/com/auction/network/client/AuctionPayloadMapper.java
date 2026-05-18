@@ -113,6 +113,7 @@ public final class AuctionPayloadMapper {
 
         item.setId(stringValue(payload.get("id")));
         item.setCurrentPrice(parseAmount(payload.get("currentPrice")));
+        item.setImageUrl(stringValue(payload.get("imageUrl")));
         return item;
     }
 

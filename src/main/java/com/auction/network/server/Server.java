@@ -377,6 +377,7 @@ public class Server {
         payload.put("currentPrice", item.getCurrentPrice().toPlainString());
         payload.put("startTime", item.getStartTime().format(DATE_FORMATTER));
         payload.put("endTime", item.getEndTime().format(DATE_FORMATTER));
+        payload.put("imageUrl", item.getImageUrl() == null ? "" : item.getImageUrl());
         payload.put("attributes", itemAttributesPayload(item));
         return payload;
     }

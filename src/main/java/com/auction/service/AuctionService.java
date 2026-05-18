@@ -132,6 +132,9 @@ public class AuctionService extends AuctionSubject {
                 seller.getId(),
                 attributes
         );
+        if (attributes != null && attributes.get("imageUrl") != null) {
+            item.setImageUrl(String.valueOf(attributes.get("imageUrl")));
+        }
 
         boolean created = auctionDao.createAuction(item, seller, bidStep);
         if (created) {

@@ -15,8 +15,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.Node;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -149,9 +153,7 @@ public class SessionCatalogController {
         VBox card = new VBox(12);
         card.getStyleClass().add("catalog-product-card");
 
-        Label imageBox = new Label(resolveImageText(auction));
-        imageBox.getStyleClass().add("catalog-product-image");
-        imageBox.setMaxWidth(Double.MAX_VALUE);
+        Node imageBox = createImageNode(auction);
 
         Label statusBadge = new Label(resolveStatusLabel(auction));
         statusBadge.getStyleClass().add(resolveStatusBadgeClass(auction));
@@ -178,6 +180,30 @@ public class SessionCatalogController {
 
         card.getChildren().addAll(imageBox, badgeRow, titleLabel, currentPriceRow, stepRow, timeRow, stateRow, bidRow, detailButton);
         return card;
+    }
+
+    private Node createImageNode(Auction auction) {
+        String imageUrl = auction.getItem().getImageUrl();
+        if (imageUrl != null && !imageUrl.isBlank()) {
+            StackPane imagePane = new StackPane();
+            imagePane.getStyleClass().add("catalog-product-image");
+            imagePane.setMinHeight(160);
+            imagePane.setPrefHeight(160);
+            imagePane.setMaxWidth(Double.MAX_VALUE);
+
+            ImageView imageView = new ImageView(new Image(imageUrl, true));
+            imageView.setFitWidth(260);
+            imageView.setFitHeight(160);
+            imageView.setPreserveRatio(true);
+            imageView.setSmooth(true);
+            imagePane.getChildren().add(imageView);
+            return imagePane;
+        }
+
+        Label imageBox = new Label(resolveImageText(auction));
+        imageBox.getStyleClass().add("catalog-product-image");
+        imageBox.setMaxWidth(Double.MAX_VALUE);
+        return imageBox;
     }
 
     private Label createCatalogInfoRow(String label, String value) {

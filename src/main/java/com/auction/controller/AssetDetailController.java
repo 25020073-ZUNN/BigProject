@@ -13,6 +13,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.Node;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -42,6 +46,7 @@ public class AssetDetailController {
     @FXML private Label lblAuctionId;
     @FXML private Label lblBidStep;
     @FXML private Label lblBidCount;
+    @FXML private ImageView itemImageView;
 
     // Countdown
     @FXML private Label lblCountdownTitle;
@@ -73,6 +78,14 @@ public class AssetDetailController {
     @FXML
     public void initialize() {
         LoginStateHelper.updateLoginButton(loginButton);
+        if (itemImageView != null) {
+            itemImageView.setPreserveRatio(true);
+            itemImageView.setSmooth(true);
+            itemImageView.setFitWidth(860);
+            itemImageView.setFitHeight(420);
+            itemImageView.setVisible(false);
+            itemImageView.setManaged(false);
+        }
     }
 
     /**
@@ -104,6 +117,7 @@ public class AssetDetailController {
         lblAuctionId.setText(auction.getId());
         lblBidStep.setText(PriceFormatter.formatPrice(auction.getMinimumBidStep()));
         lblBidCount.setText(String.valueOf(auction.getBidHistory().size()));
+        renderItemImage(item);
 
         // ── Thời gian ──
         lblStartTime.setText(item.getStartTime().format(DT_FORMAT));
@@ -121,6 +135,36 @@ public class AssetDetailController {
 
         // ── Bắt đầu countdown ──
         startCountdown();
+    }
+
+    private void renderItemImage(Item item) {
+        if (itemImageView == null) {
+            return;
+        }
+
+        String imageUrl = item.getImageUrl();
+        boolean hasImage = imageUrl != null && !imageUrl.isBlank();
+        itemImageView.setVisible(hasImage);
+        itemImageView.setManaged(hasImage);
+        updateImagePlaceholder(!hasImage);
+        if (hasImage) {
+            itemImageView.setImage(new Image(imageUrl, true));
+        } else {
+            itemImageView.setImage(null);
+        }
+    }
+
+    private void updateImagePlaceholder(boolean visible) {
+        if (!(itemImageView.getParent() instanceof VBox imageContainer)) {
+            return;
+        }
+
+        for (Node child : imageContainer.getChildren()) {
+            if (child instanceof Label) {
+                child.setVisible(visible);
+                child.setManaged(visible);
+            }
+        }
     }
 
     /**
