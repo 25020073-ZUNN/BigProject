@@ -14,6 +14,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
+<!-- 1.Phần đầu ( Root ) và Cấu hình chung   -->
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.auction.controller.HomeController"
@@ -21,7 +22,7 @@
             prefHeight="900"
             stylesheets="@style.css"
             styleClass="root">
-
+<!--2.Vùng đầu trang .....Khu vực này chứa thanh điều hướng (Navigation Bar) và phần tiêu đề giới thiệu. Tất cả được bọc trong một <VBox>-->
     <top>
         <HBox alignment="CENTER_LEFT" spacing="18" styleClass="topbar">
             <padding>
@@ -44,6 +45,7 @@
         </HBox>
     </top>
 
+<!--3.Vùng thân trang     -->
     <center>
         <VBox spacing="22" styleClass="page-section">
             <padding>
