@@ -42,7 +42,7 @@
                 <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
             </HBox>
 
-            <!-- Hero: Tiêu đề trang danh sách tài sản -->
+            <!-- Hero: Tiêu  đề  trang  danh  sách  tài  sản -->
             <VBox spacing="12" styleClass="page-hero-small">
                 <padding>
                     <Insets top="28" right="48" bottom="28" left="48"/>

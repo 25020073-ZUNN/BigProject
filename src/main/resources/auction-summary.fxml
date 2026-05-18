@@ -54,7 +54,7 @@
                     </HBox>
 
                     <HBox spacing="22">
-                        <!-- Cột Trái: Thông tin người chiến thắng & Top Bidders -->
+                        <!-- Cột  Trái: Thông  tin người chiến thắng & Top Bidders -->
                         <VBox spacing="16" prefWidth="420" styleClass="detail-side-card">
                             <padding>
                                 <Insets top="22" right="20" bottom="22" left="20"/>
@@ -84,16 +84,16 @@
                             <Separator/>
 
                             <VBox spacing="10" VBox.vgrow="ALWAYS">
-                                <Label text="Bảng xếp hạng (Top 10 Bidders)" styleClass="partner-title"/>
+                                <Label text="Bảng xếp hạng (Top 10  Bidders)" styleClass="partner-title"/>
                                 <ListView fx:id="lvTopBidders" prefHeight="350" VBox.vgrow="ALWAYS" styleClass="auction-history-list"/>
                             </VBox>
                         </VBox>
 
-                        <!-- Cột Phải: Biểu đồ lịch sử giá -->
+                        <!-- Cột Phải: Biểu đồ lịch  sử giá -->
                         <VBox spacing="18" HBox.hgrow="ALWAYS">
                             <VBox spacing="14" styleClass="content-card">
                                 <padding>
-                                    <Insets top="22" right="24" bottom="22" left="24"/>
+                                    <Insets top="22"  right="24" bottom="22" left="24"/>
                                 </padding>
                                 <Label text="Diễn biến giá trong suốt phiên đấu giá" styleClass="partner-title"/>
                                 <LineChart fx:id="priceChart"
@@ -103,10 +103,10 @@
                                            prefHeight="620"
                                            styleClass="auction-chart">
                                     <xAxis>
-                                        <NumberAxis fx:id="xAxis" label="Lượt đặt giá (Bid Order)"/>
+                                        <NumberAxis fx:id="xAxis"  label="Lượt đặt giá (Bid Order)"/>
                                     </xAxis>
                                     <yAxis>
-                                        <NumberAxis fx:id="yAxis" label="Mức giá (VND)"/>
+                                        <NumberAxis fx:id="yAxis"  label="Mức giá (VND)"/>
                                     </yAxis>
                                 </LineChart>
                             </VBox>
