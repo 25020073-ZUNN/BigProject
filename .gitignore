@@ -4,3 +4,8 @@ target/
 *.iml
 .env.local
 project_overview.md
+uploads/*
+!uploads/.gitkeep
+!uploads/images/
+uploads/images/*
+!uploads/images/.gitkeep
