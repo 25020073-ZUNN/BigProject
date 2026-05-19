@@ -11,6 +11,7 @@ import javafx.scene.control.ListView;
 import javafx.application.Platform;
 
 import java.util.List;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.math.BigDecimal;
 
@@ -64,7 +65,7 @@ public class AuctionSummaryController {
         }
 
         // Lấy lịch sử đặt giá
-        List<BidTransaction> bidHistory = auctionData.getBidHistory();
+        List<BidTransaction> bidHistory = getChronologicalBidHistory();
         if (bidHistory != null && !bidHistory.isEmpty()) {
             populateChart(bidHistory);
             populateTopBidders(bidHistory);
@@ -106,6 +107,19 @@ public class AuctionSummaryController {
             String entry = String.format("Top %d: %s - %s VND\n(%s)", i + 1, username, amount, time);
             lvTopBidders.getItems().add(entry);
         }
+    }
+
+    private List<BidTransaction> getChronologicalBidHistory() {
+        if (auctionData == null) {
+            return List.of();
+        }
+
+        return auctionData.getBidHistory().stream()
+                .sorted(Comparator
+                        .comparing(BidTransaction::getBidTime, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(BidTransaction::getBidAmount, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(BidTransaction::getId, Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
     }
 
     // --- Điều hướng ---

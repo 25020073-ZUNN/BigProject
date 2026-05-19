@@ -104,6 +104,7 @@ public class Server {
 
             ClientSession session = new ClientSession(socket, writer);
             clientSessions.add(session);
+            auctionService.refreshAuctions();
             session.send(buildAuctionSyncMessage());
 
             String line;
@@ -236,6 +237,7 @@ public class Server {
     }
 
     private Message handleGetAuctions(Message request) {
+        auctionService.refreshAuctions();
         List<Map<String, Object>> auctions = auctionService.getAllAuctions().stream()
                 .map(this::auctionPayload)
                 .collect(Collectors.toList());
@@ -272,7 +274,9 @@ public class Server {
         if (!success)
             return Message.failure(request, "Đặt giá thất bại (có thể giá của bạn thấp hơn giá hiện tại)");
 
-        return Message.success(request, auctionPayload(auction));
+        auctionService.refreshAuctions();
+        Auction latestAuction = auctionService.getAuctionById(auction.getId());
+        return Message.success(request, auctionPayload(latestAuction != null ? latestAuction : auction));
     }
 
     @SuppressWarnings("unchecked")

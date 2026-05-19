@@ -40,6 +40,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -373,7 +374,7 @@ public class AuctionDetailController {
      * Vẽ lại danh sách lịch sử đặt giá.
      */
     private void redrawHistory() {
-        List<BidTransaction> history = currentAuction.getBidHistory();
+        List<BidTransaction> history = getChronologicalBidHistory();
         List<String> rows = new ArrayList<>();
 
         // Hiển thị lịch sử từ mới nhất đến cũ nhất
@@ -424,18 +425,29 @@ public class AuctionDetailController {
     private void redrawChart() {
         priceSeries.getData().clear();
 
-        List<BidTransaction> history = currentAuction.getBidHistory();
+        List<BidTransaction> history = getChronologicalBidHistory();
         if (history.isEmpty()) {
             priceSeries.getData().add(new XYChart.Data<>(0, currentAuction.getCurrentPrice().doubleValue()));
             return;
         }
 
-        LocalDateTime firstBidTime = history.get(0).getBidTime();
-        for (BidTransaction transaction : history) {
-            // Trục X là số giây kể từ lượt bid đầu tiên
-            long seconds = ChronoUnit.SECONDS.between(firstBidTime, transaction.getBidTime());
-            priceSeries.getData().add(new XYChart.Data<>(seconds, transaction.getBidAmount().doubleValue()));
+        for (int index = 0; index < history.size(); index++) {
+            BidTransaction transaction = history.get(index);
+            priceSeries.getData().add(new XYChart.Data<>(index + 1, transaction.getBidAmount().doubleValue()));
         }
+    }
+
+    private List<BidTransaction> getChronologicalBidHistory() {
+        if (currentAuction == null) {
+            return List.of();
+        }
+
+        return currentAuction.getBidHistory().stream()
+                .sorted(Comparator
+                        .comparing(BidTransaction::getBidTime, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(BidTransaction::getBidAmount, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(BidTransaction::getId, Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
     }
 
     /**
@@ -480,18 +492,28 @@ public class AuctionDetailController {
                 () -> networkService.placeBid(itemId, username, bidAmount.toPlainString()),
                 result -> {
                     autoBidInFlight = false;
-                    String statusMsg = usedMax
-                            ? "Auto-bid đã đặt mức tối đa: " + formatPrice(bidAmount) + "."
-                            : "Auto-bid vừa nâng lên " + formatPrice(bidAmount) + ".";
-                    lblAutoBidStatus.setText(statusMsg);
-                    publishNotification(statusMsg);
                     refreshAuctionState();
+                    if (isCurrentUserLeading()) {
+                        String statusMsg = usedMax
+                                ? "Auto-bid đã đặt mức tối đa: " + formatPrice(bidAmount) + "."
+                                : "Auto-bid vừa nâng lên " + formatPrice(bidAmount) + ".";
+                        lblAutoBidStatus.setText(statusMsg);
+                        publishNotification(statusMsg);
+                    } else {
+                        lblAutoBidStatus.setText("Auto-bid đang theo dõi giá mới nhất.");
+                        maybeExecuteAutoBid();
+                    }
                 },
                 errorMsg -> {
                     autoBidInFlight = false;
                     publishNotification("Auto-bid lỗi: " + errorMsg);
                 }
         );
+    }
+
+    private boolean isCurrentUserLeading() {
+        User leader = currentAuction == null ? null : currentAuction.getHighestBidder();
+        return leader != null && currentUser.getId().equals(leader.getId());
     }
 
     /**
