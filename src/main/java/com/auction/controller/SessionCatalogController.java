@@ -34,52 +34,54 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
- * Controller cho màn hình "Phiên đấu giá" (Session Catalog).
- * Màn hình này phân loại các phiên đấu giá thành 3 nhóm: Đang diễn ra, Sắp diễn ra, và Đã kết thúc.
+ * Controller cho màn hình "Danh sách phiên đấu giá" (Session Catalog).
+ * Nhiệm vụ chính:
+ * - Hiển thị các phiên đấu giá được phân loại theo trạng thái: Đang diễn ra, Sắp diễn ra, và Đã kết thúc.
+ * - Cho phép tìm kiếm và lọc phiên đấu giá theo từ khóa và trạng thái.
+ * - Tự động cập nhật giao diện khi có dữ liệu mới từ server thông qua NetworkService.
  */
 public class SessionCatalogController {
 
-    // Định dạng hiển thị ngày giờ rút gọn
+    // Định dạng hiển thị ngày giờ ngắn gọn trên các thẻ (card)
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    // Dịch vụ mạng để đồng bộ dữ liệu với server
+    // Dịch vụ mạng để giao tiếp với Server
     private final NetworkService networkService = NetworkService.getInstance();
     
-    // Listener lắng nghe cập nhật từ server để tự động render lại danh sách các phiên
+    // Listener lắng nghe cập nhật dữ liệu từ server: khi có dữ liệu mới sẽ yêu cầu vẽ lại giao diện
     private final AuctionUpdateListener auctionUpdateListener = auctionData -> Platform.runLater(this::renderSessions);
 
     // --- Các thành phần giao diện FXML ---
-    @FXML private TextField searchField;            // Ô tìm kiếm theo từ khóa
-    @FXML private ComboBox<String> statusFilter;    // Lọc theo trạng thái
+    @FXML private TextField searchField;            // Ô nhập từ khóa tìm kiếm
+    @FXML private ComboBox<String> statusFilter;    // Dropdown lọc theo trạng thái phiên
     @FXML private FlowPane runningSessionsContainer;  // Vùng chứa các phiên Đang diễn ra
     @FXML private FlowPane upcomingSessionsContainer; // Vùng chứa các phiên Sắp diễn ra
     @FXML private FlowPane finishedSessionsContainer; // Vùng chứa các phiên Đã kết thúc
-    @FXML private Button loginButton;               // Nút Đăng nhập/Đăng xuất
+    @FXML private Button loginButton;               // Nút Đăng nhập/Đăng xuất trên thanh menu
 
     /**
-     * Khởi tạo giao diện, thiết lập các bộ lọc và đăng ký nhận dữ liệu từ server.
+     * Khởi tạo giao diện khi scene được load.
      */
     @FXML
     public void initialize() {
-        // Thiết lập các tùy chọn lọc trạng thái
+        // Thiết lập các lựa chọn cho bộ lọc trạng thái
         statusFilter.setItems(FXCollections.observableArrayList("Tất cả", "Đang diễn ra", "Sắp diễn ra", "Đã kết thúc"));
         statusFilter.setValue("Tất cả");
 
-        // Cập nhật hiển thị nút đăng nhập theo session hiện tại
+        // Cập nhật nhãn và hành động cho nút Login dựa trên trạng thái session
         LoginStateHelper.updateLoginButton(loginButton);
 
-        // Lắng nghe thay đổi trên ô tìm kiếm và bộ lọc để cập nhật danh sách ngay lập tức
+        // Đăng ký sự kiện: khi người dùng nhập text hoặc đổi bộ lọc, danh sách sẽ tự động cập nhật
         searchField.textProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderSessions));
         statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderSessions));
 
-        // Đăng ký lifecycle để hủy listener khi chuyển màn hình
+        // Đăng ký nhận thông báo từ NetworkService và quản lý vòng đời (Lifecycle)
         registerObserverLifecycle();
-        // Đăng ký nhận cập nhật từ NetworkService
         networkService.addAuctionUpdateListener(auctionUpdateListener);
     }
 
     /**
-     * Xử lý sự kiện đăng xuất.
+     * Xử lý khi nhấn nút Đăng xuất.
      */
     @FXML
     public void handleLogout(ActionEvent event) {
@@ -87,7 +89,7 @@ public class SessionCatalogController {
     }
 
     /**
-     * Xử lý tìm kiếm khi người dùng nhấn nút hoặc Enter.
+     * Xử lý khi người dùng thực hiện thao tác tìm kiếm (nhấn nút hoặc Enter).
      */
     @FXML
     public void handleSearch(ActionEvent event) {
@@ -95,7 +97,7 @@ public class SessionCatalogController {
     }
 
     /**
-     * Đảm bảo hủy đăng ký listener khi giao diện này bị đóng để tránh rò rỉ bộ nhớ.
+     * Tự động hủy đăng ký listener khi giao diện này không còn được hiển thị (tránh rò rỉ bộ nhớ).
      */
     private void registerObserverLifecycle() {
         searchField.sceneProperty().addListener((observable, oldScene, newScene) -> {
@@ -106,38 +108,38 @@ public class SessionCatalogController {
     }
 
     /**
-     * Hàm chính để phân loại và hiển thị danh sách các phiên đấu giá lên giao diện.
+     * Hàm chính để lấy dữ liệu từ server, phân loại theo trạng thái và hiển thị lên UI.
      */
     private void renderSessions() {
-        // Lấy danh sách đã qua bộ lọc từ server
+        // Lấy danh sách thô từ server và đi qua bộ lọc từ khóa/trạng thái
         List<Auction> filteredAuctions = filterAuctions(loadAuctionsFromServer());
         
-        // Nhóm 1: Các phiên đang diễn ra (sắp xếp theo thời gian kết thúc sớm nhất)
+        // Nhóm các phiên Đang diễn ra: Sắp xếp theo thời gian kết thúc sớm nhất lên đầu
         List<Auction> running = filteredAuctions.stream()
                 .filter(auction -> "Đang diễn ra".equals(resolveStatusLabel(auction)))
                 .sorted(Comparator.comparing(auction -> auction.getItem().getEndTime()))
                 .collect(Collectors.toList());
                 
-        // Nhóm 2: Các phiên sắp diễn ra (sắp xếp theo thời gian bắt đầu sớm nhất)
+        // Nhóm các phiên Sắp diễn ra: Sắp xếp theo thời gian bắt đầu sớm nhất lên đầu
         List<Auction> upcoming = filteredAuctions.stream()
                 .filter(auction -> "Sắp diễn ra".equals(resolveStatusLabel(auction)))
                 .sorted(Comparator.comparing(auction -> auction.getItem().getStartTime()))
                 .collect(Collectors.toList());
                 
-        // Nhóm 3: Các phiên đã kết thúc (sắp xếp theo thời gian kết thúc mới nhất)
+        // Nhóm các phiên Đã kết thúc: Sắp xếp theo thời gian kết thúc mới nhất lên đầu
         List<Auction> finished = filteredAuctions.stream()
                 .filter(auction -> "Đã kết thúc".equals(resolveStatusLabel(auction)))
                 .sorted(Comparator.comparing((Auction auction) -> auction.getItem().getEndTime()).reversed())
                 .collect(Collectors.toList());
 
-        // Hiển thị từng nhóm vào các vùng chứa tương ứng trên UI
+        // Hiển thị dữ liệu vào từng vùng tương ứng trên màn hình
         renderSection(runningSessionsContainer, running, "Không có phiên đang diễn ra.");
         renderSection(upcomingSessionsContainer, upcoming, "Không có phiên sắp diễn ra.");
         renderSection(finishedSessionsContainer, finished, "Không có phiên đã kết thúc.");
     }
 
     /**
-     * Lọc danh sách phiên đấu giá dựa trên từ khóa tìm kiếm và trạng thái được chọn.
+     * Lọc danh sách phiên đấu giá dựa trên dữ liệu người dùng nhập/chọn trên UI.
      */
     private List<Auction> filterAuctions(List<Auction> auctions) {
         String keyword = searchField.getText() == null ? "" : searchField.getText().trim().toLowerCase(Locale.ROOT);
@@ -150,7 +152,7 @@ public class SessionCatalogController {
     }
 
     /**
-     * Tải bản sao danh sách đấu giá mới nhất từ server.
+     * Tải dữ liệu phiên đấu giá mới nhất từ NetworkService.
      */
     private List<Auction> loadAuctionsFromServer() {
         try {
@@ -165,7 +167,7 @@ public class SessionCatalogController {
     }
 
     /**
-     * Kiểm tra từ khóa tìm kiếm trên nhiều trường thông tin.
+     * Kiểm tra xem thông tin phiên đấu giá có chứa từ khóa tìm kiếm hay không.
      */
     private boolean matchesKeyword(Auction auction, String keyword) {
         if (keyword.isBlank()) {
@@ -178,7 +180,7 @@ public class SessionCatalogController {
     }
 
     /**
-     * Render một nhóm phiên vào FlowPane cụ thể.
+     * Đưa danh sách các phiên vào một vùng chứa FlowPane và xử lý trường hợp danh sách rỗng.
      */
     private void renderSection(FlowPane container, List<Auction> auctions, String emptyMessage) {
         container.getChildren().clear();
@@ -193,16 +195,16 @@ public class SessionCatalogController {
     }
 
     /**
-     * Tạo thẻ giao diện (card) cho một phiên đấu giá.
+     * Tạo thẻ giao diện (card) hiển thị tóm tắt thông tin của một phiên đấu giá.
      */
     private VBox createSessionCard(Auction auction) {
         VBox card = new VBox(12);
         card.getStyleClass().add("catalog-product-card");
 
-        // Ảnh sản phẩm
+        // Thành phần 1: Hình ảnh sản phẩm
         Node imageBox = createImageNode(auction);
 
-        // Các nhãn Trạng thái và Danh mục
+        // Thành phần 2: Các nhãn trạng thái và danh mục
         Label statusBadge = new Label(resolveStatusLabel(auction));
         statusBadge.getStyleClass().add(resolveStatusBadgeClass(auction));
 
@@ -210,58 +212,31 @@ public class SessionCatalogController {
         categoryBadge.getStyleClass().add("badge-soft");
         HBox badgeRow = new HBox(8, statusBadge, categoryBadge);
 
-        // Tên tài sản
+        // Thành phần 3: Tên sản phẩm (giới hạn chiều cao để đồng đều các card)
         Label titleLabel = new Label(auction.getItem().getName());
         titleLabel.getStyleClass().add("catalog-product-title");
         titleLabel.setWrapText(true);
         titleLabel.setMinHeight(72);
 
-        // Các dòng thông tin: Giá, Bước giá, Thời gian, Trạng thái đếm ngược, Lượt bid
+        // Thành phần 4: Các dòng thông tin chi tiết (Giá, Bước giá, Thời gian...)
         Label currentPriceRow = createCatalogInfoRow(auction.isFinished() ? "Giá chốt:" : "Giá hiện tại:", formatPrice(auction.getCurrentPrice()));
         Label stepRow = createCatalogInfoRow("Bước giá:", formatPrice(auction.getMinimumBidStep()));
         Label timeRow = createCatalogInfoRow("Thời gian tổ chức:", auction.getItem().getStartTime().format(DATE_TIME_FORMATTER));
         Label stateRow = createCatalogInfoRow("Trạng thái:", buildTimeMessage(auction));
         Label bidRow = createCatalogInfoRow("Lượt đặt giá:", String.valueOf(auction.getBidHistory().size()));
 
-        // Nút hành động (Mở phiên hoặc Xem tổng kết)
+        // Thành phần 5: Nút bấm hành động (Xem chi tiết hoặc tham gia phòng đấu giá)
         Button detailButton = new Button(auction.isFinished() ? "Xem tổng kết" : "Mở phiên");
         detailButton.getStyleClass().add("catalog-card-btn");
         detailButton.setMaxWidth(Double.MAX_VALUE);
         detailButton.setOnAction(event -> openAuctionDetail(auction));
 
-        card.getChildren().addAll(imageBox, badgeRow, titleLabel, currentPricePriceRow(), stepRow, timeRow, stateRow, bidRow, detailButton);
-        return card;
-    }
-
-    // Sửa lỗi cú pháp nhẹ ở dòng trên khi ghép code (giả sử là currentPriceRow đã tạo ở trên)
-    private VBox createSessionCardFixed(Auction auction) {
-        VBox card = new VBox(12);
-        card.getStyleClass().add("catalog-product-card");
-        Node imageBox = createImageNode(auction);
-        Label statusBadge = new Label(resolveStatusLabel(auction));
-        statusBadge.getStyleClass().add(resolveStatusBadgeClass(auction));
-        Label categoryBadge = new Label(auction.getItem().getCategory());
-        categoryBadge.getStyleClass().add("badge-soft");
-        HBox badgeRow = new HBox(8, statusBadge, categoryBadge);
-        Label titleLabel = new Label(auction.getItem().getName());
-        titleLabel.getStyleClass().add("catalog-product-title");
-        titleLabel.setWrapText(true);
-        titleLabel.setMinHeight(72);
-        Label currentPriceRow = createCatalogInfoRow(auction.isFinished() ? "Giá chốt:" : "Giá hiện tại:", formatPrice(auction.getCurrentPrice()));
-        Label stepRow = createCatalogInfoRow("Bước giá:", formatPrice(auction.getMinimumBidStep()));
-        Label timeRow = createCatalogInfoRow("Thời gian tổ chức:", auction.getItem().getStartTime().format(DATE_TIME_FORMATTER));
-        Label stateRow = createCatalogInfoRow("Trạng thái:", buildTimeMessage(auction));
-        Label bidRow = createCatalogInfoRow("Lượt đặt giá:", String.valueOf(auction.getBidHistory().size()));
-        Button detailButton = new Button(auction.isFinished() ? "Xem tổng kết" : "Mở phiên");
-        detailButton.getStyleClass().add("catalog-card-btn");
-        detailButton.setMaxWidth(Double.MAX_VALUE);
-        detailButton.setOnAction(event -> openAuctionDetail(auction));
         card.getChildren().addAll(imageBox, badgeRow, titleLabel, currentPriceRow, stepRow, timeRow, stateRow, bidRow, detailButton);
         return card;
     }
 
     /**
-     * Tạo khối hiển thị hình ảnh sản phẩm.
+     * Tạo khối chứa hình ảnh cho sản phẩm. Nếu không có URL ảnh sẽ dùng text placeholder.
      */
     private Node createImageNode(Auction auction) {
         String imageUrl = auction.getItem().getImageUrl();
@@ -281,7 +256,6 @@ public class SessionCatalogController {
             return imagePane;
         }
 
-        // Placeholder nếu không có ảnh
         Label imageBox = new Label(resolveImageText(auction));
         imageBox.getStyleClass().add("catalog-product-image");
         imageBox.setMaxWidth(Double.MAX_VALUE);
@@ -289,7 +263,7 @@ public class SessionCatalogController {
     }
 
     /**
-     * Tạo một dòng thông tin đơn giản cho card.
+     * Hàm tiện ích tạo một dòng thông tin văn bản trên thẻ.
      */
     private Label createCatalogInfoRow(String label, String value) {
         Label row = new Label(label + "  " + value);
@@ -299,7 +273,7 @@ public class SessionCatalogController {
     }
 
     /**
-     * Trả về text mặc định dựa trên danh mục khi thiếu ảnh.
+     * Quyết định text hiển thị thay cho ảnh dựa trên danh mục.
      */
     private String resolveImageText(Auction auction) {
         return switch (auction.getItem().getCategory()) {
@@ -310,7 +284,7 @@ public class SessionCatalogController {
     }
 
     /**
-     * Tạo thông báo trạng thái trống cho một nhóm.
+     * Hiển thị trạng thái rỗng khi một nhóm phiên không có dữ liệu.
      */
     private VBox createEmptyState(String message) {
         VBox box = new VBox(8);
@@ -322,7 +296,7 @@ public class SessionCatalogController {
     }
 
     /**
-     * Xác định nhãn trạng thái thân thiện dựa trên thời gian hiện tại.
+     * Xác định nhãn trạng thái thân thiện (Tiếng Việt) dựa trên thời gian thực tế.
      */
     private String resolveStatusLabel(Auction auction) {
         LocalDateTime now = LocalDateTime.now();
@@ -336,7 +310,7 @@ public class SessionCatalogController {
     }
 
     /**
-     * Trả về CSS class tương ứng với trạng thái để trang trí.
+     * Trả về lớp CSS tương ứng để hiển thị màu sắc trạng thái.
      */
     private String resolveStatusBadgeClass(Auction auction) {
         String status = resolveStatusLabel(auction);
@@ -348,7 +322,7 @@ public class SessionCatalogController {
     }
 
     /**
-     * Xây dựng chuỗi thông báo thời gian (Đếm ngược hoặc báo kết thúc).
+     * Xây dựng nội dung đếm ngược thời gian hoặc báo đã kết thúc.
      */
     private String buildTimeMessage(Auction auction) {
         LocalDateTime now = LocalDateTime.now();
@@ -365,7 +339,7 @@ public class SessionCatalogController {
     }
 
     /**
-     * Định dạng khoảng thời gian giữa hai thời điểm thành chuỗi "X ngày HH:mm".
+     * Chuyển đổi khoảng thời gian thành định dạng "X ngày HH:mm".
      */
     private String formatDuration(LocalDateTime from, LocalDateTime to) {
         long days = from.until(to, ChronoUnit.DAYS);
@@ -377,7 +351,7 @@ public class SessionCatalogController {
     }
 
     /**
-     * Chuyển hướng sang màn hình chi tiết phiên đấu giá.
+     * Chuyển hướng sang màn hình xem chi tiết tài sản/tham gia đấu giá.
      */
     private void openAuctionDetail(Auction auction) {
         Stage stage = (Stage) searchField.getScene().getWindow();
@@ -385,13 +359,13 @@ public class SessionCatalogController {
     }
 
     /**
-     * Định dạng tiền tệ để hiển thị.
+     * Định dạng số tiền để hiển thị (ví dụ: 1.000.000 VNĐ).
      */
     private String formatPrice(BigDecimal amount) {
         return PriceFormatter.formatPrice(amount);
     }
 
-    // --- Các phương thức điều hướng sidebar ---
+    // --- Các phương thức điều hướng Sidebar Menu ---
     @FXML public void goToHome(ActionEvent event) { SceneNavigator.goToHome(event); }
     @FXML public void goToAuctionList(ActionEvent event) { SceneNavigator.goToAuctionList(event); }
     @FXML public void goToSessions(ActionEvent event) { SceneNavigator.goToSessions(event); }
