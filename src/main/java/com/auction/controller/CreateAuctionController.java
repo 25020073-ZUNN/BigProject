@@ -18,10 +18,13 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,7 +69,7 @@ public class CreateAuctionController {
     @FXML private Label selectedImageLabel;         // Hiển thị tên file ảnh đã chọn
     @FXML private Button loginButton;               // Nút Đăng nhập/Đăng xuất
 
-    private String selectedImageUrl;                // Lưu đường dẫn ảnh đã chọn
+    private File selectedImageFile;                 // Lưu file ảnh đã chọn
 
     /**
      * Khởi tạo giao diện: thiết lập danh mục, giá trị mặc định cho thời gian và đăng ký sự kiện chuyển danh mục.
@@ -117,8 +120,7 @@ public class CreateAuctionController {
             return;
         }
 
-        // Lưu URI của ảnh để hiển thị sau này
-        selectedImageUrl = selectedFile.toURI().toString();
+        selectedImageFile = selectedFile;
         if (selectedImageLabel != null) {
             selectedImageLabel.setText(selectedFile.getName());
         }
@@ -148,8 +150,8 @@ public class CreateAuctionController {
             
             // Xây dựng map các thuộc tính đặc thù theo danh mục
             Map<String, Object> attributes = buildAttributes(category);
-            if (selectedImageUrl != null && !selectedImageUrl.isBlank()) {
-                attributes.put("imageUrl", selectedImageUrl);
+            if (selectedImageFile != null) {
+                attachImagePayload(attributes);
             }
 
             // Gửi dữ liệu bất đồng bộ lên server qua NetworkService
@@ -228,9 +230,19 @@ public class CreateAuctionController {
         startTimeField.setText(LocalDateTime.now().plusMinutes(5).format(DATE_TIME_FORMATTER));
         endTimeField.setText(LocalDateTime.now().plusMonths(3).format(DATE_TIME_FORMATTER));
         bidStepField.setText("500000");
-        selectedImageUrl = null;
+        selectedImageFile = null;
         if (selectedImageLabel != null) {
             selectedImageLabel.setText("Chưa chọn ảnh");
+        }
+    }
+
+    private void attachImagePayload(Map<String, Object> attributes) {
+        try {
+            byte[] imageBytes = Files.readAllBytes(selectedImageFile.toPath());
+            attributes.put("imageBase64", Base64.getEncoder().encodeToString(imageBytes));
+            attributes.put("imageFileName", selectedImageFile.getName());
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Không thể đọc file ảnh đã chọn.");
         }
     }
 

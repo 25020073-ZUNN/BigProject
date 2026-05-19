@@ -4,3 +4,4 @@ target/
 *.iml
 .env.local
 project_overview.md
+uploads/
