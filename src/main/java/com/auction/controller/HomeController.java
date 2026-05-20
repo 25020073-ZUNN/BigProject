@@ -59,6 +59,8 @@ public class HomeController {
     private Label userRoleLabel;            // Nhãn hiển thị vai trò (Bidder/Seller/Admin)
     @FXML
     private Label userBalanceLabel;         // Nhãn hiển thị số dư ví tiền
+    @FXML
+    private Button adminDashboardButton;    // Nút Bảng quản trị (chỉ hiển thị cho Admin)
 
     // --- Các trường dữ liệu cho chức năng Đăng nhập ---
     @FXML
@@ -150,7 +152,7 @@ public class HomeController {
         // Ràng buộc 2 chiều: nhập vào ô nào thì ô kia cũng cập nhật theo
         visibleField.textProperty().bindBidirectional(hiddenField.textProperty());
         setPasswordVisible(hiddenField, visibleField, toggleButton, false);
-        
+
         toggleButton.setOnAction(event -> setPasswordVisible(
                 hiddenField,
                 visibleField,
@@ -195,8 +197,13 @@ public class HomeController {
                     userRoleLabel.setText(user.getRole());
                 if (userBalanceLabel != null) {
                     java.text.NumberFormat formatter = java.text.NumberFormat
-                            .getInstance(new java.util.Locale("vi", "VN"));
+                             .getInstance(new java.util.Locale("vi", "VN"));
                     userBalanceLabel.setText(formatter.format(user.getBalance()) + " VND");
+                }
+                if (adminDashboardButton != null) {
+                    boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
+                    adminDashboardButton.setVisible(isAdmin);
+                    adminDashboardButton.setManaged(isAdmin);
                 }
             }
         } else {
@@ -206,6 +213,10 @@ public class HomeController {
                 loginPanel.setManaged(true);
                 userPanel.setVisible(false);
                 userPanel.setManaged(false);
+                if (adminDashboardButton != null) {
+                    adminDashboardButton.setVisible(false);
+                    adminDashboardButton.setManaged(false);
+                }
             }
         }
     }
@@ -313,11 +324,17 @@ public class HomeController {
                     Map<String, Object> targetAuction = resolveTargetAuction(auctions);
                     if (targetAuction == null)
                         throw new RuntimeException("Không xác định được tài sản.");
-                    String amount = resolveBidAmount(targetAuction);
+                    String amountText = resolveBidAmount(targetAuction);
+                    BigDecimal amount = new BigDecimal(amountText);
+                    User user = UserSession.getLoggedInUser();
+                    BigDecimal balance = BigDecimal.valueOf(user.getBalance());
+                    if (balance.compareTo(amount) < 0) {
+                        throw new RuntimeException("Số dư tài khoản của bạn không đủ để đặt mức giá này (Số dư hiện tại: " + PriceFormatter.formatCurrency(balance.toPlainString()) + " VND).");
+                    }
                     return networkService.placeBid(
                             String.valueOf(targetAuction.get("itemId")),
-                            UserSession.getLoggedInUser().getUsername(),
-                            amount);
+                            user.getUsername(),
+                            amountText);
                 },
                 result -> AlertHelper.showInformation("Đặt giá thành công",
                         "Bạn đã đặt giá cho " + result.get("itemName")
@@ -528,5 +545,10 @@ public class HomeController {
     @FXML
     public void goToCreateAuction(ActionEvent event) {
         SceneNavigator.goToCreateAuction(event);
+    }
+
+    @FXML
+    public void goToAdminDashboard(ActionEvent event) {
+        SceneNavigator.goToAdminDashboard(event);
     }
 }

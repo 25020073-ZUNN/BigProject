@@ -561,4 +561,64 @@ public class AuctionDao {
             stmt.setInt(index, value);
         }
     }
+
+    /**
+     * Xóa hoàn toàn phiên đấu giá, thầu liên quan và sản phẩm khỏi cơ sở dữ liệu.
+     * Hoạt động dưới dạng Transaction để đảm bảo tính toàn vẹn dữ liệu.
+     */
+    public boolean deleteAuction(String auctionId) {
+        String selectItemIdSql = "SELECT item_id FROM auctions WHERE id = ?";
+        String deleteBidsSql = "DELETE FROM bid_transactions WHERE auction_id = ?";
+        String deleteAuctionSql = "DELETE FROM auctions WHERE id = ?";
+        String deleteItemSql = "DELETE FROM items WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            String itemId = null;
+            
+            // 1. Lấy item_id của phiên
+            try (PreparedStatement selectStmt = conn.prepareStatement(selectItemIdSql)) {
+                selectStmt.setString(1, auctionId);
+                try (ResultSet rs = selectStmt.executeQuery()) {
+                    if (rs.next()) {
+                        itemId = rs.getString("item_id");
+                    }
+                }
+            }
+
+            if (itemId == null) {
+                conn.rollback();
+                return false;
+            }
+
+            try (PreparedStatement deleteBidsStmt = conn.prepareStatement(deleteBidsSql);
+                 PreparedStatement deleteAuctionStmt = conn.prepareStatement(deleteAuctionSql);
+                 PreparedStatement deleteItemStmt = conn.prepareStatement(deleteItemSql)) {
+
+                // 2. Xóa lịch sử đặt giá liên quan
+                deleteBidsStmt.setString(1, auctionId);
+                deleteBidsStmt.executeUpdate();
+
+                // 3. Xóa dòng trong bảng auctions
+                deleteAuctionStmt.setString(1, auctionId);
+                deleteAuctionStmt.executeUpdate();
+
+                // 4. Xóa sản phẩm tương ứng trong bảng items
+                deleteItemStmt.setString(1, itemId);
+                deleteItemStmt.executeUpdate();
+
+                conn.commit();
+                return true;
+            } catch (Exception e) {
+                conn.rollback();
+                e.printStackTrace();
+                return false;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

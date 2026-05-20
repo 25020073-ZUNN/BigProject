@@ -117,6 +117,31 @@ public class NetworkService {
         ensureSuccess(response);
     }
 
+    public List<Map<String, Object>> getUsers(String adminUsername) throws IOException {
+        Message response = send(Message.Type.GET_USERS, Map.of(
+                "adminUsername", adminUsername
+        ));
+        ensureSuccess(response);
+        return decodeMapList(response.getPayload().get("users"));
+    }
+
+    public void setUserActive(String adminUsername, String targetUsername, boolean active) throws IOException {
+        Message response = send(Message.Type.SET_USER_ACTIVE, Map.of(
+                "adminUsername", adminUsername,
+                "targetUsername", targetUsername,
+                "active", active
+        ));
+        ensureSuccess(response);
+    }
+
+    public void deleteAuction(String adminUsername, String auctionId) throws IOException {
+        Message response = send(Message.Type.DELETE_AUCTION, Map.of(
+                "adminUsername", adminUsername,
+                "auctionId", auctionId
+        ));
+        ensureSuccess(response);
+    }
+
     public List<Map<String, Object>> getAuctions() throws IOException {
         Message response = send(Message.Type.GET_AUCTIONS, Map.of());
         ensureSuccess(response);
@@ -263,6 +288,11 @@ public class NetworkService {
 
     @SuppressWarnings("unchecked")
     private List<Map<String, Object>> decodeAuctionSnapshot(Object auctionsPayload) {
+        return decodeMapList(auctionsPayload);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> decodeMapList(Object auctionsPayload) {
         if (!(auctionsPayload instanceof List<?> rawList)) {
             return List.of();
         }

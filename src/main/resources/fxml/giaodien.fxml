@@ -151,6 +151,9 @@
 
                             <Separator/>
 
+                            <Button fx:id="adminDashboardButton" managed="false" maxWidth="1.7976931348623157E308"
+                                    onAction="#goToAdminDashboard" styleClass="primary-btn" text="Bảng quản trị"
+                                    visible="false"/>
                             <Button maxWidth="1.7976931348623157E308" onAction="#goToUserProfile"
                                     styleClass="primary-btn" text="Quản lý hồ sơ"/>
                             <Button maxWidth="1.7976931348623157E308" onAction="#handleComingSoon"

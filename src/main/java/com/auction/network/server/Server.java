@@ -146,6 +146,9 @@ public class Server {
                 case GET_AUCTIONS -> handleGetAuctions(request);
                 case PLACE_BID -> handlePlaceBid(request);
                 case CREATE_AUCTION -> handleCreateAuction(request);
+                case GET_USERS -> handleGetUsers(request);
+                case SET_USER_ACTIVE -> handleSetUserActive(request);
+                case DELETE_AUCTION -> handleDeleteAuction(request);
                 case UPDATE_PROFILE -> handleUpdateProfile(request);
                 case DELETE_ACCOUNT -> handleDeleteAccount(request);
                 case DB_STATUS -> handleDatabaseStatus(request);
@@ -267,7 +270,13 @@ public class Server {
             return Message.failure(request, "Bạn không thể đấu giá sản phẩm do chính mình đăng bán");
         }
 
-        boolean success = auctionService.placeBid(auction, bidder, new BigDecimal(amountText));
+        BigDecimal bidAmount = new BigDecimal(amountText);
+        BigDecimal bidderBalance = BigDecimal.valueOf(bidder.getBalance());
+        if (bidderBalance.compareTo(bidAmount) < 0) {
+            return Message.failure(request, "Số dư tài khoản không đủ để thực hiện đặt giá (Số dư hiện tại: " + bidder.getBalance() + " VNĐ)");
+        }
+
+        boolean success = auctionService.placeBid(auction, bidder, bidAmount);
 
         if (!success)
             return Message.failure(request, "Đặt giá thất bại (có thể giá của bạn thấp hơn giá hiện tại)");
@@ -318,6 +327,53 @@ public class Server {
         } catch (Exception e) {
             return Message.failure(request, "Lỗi tạo phiên: " + e.getMessage());
         }
+    }
+
+    private Message handleGetUsers(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String adminUsername = stringValue(payload.get("adminUsername"));
+        User admin = userDao.findByUsername(adminUsername);
+        if (admin == null || !"ADMIN".equalsIgnoreCase(admin.getRole())) {
+            return Message.failure(request, "Quyền truy cập bị từ chối");
+        }
+        List<Map<String, Object>> users = userDao.findAll().stream()
+                .map(this::userPayload)
+                .collect(Collectors.toList());
+        return Message.success(request, Map.of("users", users));
+    }
+
+    private Message handleSetUserActive(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String adminUsername = stringValue(payload.get("adminUsername"));
+        String targetUsername = stringValue(payload.get("targetUsername"));
+        boolean active = Boolean.parseBoolean(stringValue(payload.get("active")));
+        User admin = userDao.findByUsername(adminUsername);
+        if (admin == null || !"ADMIN".equalsIgnoreCase(admin.getRole())) {
+            return Message.failure(request, "Quyền truy cập bị từ chối");
+        }
+        if (admin.getUsername().equals(targetUsername) && !active) {
+            return Message.failure(request, "Admin không thể tự khóa tài khoản đang đăng nhập");
+        }
+        boolean updated = userDao.setUserActive(targetUsername, active);
+        if (!updated) {
+            return Message.failure(request, "Không tìm thấy tài khoản cần cập nhật");
+        }
+        return Message.success(request, Map.of("success", true));
+    }
+
+    private Message handleDeleteAuction(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String adminUsername = stringValue(payload.get("adminUsername"));
+        String auctionId = stringValue(payload.get("auctionId"));
+        User admin = userDao.findByUsername(adminUsername);
+        if (admin == null || !"ADMIN".equalsIgnoreCase(admin.getRole())) {
+            return Message.failure(request, "Quyền truy cập bị từ chối");
+        }
+        boolean success = auctionService.deleteAuction(auctionId);
+        if (!success) {
+            return Message.failure(request, "Xóa phiên đấu giá thất bại");
+        }
+        return Message.success(request, Map.of("deleted", true));
     }
 
     private Message handleDatabaseStatus(Message request) {

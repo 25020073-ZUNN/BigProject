@@ -7,8 +7,11 @@
  *   Border:  #e0e0e0 / #d1d1d1
  * ============================================== */
 
+.root, .label, .button, .text-field, .text-area, .combo-box, .table-view, .table-row-cell, .tab-pane .tab .tab-label, .table-column, .table-view .column-header .label {
+    -fx-font-family: "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+}
+
 .root {
-    -fx-font-family: "Segoe UI", "Inter", Arial, sans-serif;
     -fx-background-color: #f5f5f5;
 }
 
@@ -458,3 +461,229 @@
 .list-cell:empty { -fx-background-color: transparent; }
 
 .tooltip { -fx-background-color: #1a1a1a; -fx-text-fill: #ffffff; -fx-background-radius: 6; -fx-font-size: 12px; }
+
+/* =========================================================================
+   * MODERN ADMIN DASHBOARD & FLAT TABLE STYLES (Aurex Premium Enterprise Console)
+   * ========================================================================= */
+
+/* ── Sidebar Navigation ── */
+.sidebar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent #e2e8f0 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+.sidebar-logo-box {
+    -fx-padding: 24 24 30 24;
+}
+.sidebar-brand {
+    -fx-text-fill: #0078d4;
+    -fx-font-size: 24px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1px;
+}
+.sidebar-subbrand {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 2px;
+}
+.sidebar-menu-list {
+    -fx-padding: 0 12;
+}
+.sidebar-menu-item, .sidebar-menu-item-active {
+    -fx-font-size: 13.5px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+    -fx-padding: 12 16;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-alignment: center-left;
+    -fx-max-width: 1.7976931348623157E308;
+}
+.sidebar-menu-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #475569;
+}
+.sidebar-menu-item:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #0078d4;
+}
+.sidebar-menu-item-active {
+    -fx-background-color: #edf4fb;
+    -fx-text-fill: #0078d4;
+}
+.sidebar-menu-item-active:hover {
+    -fx-background-color: #deecf9;
+}
+
+/* ── Top Header ── */
+.admin-top-header {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent transparent #e2e8f0 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 16 40;
+}
+.admin-breadcrumb-title {
+    -fx-text-fill: #0f172a;
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+}
+.admin-breadcrumb-sub {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+/* ── Premium Metric Cards ── */
+.admin-stat-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-padding: 20 22;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.03), 8, 0, 0, 2);
+}
+.admin-stat-card:hover {
+    -fx-border-color: #cbd5e1;
+    -fx-translate-y: -2;
+    -fx-effect: dropshadow(gaussian, rgba(0,120,212,0.08), 12, 0.15, 0, 4);
+}
+.admin-stat-icon {
+    -fx-font-size: 26px;
+    -fx-padding: 0 0 8 0;
+}
+.admin-stat-val {
+    -fx-font-size: 28px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0f172a;
+}
+.admin-stat-desc {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+/* Accent Card Colors */
+.card-blue .admin-stat-icon { -fx-text-fill: #0078d4; }
+.card-green .admin-stat-icon { -fx-text-fill: #107c10; }
+.card-orange .admin-stat-icon { -fx-text-fill: #ca5010; }
+.card-red .admin-stat-icon { -fx-text-fill: #d13438; }
+
+/* ── Flat & Modern TableView ── */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 0;
+}
+.table-view .column-header-background {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 9 9 0 0;
+    -fx-padding: 6 0;
+    -fx-border-color: transparent transparent #e2e8f0 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 44;
+    -fx-border-color: transparent;
+    -fx-padding: 0 10;
+}
+.table-view .column-header .label {
+    -fx-text-fill: #475569;
+    -fx-font-weight: 800;
+    -fx-font-size: 12.5px;
+    -fx-alignment: center-left;
+}
+.table-view .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #f1f5f9 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-cell-size: 46;
+}
+.table-view .table-row-cell:filled:even {
+    -fx-background-color: #ffffff;
+}
+.table-view .table-row-cell:filled:odd {
+    -fx-background-color: #fafbfc;
+}
+.table-view .table-row-cell:filled:hover {
+    -fx-background-color: #f8fafc;
+}
+.table-view .table-row-cell:filled:selected {
+    -fx-background-color: #edf4fb;
+    -fx-text-fill: #0078d4;
+    -fx-effect: none;
+}
+.table-view .table-row-cell:filled:selected:hover {
+    -fx-background-color: #deecf9;
+}
+.table-view .table-row-cell .text {
+    -fx-fill: #1e293b;
+    -fx-font-size: 13px;
+}
+.table-view .table-row-cell:filled:selected .text {
+    -fx-fill: #0078d4;
+    -fx-font-weight: 700;
+}
+.table-view .placeholder .label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: 600;
+}
+
+/* ── Modern Flat TabPane ── */
+.tab-pane {
+    -fx-background-color: transparent;
+}
+.tab-pane .tab-header-area {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 8 0;
+}
+.tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+}
+.tab-pane .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 8 20;
+    -fx-cursor: hand;
+    -fx-border-color: transparent transparent #e2e8f0 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+.tab-pane .tab:hover {
+    -fx-border-color: transparent transparent #cbd5e1 transparent;
+}
+.tab-pane .tab:selected {
+    -fx-border-color: transparent transparent #0078d4 transparent;
+}
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+}
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #0078d4;
+}
+
+/* ── Interactive search bar ── */
+.search-bar-field {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 14;
+    -fx-font-size: 13px;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+}
+.search-bar-field:hover {
+    -fx-border-color: #94a3b8;
+}
+.search-bar-field:focused {
+    -fx-border-color: #0078d4;
+    -fx-effect: dropshadow(gaussian, rgba(0,120,212,0.12), 8, 0, 0, 0);
+}
+

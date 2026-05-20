@@ -32,10 +32,13 @@ public class Message {
         PLACE_BID,
         /** Tạo phiên đấu giá mới */
         CREATE_AUCTION,
+        GET_USERS,
+        SET_USER_ACTIVE,
         /** Cập nhật thông tin hồ sơ người dùng */
         UPDATE_PROFILE,
         /** Xóa tài khoản người dùng */
         DELETE_ACCOUNT,
+        DELETE_AUCTION,
         /** Kiểm tra trạng thái cơ sở dữ liệu */
         DB_STATUS,
         /** Đồng bộ snapshot phiên đấu giá từ server xuống client */

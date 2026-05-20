@@ -162,6 +162,17 @@ public class AuctionService extends AuctionSubject {
         return success;
     }
 
+    public synchronized boolean deleteAuction(String auctionId) {
+        if (auctionId == null || auctionId.isBlank()) {
+            return false;
+        }
+        boolean deleted = auctionDao.deleteAuction(auctionId);
+        if (deleted) {
+            refreshAuctions();
+        }
+        return deleted;
+    }
+
     public void addAuctionObserver(AuctionObserver observer) {
         addObserver(observer);
         observer.onAuctionsUpdated(getAllAuctions());
