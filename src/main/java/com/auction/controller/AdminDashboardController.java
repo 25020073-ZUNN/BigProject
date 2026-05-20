@@ -120,7 +120,28 @@ public class AdminDashboardController {
         
         auctionStatusColumn.setCellValueFactory(data -> {
             boolean finished = Boolean.parseBoolean(String.valueOf(data.getValue().get("finished")));
-            return text(finished ? "Đã kết thúc" : "Đang diễn ra");
+            if (finished) {
+                return text("Đã kết thúc");
+            }
+            // Kiểm tra thời gian thực: nếu đã quá end_time thì cũng coi là kết thúc
+            Object endTimeObj = data.getValue().get("endTime");
+            Object startTimeObj = data.getValue().get("startTime");
+            if (endTimeObj != null) {
+                try {
+                    java.time.LocalDateTime endTime = java.time.LocalDateTime.parse(String.valueOf(endTimeObj));
+                    java.time.LocalDateTime now = java.time.LocalDateTime.now();
+                    if (now.isAfter(endTime)) {
+                        return text("Đã kết thúc");
+                    }
+                    if (startTimeObj != null) {
+                        java.time.LocalDateTime startTime = java.time.LocalDateTime.parse(String.valueOf(startTimeObj));
+                        if (now.isBefore(startTime)) {
+                            return text("Sắp diễn ra");
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+            return text("Đang diễn ra");
         });
     }
 
@@ -284,7 +305,21 @@ public class AdminDashboardController {
                 .filter(user -> Boolean.parseBoolean(String.valueOf(user.get("active"))))
                 .count();
         long runningAuctions = loadedAuctions.stream()
-                .filter(auction -> !Boolean.parseBoolean(String.valueOf(auction.get("finished"))))
+                .filter(auction -> {
+                    if (Boolean.parseBoolean(String.valueOf(auction.get("finished")))) {
+                        return false;
+                    }
+                    Object endTimeObj = auction.get("endTime");
+                    if (endTimeObj != null) {
+                        try {
+                            java.time.LocalDateTime endTime = java.time.LocalDateTime.parse(String.valueOf(endTimeObj));
+                            if (java.time.LocalDateTime.now().isAfter(endTime)) {
+                                return false;
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                    return true;
+                })
                 .count();
 
         totalUsersLabel.setText(String.valueOf(loadedUsers.size()));
