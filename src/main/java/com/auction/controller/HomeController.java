@@ -180,32 +180,8 @@ public class HomeController {
         LoginStateHelper.updateLoginButton(loginButton);
 
         if (UserSession.isLoggedIn()) {
-            User user = UserSession.getLoggedInUser();
-            if (mainLoginButton != null) {
-                mainLoginButton.setText("Chào mừng, " + user.getUsername());
-                mainLoginButton.setOnAction(e -> AlertHelper.showInformation("Hồ sơ",
-                        "Chào mừng " + user.getUsername() + " đến với hệ thống!"));
-            }
-            if (loginPanel != null && userPanel != null) {
-                loginPanel.setVisible(false);
-                loginPanel.setManaged(false);
-                userPanel.setVisible(true);
-                userPanel.setManaged(true);
-                if (userNameLabel != null)
-                    userNameLabel.setText(user.getUsername());
-                if (userRoleLabel != null)
-                    userRoleLabel.setText(user.getRole());
-                if (userBalanceLabel != null) {
-                    java.text.NumberFormat formatter = java.text.NumberFormat
-                             .getInstance(new java.util.Locale("vi", "VN"));
-                    userBalanceLabel.setText(formatter.format(user.getBalance()) + " VND");
-                }
-                if (adminDashboardButton != null) {
-                    boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
-                    adminDashboardButton.setVisible(isAdmin);
-                    adminDashboardButton.setManaged(isAdmin);
-                }
-            }
+            renderLoggedInUser(UserSession.getLoggedInUser());
+            refreshLoggedInUser();
         } else {
             // Hiển thị form đăng nhập nếu chưa có session
             if (loginPanel != null && userPanel != null) {
@@ -219,6 +195,53 @@ public class HomeController {
                 }
             }
         }
+    }
+
+    private void renderLoggedInUser(User user) {
+        if (user == null) {
+            return;
+        }
+        if (mainLoginButton != null) {
+            mainLoginButton.setText("Chào mừng, " + user.getUsername());
+            mainLoginButton.setOnAction(e -> AlertHelper.showInformation("Hồ sơ",
+                    "Chào mừng " + user.getUsername() + " đến với hệ thống!"));
+        }
+        if (loginPanel != null && userPanel != null) {
+            loginPanel.setVisible(false);
+            loginPanel.setManaged(false);
+            userPanel.setVisible(true);
+            userPanel.setManaged(true);
+            if (userNameLabel != null)
+                userNameLabel.setText(user.getUsername());
+            if (userRoleLabel != null)
+                userRoleLabel.setText(user.getRole());
+            if (userBalanceLabel != null) {
+                java.text.NumberFormat formatter = java.text.NumberFormat
+                         .getInstance(new java.util.Locale("vi", "VN"));
+                userBalanceLabel.setText(formatter.format(user.getBalance()) + " VND");
+            }
+            if (adminDashboardButton != null) {
+                boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
+                adminDashboardButton.setVisible(isAdmin);
+                adminDashboardButton.setManaged(isAdmin);
+            }
+        }
+    }
+
+    private void refreshLoggedInUser() {
+        User currentUser = UserSession.getLoggedInUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        FxAsync.run(
+                () -> networkService.getCurrentUser(currentUser.getUsername()),
+                refreshedUser -> {
+                    UserSession.login(refreshedUser);
+                    renderLoggedInUser(refreshedUser);
+                    LoginStateHelper.updateLoginButton(loginButton);
+                },
+                ignored -> {});
     }
 
     /**

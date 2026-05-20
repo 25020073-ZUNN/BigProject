@@ -117,6 +117,14 @@ public class NetworkService {
         ensureSuccess(response);
     }
 
+    public User getCurrentUser(String username) throws IOException {
+        Message response = send(Message.Type.GET_CURRENT_USER, Map.of(
+                "username", username
+        ));
+        ensureSuccess(response);
+        return toUser(response.getPayload());
+    }
+
     public List<Map<String, Object>> getUsers(String adminUsername) throws IOException {
         Message response = send(Message.Type.GET_USERS, Map.of(
                 "adminUsername", adminUsername

@@ -13,6 +13,7 @@ import com.auction.model.user.User;
 import com.auction.network.Message;
 import com.auction.service.AuctionService;
 import com.auction.service.AuthService;
+import com.auction.service.ImageStorageService;
 import com.auction.util.ValidationUtil;
 import com.auction.observer.AuctionObserver;
 
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +48,7 @@ public class Server {
     private final int port;
     private final AuthService authService;
     private final AuctionService auctionService;
+    private final ImageStorageService imageStorageService;
     private final UserDao userDao;
     private final ExecutorService executor;
     private final Set<ClientSession> clientSessions;
@@ -62,6 +65,7 @@ public class Server {
         this.port = port;
         this.authService = AuthService.getInstance();
         this.auctionService = AuctionService.getInstance();
+        this.imageStorageService = new ImageStorageService();
         this.userDao = new UserDao();
         this.executor = Executors.newCachedThreadPool();
         this.clientSessions = ConcurrentHashMap.newKeySet();
@@ -72,6 +76,7 @@ public class Server {
     public void start() throws IOException {
         if (running)
             return;
+        imageStorageService.start();
         serverSocket = new ServerSocket(port);
         running = true;
         System.out.println("Auction server started on port " + port + " (JSON protocol)");
@@ -87,6 +92,7 @@ public class Server {
         running = false;
         if (serverSocket != null && !serverSocket.isClosed())
             serverSocket.close();
+        imageStorageService.stop();
         auctionService.removeAuctionObserver(auctionBroadcastObserver);
         executor.shutdownNow();
     }
@@ -151,6 +157,7 @@ public class Server {
                 case DELETE_AUCTION -> handleDeleteAuction(request);
                 case UPDATE_PROFILE -> handleUpdateProfile(request);
                 case DELETE_ACCOUNT -> handleDeleteAccount(request);
+                case GET_CURRENT_USER -> handleGetCurrentUser(request);
                 case DB_STATUS -> handleDatabaseStatus(request);
                 case AUCTION_SYNC -> Message.failure(request, "Client không được phép gửi AUCTION_SYNC");
                 case ERROR -> Message.failure(request, "Client gửi tin nhắn lỗi");
@@ -203,6 +210,22 @@ public class Server {
         } else {
             return Message.failure(request, "Xóa tài khoản thất bại");
         }
+    }
+
+    private Message handleGetCurrentUser(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String username = stringValue(payload.get("username"));
+
+        if (username == null || username.isBlank()) {
+            return Message.failure(request, "Thiếu tên đăng nhập");
+        }
+
+        auctionService.refreshAuctions();
+        User user = userDao.findByUsername(username);
+        if (user == null || !user.isActive()) {
+            return Message.failure(request, "Không tìm thấy tài khoản đang hoạt động");
+        }
+        return Message.success(request, userPayload(user));
     }
 
     private Message handleRegister(Message request) {
@@ -297,8 +320,8 @@ public class Server {
         String sellerUsername = stringValue(payload.get("sellerUsername"));
 
         Map<String, Object> attributes = payload.get("attributes") instanceof Map<?, ?> rawMap
-                ? (Map<String, Object>) rawMap
-                : Map.of();
+                ? new HashMap<>((Map<String, Object>) rawMap)
+                : new HashMap<>();
 
         if (sellerUsername == null || sellerUsername.isBlank()) {
             return Message.failure(request, "Thiếu thông tin người bán");
@@ -310,6 +333,8 @@ public class Server {
         }
 
         try {
+            attachStoredImageUrl(attributes);
+
             BigDecimal startingPrice = new BigDecimal(startingPriceStr);
             BigDecimal bidStep = new BigDecimal(bidStepStr);
             LocalDateTime startTime = LocalDateTime.parse(startTimeStr, DATE_FORMATTER);
@@ -340,6 +365,19 @@ public class Server {
                 .map(this::userPayload)
                 .collect(Collectors.toList());
         return Message.success(request, Map.of("users", users));
+    }
+
+    private void attachStoredImageUrl(Map<String, Object> attributes) throws IOException {
+        String imageBase64 = stringValue(attributes.get("imageBase64"));
+        if (imageBase64 == null || imageBase64.isBlank()) {
+            return;
+        }
+
+        byte[] imageBytes = Base64.getDecoder().decode(imageBase64);
+        String originalFileName = stringValue(attributes.get("imageFileName"));
+        String imageUrl = imageStorageService.storeImage(imageBytes, originalFileName);
+        attributes.put("imageUrl", imageUrl);
+        attributes.remove("imageBase64");
     }
 
     private Message handleSetUserActive(Message request) {

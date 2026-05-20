@@ -38,6 +38,8 @@ public class Message {
         UPDATE_PROFILE,
         /** Xóa tài khoản người dùng */
         DELETE_ACCOUNT,
+        /** Lấy lại thông tin mới nhất của người dùng đang đăng nhập */
+        GET_CURRENT_USER,
         DELETE_AUCTION,
         /** Kiểm tra trạng thái cơ sở dữ liệu */
         DB_STATUS,

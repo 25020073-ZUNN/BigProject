@@ -12,6 +12,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -90,6 +92,7 @@ public class CreateAuctionController {
         startTimeField.setText(LocalDateTime.now().plusMinutes(5).format(DATE_TIME_FORMATTER));
         endTimeField.setText(LocalDateTime.now().plusMonths(3).format(DATE_TIME_FORMATTER));
         bidStepField.setText("500000");
+        configureSelectedImageLabel();
         
         hintLabel.setText("Định dạng thời gian: yyyy-MM-dd HH:mm:ss. Bạn có thể đặt phiên kéo dài 3 tháng để làm mẫu.");
         
@@ -122,7 +125,8 @@ public class CreateAuctionController {
 
         selectedImageFile = selectedFile;
         if (selectedImageLabel != null) {
-            selectedImageLabel.setText(selectedFile.getName());
+            selectedImageLabel.setText(shortenFileName(selectedFile.getName(), 42));
+            selectedImageLabel.setTooltip(new Tooltip(selectedFile.getAbsolutePath()));
         }
     }
 
@@ -234,6 +238,30 @@ public class CreateAuctionController {
         if (selectedImageLabel != null) {
             selectedImageLabel.setText("Chưa chọn ảnh");
         }
+    }
+
+    private void configureSelectedImageLabel() {
+        if (selectedImageLabel == null) {
+            return;
+        }
+        selectedImageLabel.setMaxWidth(360);
+        selectedImageLabel.setWrapText(false);
+        selectedImageLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
+    }
+
+    private String shortenFileName(String fileName, int maxLength) {
+        if (fileName == null || fileName.length() <= maxLength) {
+            return fileName;
+        }
+
+        int dotIndex = fileName.lastIndexOf('.');
+        String extension = dotIndex > 0 ? fileName.substring(dotIndex) : "";
+        String baseName = dotIndex > 0 ? fileName.substring(0, dotIndex) : fileName;
+        int availableBaseLength = Math.max(8, maxLength - extension.length() - 3);
+        if (baseName.length() <= availableBaseLength) {
+            return baseName + extension;
+        }
+        return baseName.substring(0, availableBaseLength) + "..." + extension;
     }
 
     private void attachImagePayload(Map<String, Object> attributes) {

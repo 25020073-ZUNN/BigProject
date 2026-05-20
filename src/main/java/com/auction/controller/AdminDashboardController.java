@@ -238,9 +238,7 @@ public class AdminDashboardController {
         }
 
         String auctionId = String.valueOf(selectedAuction.get("auctionId"));
-        boolean finished = Boolean.parseBoolean(String.valueOf(selectedAuction.get("finished")));
-        
-        if (!finished) {
+        if (!isAuctionFinished(selectedAuction)) {
             AlertHelper.showError("Lỗi xóa phiên", "Chỉ được phép xóa những phiên đấu giá đã kết thúc.");
             return;
         }
@@ -332,6 +330,27 @@ public class AdminDashboardController {
     private boolean isAdminLoggedIn() {
         return UserSession.isLoggedIn()
                 && "ADMIN".equalsIgnoreCase(UserSession.getLoggedInUser().getRole());
+    }
+
+    private boolean isAuctionFinished(Map<String, Object> auction) {
+        if (auction == null) {
+            return false;
+        }
+        if (Boolean.parseBoolean(String.valueOf(auction.get("finished")))) {
+            return true;
+        }
+
+        Object endTimeObj = auction.get("endTime");
+        if (endTimeObj == null) {
+            return false;
+        }
+
+        try {
+            java.time.LocalDateTime endTime = java.time.LocalDateTime.parse(String.valueOf(endTimeObj));
+            return !java.time.LocalDateTime.now().isBefore(endTime);
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     private SimpleStringProperty text(Object value) {
