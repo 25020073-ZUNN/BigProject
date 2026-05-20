@@ -139,7 +139,7 @@
                                            prefHeight="620"
                                            styleClass="auction-chart">
                                     <xAxis>
-                                        <NumberAxis fx:id="xAxis" label="Giây kể từ bid đầu tiên"/>
+                                        <NumberAxis fx:id="xAxis" label="Thứ tự lượt bid"/>
                                     </xAxis>
                                     <yAxis>
                                         <NumberAxis fx:id="yAxis" label="Giá (VND)"/>
