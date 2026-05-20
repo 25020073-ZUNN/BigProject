@@ -120,9 +120,7 @@ public class NetworkService {
     public List<Map<String, Object>> getAuctions() throws IOException {
         Message response = send(Message.Type.GET_AUCTIONS, Map.of());
         ensureSuccess(response);
-        List<Map<String, Object>> auctions = decodeAuctionSnapshot(response.getPayload().get("auctions"));
-        latestAuctionSnapshot = List.copyOf(auctions);
-        return auctions;
+        return decodeAuctionSnapshot(response.getPayload().get("auctions"));
     }
 
     public Map<String, Object> placeBid(String itemId, String bidderUsername, String amount)
@@ -133,9 +131,7 @@ public class NetworkService {
                 "amount", amount
         ));
         ensureSuccess(response);
-        Map<String, Object> auctionPayload = response.getPayload();
-        mergeAuctionSnapshot(auctionPayload);
-        return auctionPayload;
+        return response.getPayload();
     }
 
     /**
@@ -210,37 +206,6 @@ public class NetworkService {
 
     public List<Map<String, Object>> getLatestAuctionSnapshot() {
         return new ArrayList<>(latestAuctionSnapshot);
-    }
-
-    private void mergeAuctionSnapshot(Map<String, Object> auctionPayload) {
-        if (auctionPayload == null || auctionPayload.isEmpty()) {
-            return;
-        }
-
-        String auctionId = String.valueOf(auctionPayload.getOrDefault("auctionId", ""));
-        String itemId = String.valueOf(auctionPayload.getOrDefault("itemId", ""));
-        if (auctionId.isBlank() && itemId.isBlank()) {
-            return;
-        }
-
-        List<Map<String, Object>> mergedSnapshot = new ArrayList<>();
-        boolean replaced = false;
-        for (Map<String, Object> auction : latestAuctionSnapshot) {
-            String currentAuctionId = String.valueOf(auction.getOrDefault("auctionId", ""));
-            String currentItemId = String.valueOf(auction.getOrDefault("itemId", ""));
-            if ((!auctionId.isBlank() && auctionId.equals(currentAuctionId))
-                    || (!itemId.isBlank() && itemId.equals(currentItemId))) {
-                mergedSnapshot.add(new HashMap<>(auctionPayload));
-                replaced = true;
-            } else {
-                mergedSnapshot.add(auction);
-            }
-        }
-
-        if (!replaced) {
-            mergedSnapshot.add(new HashMap<>(auctionPayload));
-        }
-        latestAuctionSnapshot = List.copyOf(mergedSnapshot);
     }
 
     private User toUser(Map<String, Object> payload) {

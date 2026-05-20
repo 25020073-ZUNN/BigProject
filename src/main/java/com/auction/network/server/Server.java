@@ -13,7 +13,6 @@ import com.auction.model.user.User;
 import com.auction.network.Message;
 import com.auction.service.AuctionService;
 import com.auction.service.AuthService;
-import com.auction.service.ImageStorageService;
 import com.auction.util.ValidationUtil;
 import com.auction.observer.AuctionObserver;
 
@@ -22,7 +21,6 @@ import java.math.BigDecimal;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -49,7 +47,6 @@ public class Server {
     private final AuthService authService;
     private final AuctionService auctionService;
     private final UserDao userDao;
-    private final ImageStorageService imageStorageService;
     private final ExecutorService executor;
     private final Set<ClientSession> clientSessions;
     private final AuctionObserver auctionBroadcastObserver;
@@ -66,7 +63,6 @@ public class Server {
         this.authService = AuthService.getInstance();
         this.auctionService = AuctionService.getInstance();
         this.userDao = new UserDao();
-        this.imageStorageService = new ImageStorageService();
         this.executor = Executors.newCachedThreadPool();
         this.clientSessions = ConcurrentHashMap.newKeySet();
         this.auctionBroadcastObserver = auctions -> broadcastAuctionSnapshot();
@@ -77,7 +73,6 @@ public class Server {
         if (running)
             return;
         serverSocket = new ServerSocket(port);
-        imageStorageService.start();
         running = true;
         System.out.println("Auction server started on port " + port + " (JSON protocol)");
 
@@ -92,7 +87,6 @@ public class Server {
         running = false;
         if (serverSocket != null && !serverSocket.isClosed())
             serverSocket.close();
-        imageStorageService.stop();
         auctionService.removeAuctionObserver(auctionBroadcastObserver);
         executor.shutdownNow();
     }
@@ -110,7 +104,6 @@ public class Server {
 
             ClientSession session = new ClientSession(socket, writer);
             clientSessions.add(session);
-            auctionService.refreshAuctions();
             session.send(buildAuctionSyncMessage());
 
             String line;
@@ -243,7 +236,6 @@ public class Server {
     }
 
     private Message handleGetAuctions(Message request) {
-        auctionService.refreshAuctions();
         List<Map<String, Object>> auctions = auctionService.getAllAuctions().stream()
                 .map(this::auctionPayload)
                 .collect(Collectors.toList());
@@ -280,9 +272,7 @@ public class Server {
         if (!success)
             return Message.failure(request, "Đặt giá thất bại (có thể giá của bạn thấp hơn giá hiện tại)");
 
-        auctionService.refreshAuctions();
-        Auction latestAuction = auctionService.getAuctionById(auction.getId());
-        return Message.success(request, auctionPayload(latestAuction != null ? latestAuction : auction));
+        return Message.success(request, auctionPayload(auction));
     }
 
     @SuppressWarnings("unchecked")
@@ -315,11 +305,10 @@ public class Server {
             BigDecimal bidStep = new BigDecimal(bidStepStr);
             LocalDateTime startTime = LocalDateTime.parse(startTimeStr, DATE_FORMATTER);
             LocalDateTime endTime = LocalDateTime.parse(endTimeStr, DATE_FORMATTER);
-            Map<String, Object> normalizedAttributes = prepareImageAttributes(attributes);
 
             boolean created = auctionService.createAuction(
                     itemType, name, description, startingPrice, bidStep,
-                    startTime, endTime, seller, normalizedAttributes);
+                    startTime, endTime, seller, attributes);
 
             if (!created) {
                 return Message.failure(request, "Không thể tạo phiên đấu giá. Kiểm tra kết nối DB.");
@@ -420,26 +409,6 @@ public class Server {
 
     private String stringValue(Object value) {
         return value == null ? null : String.valueOf(value).trim();
-    }
-
-    private Map<String, Object> prepareImageAttributes(Map<String, Object> attributes) throws IOException {
-        Map<String, Object> normalized = new HashMap<>(attributes);
-        String imageBase64 = stringValue(normalized.remove("imageBase64"));
-        String imageFileName = stringValue(normalized.remove("imageFileName"));
-        if (imageBase64 == null || imageBase64.isBlank()) {
-            return normalized;
-        }
-
-        byte[] imageBytes;
-        try {
-            imageBytes = Base64.getDecoder().decode(imageBase64);
-        } catch (IllegalArgumentException ex) {
-            throw new IOException("Dữ liệu ảnh không hợp lệ");
-        }
-
-        String imageUrl = imageStorageService.storeImage(imageBytes, imageFileName);
-        normalized.put("imageUrl", imageUrl);
-        return normalized;
     }
 
     // ===== Broadcast =====
