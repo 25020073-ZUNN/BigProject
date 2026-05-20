@@ -54,6 +54,7 @@ public class UserProfileController {
         LoginStateHelper.updateLoginButton(loginButton);
         // Tải thông tin người dùng lên giao diện
         loadUserProfile();
+        refreshLoggedInUser();
     }
 
     /**
@@ -81,6 +82,22 @@ public class UserProfileController {
         txtUsername.setText(user.getUsername());
         txtFullName.setText(user.getFullname());
         txtEmail.setText(user.getEmail());
+    }
+
+    private void refreshLoggedInUser() {
+        if (!UserSession.isLoggedIn()) {
+            return;
+        }
+
+        String username = UserSession.getLoggedInUser().getUsername();
+        FxAsync.run(
+                () -> networkService.getCurrentUser(username),
+                refreshedUser -> {
+                    UserSession.login(refreshedUser);
+                    loadUserProfile();
+                    LoginStateHelper.updateLoginButton(loginButton);
+                },
+                ignored -> {});
     }
 
     /**

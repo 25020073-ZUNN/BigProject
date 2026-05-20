@@ -234,6 +234,13 @@ public class AuctionDetailController {
                 return;
             }
 
+            // Kiểm tra số dư tài khoản của người dùng
+            BigDecimal userBalance = BigDecimal.valueOf(currentUser.getBalance());
+            if (userBalance.compareTo(bidAmount) < 0) {
+                showError("Số dư tài khoản của bạn không đủ để đặt mức giá này (Số dư hiện tại: " + formatPrice(userBalance) + ").");
+                return;
+            }
+
             String itemId = currentAuction.getItem().getId();
             String username = currentUser.getUsername();
             String amount = bidAmount.toPlainString();
@@ -481,6 +488,16 @@ public class AuctionDetailController {
         }
 
         BigDecimal bidAmount = decision.bidAmount();
+        BigDecimal userBalance = BigDecimal.valueOf(currentUser.getBalance());
+        if (userBalance.compareTo(bidAmount) < 0) {
+            autoBidEnabled = false;
+            String msg = "Auto-bid dừng: Số dư tài khoản không đủ để đặt " + formatPrice(bidAmount) + " (Số dư hiện tại: " + formatPrice(userBalance) + ").";
+            lblAutoBidStatus.setText("Số dư không đủ.");
+            publishNotification(msg);
+            showError(msg);
+            return;
+        }
+
         String itemId = currentAuction.getItem().getId();
         String username = currentUser.getUsername();
         boolean usedMax = decision.usedMaximum();

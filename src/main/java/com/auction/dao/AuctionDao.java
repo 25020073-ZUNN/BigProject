@@ -144,39 +144,72 @@ public class AuctionDao {
                 return;
             }
 
-        String sql = """
-                UPDATE auctions a
-                JOIN items i ON i.id = a.item_id
-                SET a.active = CASE
-                                   WHEN ? >= i.start_time AND ? < i.end_time THEN TRUE
-                                   ELSE FALSE
-                               END,
-                    a.finished = CASE
-                                     WHEN ? >= i.end_time THEN TRUE
-                                     ELSE FALSE
-                                 END,
-                    i.status = CASE
-                                   WHEN ? < i.start_time THEN 'OPEN'
-                                   WHEN ? >= i.start_time AND ? < i.end_time THEN 'RUNNING'
-                                   ELSE 'FINISHED'
-                               END
-                """;
+            try (Connection conn = DBConnection.getConnection()) {
+                conn.setAutoCommit(false);
+                try {
+                    Timestamp currentJavaTime = Timestamp.valueOf(LocalDateTime.now());
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            Timestamp currentJavaTime = Timestamp.valueOf(LocalDateTime.now());
-            stmt.setTimestamp(1, currentJavaTime);
-            stmt.setTimestamp(2, currentJavaTime);
-            stmt.setTimestamp(3, currentJavaTime);
-            stmt.setTimestamp(4, currentJavaTime);
-            stmt.setTimestamp(5, currentJavaTime);
-            stmt.setTimestamp(6, currentJavaTime);
-            
-            stmt.executeUpdate();
+                    /*
+                     * Bước 1: Trừ tiền người thắng cho các phiên vừa hết hạn.
+                     * Chỉ xử lý những phiên chưa bị đánh dấu finished (a.finished = FALSE)
+                     * nhưng đã quá giờ kết thúc, và có người đặt giá cao nhất (highest_bidder_id IS NOT NULL).
+                     */
+                    String deductSql = """
+                            UPDATE users u
+                            JOIN auctions a ON u.id = a.highest_bidder_id
+                            JOIN items i ON i.id = a.item_id
+                            SET u.balance = u.balance - a.current_price
+                            WHERE a.finished = FALSE
+                              AND ? >= i.end_time
+                              AND a.highest_bidder_id IS NOT NULL
+                            """;
+                    try (PreparedStatement deductStmt = conn.prepareStatement(deductSql)) {
+                        deductStmt.setTimestamp(1, currentJavaTime);
+                        deductStmt.executeUpdate();
+                    }
+
+                    /*
+                     * Bước 2: Cập nhật trạng thái active/finished/status cho tất cả phiên.
+                     */
+                    String syncSql = """
+                            UPDATE auctions a
+                            JOIN items i ON i.id = a.item_id
+                            SET a.active = CASE
+                                               WHEN ? >= i.start_time AND ? < i.end_time THEN TRUE
+                                               ELSE FALSE
+                                           END,
+                                a.finished = CASE
+                                                 WHEN ? >= i.end_time THEN TRUE
+                                                 ELSE FALSE
+                                             END,
+                                i.status = CASE
+                                               WHEN ? < i.start_time THEN 'OPEN'
+                                               WHEN ? >= i.start_time AND ? < i.end_time THEN 'RUNNING'
+                                               ELSE 'FINISHED'
+                                           END
+                            """;
+                    try (PreparedStatement syncStmt = conn.prepareStatement(syncSql)) {
+                        syncStmt.setTimestamp(1, currentJavaTime);
+                        syncStmt.setTimestamp(2, currentJavaTime);
+                        syncStmt.setTimestamp(3, currentJavaTime);
+                        syncStmt.setTimestamp(4, currentJavaTime);
+                        syncStmt.setTimestamp(5, currentJavaTime);
+                        syncStmt.setTimestamp(6, currentJavaTime);
+                        syncStmt.executeUpdate();
+                    }
+
+                    conn.commit();
+                } catch (Exception e) {
+                    conn.rollback();
+                    e.printStackTrace();
+                } finally {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
             lastStateSyncAtMillis = now;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
         }
     }
 
@@ -559,6 +592,66 @@ public class AuctionDao {
             stmt.setNull(index, java.sql.Types.INTEGER);
         } else {
             stmt.setInt(index, value);
+        }
+    }
+
+    /**
+     * Xóa hoàn toàn phiên đấu giá, thầu liên quan và sản phẩm khỏi cơ sở dữ liệu.
+     * Hoạt động dưới dạng Transaction để đảm bảo tính toàn vẹn dữ liệu.
+     */
+    public boolean deleteAuction(String auctionId) {
+        String selectItemIdSql = "SELECT item_id FROM auctions WHERE id = ?";
+        String deleteBidsSql = "DELETE FROM bid_transactions WHERE auction_id = ?";
+        String deleteAuctionSql = "DELETE FROM auctions WHERE id = ?";
+        String deleteItemSql = "DELETE FROM items WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            String itemId = null;
+            
+            // 1. Lấy item_id của phiên
+            try (PreparedStatement selectStmt = conn.prepareStatement(selectItemIdSql)) {
+                selectStmt.setString(1, auctionId);
+                try (ResultSet rs = selectStmt.executeQuery()) {
+                    if (rs.next()) {
+                        itemId = rs.getString("item_id");
+                    }
+                }
+            }
+
+            if (itemId == null) {
+                conn.rollback();
+                return false;
+            }
+
+            try (PreparedStatement deleteBidsStmt = conn.prepareStatement(deleteBidsSql);
+                 PreparedStatement deleteAuctionStmt = conn.prepareStatement(deleteAuctionSql);
+                 PreparedStatement deleteItemStmt = conn.prepareStatement(deleteItemSql)) {
+
+                // 2. Xóa lịch sử đặt giá liên quan
+                deleteBidsStmt.setString(1, auctionId);
+                deleteBidsStmt.executeUpdate();
+
+                // 3. Xóa dòng trong bảng auctions
+                deleteAuctionStmt.setString(1, auctionId);
+                deleteAuctionStmt.executeUpdate();
+
+                // 4. Xóa sản phẩm tương ứng trong bảng items
+                deleteItemStmt.setString(1, itemId);
+                deleteItemStmt.executeUpdate();
+
+                conn.commit();
+                return true;
+            } catch (Exception e) {
+                conn.rollback();
+                e.printStackTrace();
+                return false;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

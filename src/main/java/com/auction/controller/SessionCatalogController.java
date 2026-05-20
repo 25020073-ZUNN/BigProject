@@ -219,14 +219,15 @@ public class SessionCatalogController {
         titleLabel.setMinHeight(72);
 
         // Thành phần 4: Các dòng thông tin chi tiết (Giá, Bước giá, Thời gian...)
-        Label currentPriceRow = createCatalogInfoRow(auction.isFinished() ? "Giá chốt:" : "Giá hiện tại:", formatPrice(auction.getCurrentPrice()));
+        boolean isEnded = "Đã kết thúc".equals(resolveStatusLabel(auction));
+        Label currentPriceRow = createCatalogInfoRow(isEnded ? "Giá chốt:" : "Giá hiện tại:", formatPrice(auction.getCurrentPrice()));
         Label stepRow = createCatalogInfoRow("Bước giá:", formatPrice(auction.getMinimumBidStep()));
         Label timeRow = createCatalogInfoRow("Thời gian tổ chức:", auction.getItem().getStartTime().format(DATE_TIME_FORMATTER));
         Label stateRow = createCatalogInfoRow("Trạng thái:", buildTimeMessage(auction));
         Label bidRow = createCatalogInfoRow("Lượt đặt giá:", String.valueOf(auction.getBidHistory().size()));
 
         // Thành phần 5: Nút bấm hành động (Xem chi tiết hoặc tham gia phòng đấu giá)
-        Button detailButton = new Button(auction.isFinished() ? "Xem tổng kết" : "Mở phiên");
+        Button detailButton = new Button(isEnded ? "Xem tổng kết" : "Mở phiên");
         detailButton.getStyleClass().add("catalog-card-btn");
         detailButton.setMaxWidth(Double.MAX_VALUE);
         detailButton.setOnAction(event -> openAuctionDetail(auction));

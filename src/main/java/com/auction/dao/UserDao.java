@@ -179,6 +179,34 @@ public class UserDao {
         return sellers;
     }
 
+    public List<User> findAll() {
+        String sql = "SELECT * FROM users ORDER BY created_at DESC, username";
+        List<User> users = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                users.add(mapUser(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    public boolean setUserActive(String username, boolean active) {
+        String sql = "UPDATE users SET active = ? WHERE username = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setBoolean(1, active);
+            stmt.setString(2, username);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     /**
      * Kiểm tra xem Database có đang "sống" hay không.
      */

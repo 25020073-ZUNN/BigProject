@@ -13,6 +13,7 @@ import com.auction.model.user.User;
 import com.auction.network.Message;
 import com.auction.service.AuctionService;
 import com.auction.service.AuthService;
+import com.auction.service.ImageStorageService;
 import com.auction.util.ValidationUtil;
 import com.auction.observer.AuctionObserver;
 
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +48,7 @@ public class Server {
     private final int port;
     private final AuthService authService;
     private final AuctionService auctionService;
+    private final ImageStorageService imageStorageService;
     private final UserDao userDao;
     private final ExecutorService executor;
     private final Set<ClientSession> clientSessions;
@@ -62,6 +65,7 @@ public class Server {
         this.port = port;
         this.authService = AuthService.getInstance();
         this.auctionService = AuctionService.getInstance();
+        this.imageStorageService = new ImageStorageService();
         this.userDao = new UserDao();
         this.executor = Executors.newCachedThreadPool();
         this.clientSessions = ConcurrentHashMap.newKeySet();
@@ -72,6 +76,7 @@ public class Server {
     public void start() throws IOException {
         if (running)
             return;
+        imageStorageService.start();
         serverSocket = new ServerSocket(port);
         running = true;
         System.out.println("Auction server started on port " + port + " (JSON protocol)");
@@ -87,6 +92,7 @@ public class Server {
         running = false;
         if (serverSocket != null && !serverSocket.isClosed())
             serverSocket.close();
+        imageStorageService.stop();
         auctionService.removeAuctionObserver(auctionBroadcastObserver);
         executor.shutdownNow();
     }
@@ -146,8 +152,12 @@ public class Server {
                 case GET_AUCTIONS -> handleGetAuctions(request);
                 case PLACE_BID -> handlePlaceBid(request);
                 case CREATE_AUCTION -> handleCreateAuction(request);
+                case GET_USERS -> handleGetUsers(request);
+                case SET_USER_ACTIVE -> handleSetUserActive(request);
+                case DELETE_AUCTION -> handleDeleteAuction(request);
                 case UPDATE_PROFILE -> handleUpdateProfile(request);
                 case DELETE_ACCOUNT -> handleDeleteAccount(request);
+                case GET_CURRENT_USER -> handleGetCurrentUser(request);
                 case DB_STATUS -> handleDatabaseStatus(request);
                 case AUCTION_SYNC -> Message.failure(request, "Client không được phép gửi AUCTION_SYNC");
                 case ERROR -> Message.failure(request, "Client gửi tin nhắn lỗi");
@@ -200,6 +210,22 @@ public class Server {
         } else {
             return Message.failure(request, "Xóa tài khoản thất bại");
         }
+    }
+
+    private Message handleGetCurrentUser(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String username = stringValue(payload.get("username"));
+
+        if (username == null || username.isBlank()) {
+            return Message.failure(request, "Thiếu tên đăng nhập");
+        }
+
+        auctionService.refreshAuctions();
+        User user = userDao.findByUsername(username);
+        if (user == null || !user.isActive()) {
+            return Message.failure(request, "Không tìm thấy tài khoản đang hoạt động");
+        }
+        return Message.success(request, userPayload(user));
     }
 
     private Message handleRegister(Message request) {
@@ -267,7 +293,13 @@ public class Server {
             return Message.failure(request, "Bạn không thể đấu giá sản phẩm do chính mình đăng bán");
         }
 
-        boolean success = auctionService.placeBid(auction, bidder, new BigDecimal(amountText));
+        BigDecimal bidAmount = new BigDecimal(amountText);
+        BigDecimal bidderBalance = BigDecimal.valueOf(bidder.getBalance());
+        if (bidderBalance.compareTo(bidAmount) < 0) {
+            return Message.failure(request, "Số dư tài khoản không đủ để thực hiện đặt giá (Số dư hiện tại: " + bidder.getBalance() + " VNĐ)");
+        }
+
+        boolean success = auctionService.placeBid(auction, bidder, bidAmount);
 
         if (!success)
             return Message.failure(request, "Đặt giá thất bại (có thể giá của bạn thấp hơn giá hiện tại)");
@@ -288,8 +320,8 @@ public class Server {
         String sellerUsername = stringValue(payload.get("sellerUsername"));
 
         Map<String, Object> attributes = payload.get("attributes") instanceof Map<?, ?> rawMap
-                ? (Map<String, Object>) rawMap
-                : Map.of();
+                ? new HashMap<>((Map<String, Object>) rawMap)
+                : new HashMap<>();
 
         if (sellerUsername == null || sellerUsername.isBlank()) {
             return Message.failure(request, "Thiếu thông tin người bán");
@@ -301,6 +333,8 @@ public class Server {
         }
 
         try {
+            attachStoredImageUrl(attributes);
+
             BigDecimal startingPrice = new BigDecimal(startingPriceStr);
             BigDecimal bidStep = new BigDecimal(bidStepStr);
             LocalDateTime startTime = LocalDateTime.parse(startTimeStr, DATE_FORMATTER);
@@ -318,6 +352,66 @@ public class Server {
         } catch (Exception e) {
             return Message.failure(request, "Lỗi tạo phiên: " + e.getMessage());
         }
+    }
+
+    private Message handleGetUsers(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String adminUsername = stringValue(payload.get("adminUsername"));
+        User admin = userDao.findByUsername(adminUsername);
+        if (admin == null || !"ADMIN".equalsIgnoreCase(admin.getRole())) {
+            return Message.failure(request, "Quyền truy cập bị từ chối");
+        }
+        List<Map<String, Object>> users = userDao.findAll().stream()
+                .map(this::userPayload)
+                .collect(Collectors.toList());
+        return Message.success(request, Map.of("users", users));
+    }
+
+    private void attachStoredImageUrl(Map<String, Object> attributes) throws IOException {
+        String imageBase64 = stringValue(attributes.get("imageBase64"));
+        if (imageBase64 == null || imageBase64.isBlank()) {
+            return;
+        }
+
+        byte[] imageBytes = Base64.getDecoder().decode(imageBase64);
+        String originalFileName = stringValue(attributes.get("imageFileName"));
+        String imageUrl = imageStorageService.storeImage(imageBytes, originalFileName);
+        attributes.put("imageUrl", imageUrl);
+        attributes.remove("imageBase64");
+    }
+
+    private Message handleSetUserActive(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String adminUsername = stringValue(payload.get("adminUsername"));
+        String targetUsername = stringValue(payload.get("targetUsername"));
+        boolean active = Boolean.parseBoolean(stringValue(payload.get("active")));
+        User admin = userDao.findByUsername(adminUsername);
+        if (admin == null || !"ADMIN".equalsIgnoreCase(admin.getRole())) {
+            return Message.failure(request, "Quyền truy cập bị từ chối");
+        }
+        if (admin.getUsername().equals(targetUsername) && !active) {
+            return Message.failure(request, "Admin không thể tự khóa tài khoản đang đăng nhập");
+        }
+        boolean updated = userDao.setUserActive(targetUsername, active);
+        if (!updated) {
+            return Message.failure(request, "Không tìm thấy tài khoản cần cập nhật");
+        }
+        return Message.success(request, Map.of("success", true));
+    }
+
+    private Message handleDeleteAuction(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String adminUsername = stringValue(payload.get("adminUsername"));
+        String auctionId = stringValue(payload.get("auctionId"));
+        User admin = userDao.findByUsername(adminUsername);
+        if (admin == null || !"ADMIN".equalsIgnoreCase(admin.getRole())) {
+            return Message.failure(request, "Quyền truy cập bị từ chối");
+        }
+        boolean success = auctionService.deleteAuction(auctionId);
+        if (!success) {
+            return Message.failure(request, "Xóa phiên đấu giá thất bại");
+        }
+        return Message.success(request, Map.of("deleted", true));
     }
 
     private Message handleDatabaseStatus(Message request) {
