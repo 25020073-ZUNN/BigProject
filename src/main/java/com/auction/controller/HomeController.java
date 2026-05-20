@@ -126,7 +126,7 @@ public class HomeController {
         setupPasswordToggles(); // Cấu hình nút xem mật khẩu
         
         // Đăng ký nhận thông báo thay đổi dữ liệu đấu giá
-        networkService.addAuctionUpdateListener(auctionUpdateListener);
+        //networkService.addAuctionUpdateListener(auctionUpdateListener);
         registerListenerLifecycle(); // Tự động hủy đăng ký khi scene bị đóng
     }
 

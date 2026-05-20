@@ -136,7 +136,7 @@
                 <Button text="Đăng nhập hệ thống" maxWidth="1.7976931348623157E308"
                         onAction="#handleLogin" styleClass="primary-btn"/>
                 <!-- Tùy chọn đăng nhập bằng phương thức khác -->
-                <Button text="Đăng nhập bằng CCCD / Định danh" maxWidth="1.7976931348623157E308"
+                <Button text="Đăng nhập bằng số điện thoại" maxWidth="1.7976931348623157E308"
                         styleClass="secondary-btn"/>
 
                 <!-- Liên kết chuyển sang màn hình Đăng ký -->

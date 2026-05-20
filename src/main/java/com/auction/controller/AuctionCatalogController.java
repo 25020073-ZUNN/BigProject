@@ -12,6 +12,11 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.application.Platform;
+//****Thêm
+import javafx.concurrent.Task;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
+
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -52,6 +57,9 @@ public class AuctionCatalogController {
     // Listener lắng nghe sự kiện cập nhật dữ liệu từ server và cập nhật UI trên JavaFX Application Thread
     private final AuctionUpdateListener auctionUpdateListener = auctionData -> Platform.runLater(this::renderAuctions);
 
+    // ***Thêm
+    private final PauseTransition searchDebounce = new PauseTransition(Duration.millis(300));
+
     // --- Các thành phần giao diện FXML ---
     @FXML private TextField searchField;            // Ô nhập từ khóa tìm kiếm
     @FXML private ComboBox<String> categoryFilter;  // Dropdown lọc theo danh mục sản phẩm
@@ -88,10 +96,24 @@ public class AuctionCatalogController {
         sortFilter.setValue("Ưu tiên phiên đang diễn ra");
 
         // Đăng ký sự kiện thay đổi giá trị bộ lọc: khi có thay đổi, tiến hành render lại danh sách
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderAuctions));
-        categoryFilter.valueProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderAuctions));
-        statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderAuctions));
-        sortFilter.valueProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderAuctions));
+        //searchField.textProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderAuctions));
+
+        // ****thay bằng
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            searchDebounce.setOnFinished(event -> renderAuctions());
+            searchDebounce.playFromStart();
+        });
+        //***
+
+        //categoryFilter.valueProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderAuctions));
+        //statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderAuctions));
+        //sortFilter.valueProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(this::renderAuctions));
+
+        //****thay bằng
+        categoryFilter.valueProperty().addListener((observable, oldValue, newValue) -> renderAuctions());
+        statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> renderAuctions());
+        sortFilter.valueProperty().addListener((observable, oldValue, newValue) -> renderAuctions());
+        //****
 
         // Quản lý vòng đời của observer để tránh rò rỉ bộ nhớ
         registerObserverLifecycle();
@@ -116,7 +138,7 @@ public class AuctionCatalogController {
     /**
      * Phương thức chính để lấy dữ liệu, lọc, sắp xếp và hiển thị lên giao diện.
      */
-    private void renderAuctions() {
+   /* private void renderAuctions() {
         // Lấy danh sách từ server, lọc theo điều kiện và sau đó sắp xếp
         List<Auction> filteredAuctions = sortAuctions(filterAuctions(loadAuctionsFromServer()));
 
@@ -133,9 +155,45 @@ public class AuctionCatalogController {
         }
 
         // Tạo thẻ (card) cho từng phiên đấu giá và thêm vào vùng chứa
-        for (Auction auction : filteredAuctions) {
+        //for (Auction auction : filteredAuctions) {
+        //***thay bằng
+        for (Auction auction : filteredAuctions.stream().limit(20).toList()) {
             auctionListContainer.getChildren().add(createAuctionCard(auction));
         }
+    }*/
+    //*** Thay bằng
+    private void renderAuctions() {
+
+        Task<List<Auction>> task = new Task<>() {
+            @Override
+            protected List<Auction> call() {
+                return sortAuctions(filterAuctions(loadAuctionsFromServer()));
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+
+            List<Auction> filteredAuctions = task.getValue();
+
+            resultCountLabel.setText("Hiển thị " + filteredAuctions.size() + " sản phẩm");
+
+            auctionListContainer.getChildren().clear();
+
+            if (filteredAuctions.isEmpty()) {
+                auctionListContainer.getChildren().add(createEmptyState());
+                return;
+            }
+
+            for (Auction auction : filteredAuctions.stream().limit(20).toList()) {
+                auctionListContainer.getChildren().add(createAuctionCard(auction));
+            }
+        });
+
+        task.setOnFailed(event -> {
+            task.getException().printStackTrace();
+        });
+
+        new Thread(task).start();
     }
 
     /**

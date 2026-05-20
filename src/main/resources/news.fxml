@@ -216,9 +216,9 @@
                         </padding>
                         <HBox spacing="60">
                             <VBox spacing="10" prefWidth="280">
-                                <Label text="Công ty đấu giá hợp danh Aurex" styleClass="footer-title"/>
-                                <Label text="Mã số doanh nghiệp: 08058420&#10;Hotline: 1900 9999&#10;Email: info@aurexauction.vn"
-                                       wrapText="true" styleClass="footer-text"/>
+                                <Label text="Trang web đấu giá uet" styleClass="footer-title"/>
+                                <!--<Label text="Mã số doanh nghiệp: 08058420&#10;Hotline: 1900 9999&#10;Email: info@aurexauction.vn"
+                                       wrapText="true" styleClass="footer-text"/> -->
                             </VBox>
                             <VBox spacing="10" prefWidth="220">
                                 <Label text="Về chúng tôi" styleClass="footer-title"/>
@@ -232,7 +232,7 @@
                             </VBox>
                             <VBox spacing="10" prefWidth="260">
                                 <Label text="Liên hệ nhanh" styleClass="footer-title"/>
-                                <Label text="Địa chỉ: Hà Nội&#10;Giờ làm việc: 08:00 - 17:30"
+                                <Label text="Địa chỉ:Kiều Mai- Hà Nội&#10;Giờ làm việc: 08:00 - 17:30"
                                        wrapText="true" styleClass="footer-text"/>
                             </VBox>
                         </HBox>
