@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.auction.controller.CreateAuctionController"
+            prefWidth="1380"
+            prefHeight="920"
+            stylesheets="@../style.css"
+            styleClass="root">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" styleClass="topbar">
+            <padding>
+                <Insets top="12" right="36" bottom="12" left="36"/>
+            </padding>
+            <VBox spacing="0">
+                <Label text="AUREX" styleClass="logo-main"/>
+                <Label text="AUCTION PLATFORM" styleClass="logo-sub"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Trang chủ" onAction="#goToHome" styleClass="nav-btn"/>
+            <Button text="Tài sản đấu giá" onAction="#goToAuctionList" styleClass="nav-btn"/>
+            <Button text="Phiên đấu giá" onAction="#goToSessions" styleClass="nav-btn"/>
+            <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn"/>
+            <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
+            <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
+            <content>
+                <VBox spacing="24" styleClass="page-section">
+                    <padding>
+                        <Insets top="32" right="48" bottom="40" left="48"/>
+                    </padding>
+
+                    <VBox spacing="8">
+                        <Label text="Tạo tài sản và phiên đấu giá thật" styleClass="section-title-dark"/>
+                        <Label fx:id="hintLabel" text="Dữ liệu sẽ được lưu trực tiếp vào MySQL." styleClass="partner-text" wrapText="true"/>
+                    </VBox>
+
+                    <HBox spacing="24">
+                        <!-- Form chính: Nhập thông tin tài sản và phiên đấu giá -->
+                        <VBox spacing="22" styleClass="register-panel" prefWidth="900">
+                            <padding>
+                                <Insets top="28" right="28" bottom="28" left="28"/>
+                            </padding>
+
+                            <Label text="Thông tin cơ bản" styleClass="partner-title"/>
+
+                            <GridPane hgap="18" vgap="16">
+
+                                <Label text="Danh mục" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-label"/>
+                                <ComboBox fx:id="categoryComboBox" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="mail-field" prefWidth="260"/>
+
+                                <Label text="Tên tài sản" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="field-label"/>
+                                <TextField fx:id="nameField" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="mail-field" promptText="Ví dụ: Honda Vision 2023"/>
+
+                                <Label text="Giá khởi điểm (VND)" GridPane.columnIndex="1" GridPane.rowIndex="2" styleClass="field-label"/>
+                                <TextField fx:id="startingPriceField" GridPane.columnIndex="1" GridPane.rowIndex="3" styleClass="mail-field" promptText="25000000"/>
+
+                                <Label text="Bước giá (VND)" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="field-label"/>
+                                <TextField fx:id="bidStepField" GridPane.columnIndex="0" GridPane.rowIndex="5" styleClass="mail-field" promptText="500000"/>
+
+                                <Label text="Thời gian bắt đầu" GridPane.columnIndex="1" GridPane.rowIndex="4" styleClass="field-label"/>
+                                <TextField fx:id="startTimeField" GridPane.columnIndex="1" GridPane.rowIndex="5" styleClass="mail-field" promptText="2026-05-11 19:00:00"/>
+
+                                <Label text="Thời gian kết thúc" GridPane.columnIndex="0" GridPane.rowIndex="6" styleClass="field-label"/>
+                                <TextField fx:id="endTimeField" GridPane.columnIndex="0" GridPane.rowIndex="7" styleClass="mail-field" promptText="2026-08-11 19:00:00"/>
+
+                                <Label text="Anh san pham" GridPane.columnIndex="1" GridPane.rowIndex="6" styleClass="field-label"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="7">
+                                    <Button text="Chon anh" onAction="#handleChooseImage" styleClass="secondary-btn"/>
+                                    <Label fx:id="selectedImageLabel" text="Chua chon anh" styleClass="partner-text"/>
+                                </HBox>
+                            </GridPane>
+
+                            <Label text="Mô tả tài sản" styleClass="field-label"/>
+                            <TextArea fx:id="descriptionArea" prefRowCount="6" wrapText="true" styleClass="mail-field" promptText="Mô tả chi tiết tài sản, nguồn gốc, tình trạng..."/>
+
+                            <Label text="Thông tin theo danh mục" styleClass="partner-title"/>
+
+                            <VBox fx:id="electronicsFields" spacing="14">
+                                <Label text="Điện tử" styleClass="field-label"/>
+                                <GridPane hgap="18" vgap="16">
+                                    <Label text="Hãng điện tử" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-label"/>
+                                    <TextField fx:id="brandField" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="mail-field" promptText="Apple, Samsung..."/>
+
+                                    <Label text="Số tháng bảo hành" GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="field-label"/>
+                                    <TextField fx:id="warrantyMonthsField" GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="mail-field" promptText="12"/>
+                                </GridPane>
+                            </VBox>
+
+                            <VBox fx:id="vehicleFields" spacing="14">
+                                <Label text="Phương tiện" styleClass="field-label"/>
+                                <GridPane hgap="18" vgap="16">
+                                    <Label text="Hãng xe" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-label"/>
+                                    <TextField fx:id="manufacturerField" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="mail-field" promptText="Honda, Toyota..."/>
+
+                                    <Label text="Năm sản xuất" GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="field-label"/>
+                                    <TextField fx:id="productionYearField" GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="mail-field" promptText="2023"/>
+
+                                    <Label text="Số km đã đi" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="field-label"/>
+                                    <TextField fx:id="mileageField" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="mail-field" promptText="12000"/>
+                                </GridPane>
+                            </VBox>
+
+                            <VBox fx:id="artFields" spacing="14">
+                                <Label text="Tác phẩm nghệ thuật" styleClass="field-label"/>
+                                <GridPane hgap="18" vgap="16">
+                                    <Label text="Tên tác giả" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-label"/>
+                                    <TextField fx:id="artistField" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="mail-field" promptText="Bùi Xuân Phái"/>
+
+                                    <Label text="Năm sáng tác" GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="field-label"/>
+                                    <TextField fx:id="yearCreatedField" GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="mail-field" promptText="1978"/>
+                                </GridPane>
+                            </VBox>
+
+                            <HBox spacing="12">
+                                <Button text="Lưu phiên đấu giá" onAction="#handleCreateAuction" styleClass="primary-btn"/>
+                                <Button text="Xem danh sách" onAction="#goToAuctionList" styleClass="secondary-btn"/>
+                            </HBox>
+                        </VBox>
+
+                        <VBox spacing="16" prefWidth="360">
+                            <VBox spacing="14" styleClass="side-info-card">
+                                <padding>
+                                    <Insets top="22" right="22" bottom="22" left="22"/>
+                                </padding>
+                                <Label text="Quy tắc nhập thời gian" styleClass="partner-title"/>
+                                <Label text="1. Dùng định dạng yyyy-MM-dd HH:mm:ss&#10;2. Thời gian kết thúc phải lớn hơn bắt đầu&#10;3. Có thể nhập phiên kéo dài 3 tháng để làm mẫu kiểm thử countdown"
+                                       wrapText="true" styleClass="partner-text"/>
+                            </VBox>
+
+                            <VBox spacing="14" styleClass="side-info-card">
+                                <padding>
+                                    <Insets top="22" right="22" bottom="22" left="22"/>
+                                </padding>
+                                <Label text="Danh mục đang hỗ trợ" styleClass="partner-title"/>
+                                <Label text="• Electronics: Hãng + bảo hành&#10;• Vehicle: Hãng xe + năm sản xuất + số km&#10;• Art: Tác giả + năm sáng tác"
+                                       wrapText="true" styleClass="partner-text"/>
+                            </VBox>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

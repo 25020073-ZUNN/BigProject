@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.auction.controller.HomeController"
+            prefWidth="1380" prefHeight="920" stylesheets="@../style.css" styleClass="root">
+
+    <top>
+        <VBox>
+            <HBox alignment="CENTER_LEFT" spacing="20" styleClass="topbar">
+                <padding><Insets top="12" right="36" bottom="12" left="36"/></padding>
+                <VBox spacing="0">
+                    <Label text="AUREX" styleClass="logo-main"/>
+                    <Label text="AUCTION PLATFORM" styleClass="logo-sub"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Trang chủ" onAction="#goToHome" styleClass="nav-btn"/>
+                <Button text="Tài sản đấu giá" onAction="#goToAuctionList" styleClass="nav-btn"/>
+                <Button text="Phiên đấu giá" onAction="#goToSessions" styleClass="nav-btn"/>
+                <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn"/>
+                <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
+                <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
+            </HBox>
+
+            <!-- Page Hero -->
+            <VBox spacing="6" styleClass="page-hero-small" alignment="CENTER_LEFT">
+                <padding><Insets top="28" right="48" bottom="28" left="48"/></padding>
+                <Label text="TẠO TÀI KHOẢN MỚI" styleClass="hero-small"/>
+                <Label text="Đăng ký tham gia nền tảng đấu giá" styleClass="hero-title-small"/>
+                <Label text="Đăng ký để theo dõi phiên, quản lý tài sản và nhận thông báo." styleClass="muted-text"/>
+            </VBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
+            <content>
+                <VBox spacing="24" styleClass="page-section">
+                    <padding><Insets top="32" right="48" bottom="40" left="48"/></padding>
+
+                    <HBox spacing="24">
+                        <!-- Form đăng ký -->
+                        <VBox prefWidth="860" spacing="24" styleClass="register-panel" HBox.hgrow="ALWAYS">
+                            <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
+
+                            <Label text="📝  Thông tin đăng ký" styleClass="login-panel-title"/>
+
+                            <GridPane hgap="18" vgap="16">
+                                <Label text="Họ và tên" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-label"/>
+                                <TextField fx:id="fullNameField" promptText="Nhập họ và tên" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="mail-field"/>
+
+                                <Label text="Tên đăng nhập" GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="field-label"/>
+                                <TextField fx:id="regUsernameField" promptText="Nhập tên đăng nhập" GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="mail-field"/>
+
+                                <Label text="Số điện thoại" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="field-label"/>
+                                <TextField fx:id="phoneField" promptText="Nhập số điện thoại" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="mail-field"/>
+
+                                <Label text="Email" GridPane.columnIndex="1" GridPane.rowIndex="2" styleClass="field-label"/>
+                                <TextField fx:id="emailField" promptText="example@gmail.com" GridPane.columnIndex="1" GridPane.rowIndex="3" styleClass="mail-field"/>
+
+
+
+                                <Label text="Mật khẩu" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="field-label"/>
+                                <HBox spacing="8" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="5">
+                                    <PasswordField fx:id="regPasswordField" promptText="Nhập mật khẩu" styleClass="mail-field" HBox.hgrow="ALWAYS"/>
+                                    <TextField fx:id="visibleRegPasswordField" promptText="Nhập mật khẩu" styleClass="mail-field" visible="false" managed="false" HBox.hgrow="ALWAYS"/>
+                                    <Button fx:id="toggleRegPasswordButton" text="👁" styleClass="password-eye-btn"/>
+                                </HBox>
+
+                                <Label text="Xác nhận mật khẩu" GridPane.columnIndex="1" GridPane.rowIndex="4" styleClass="field-label"/>
+                                <HBox spacing="8" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                                    <PasswordField fx:id="confirmPasswordField" promptText="Nhập lại mật khẩu" styleClass="mail-field" HBox.hgrow="ALWAYS"/>
+                                    <TextField fx:id="visibleConfirmPasswordField" promptText="Nhập lại mật khẩu" styleClass="mail-field" visible="false" managed="false" HBox.hgrow="ALWAYS"/>
+                                    <Button fx:id="toggleConfirmPasswordButton" text="👁" styleClass="password-eye-btn"/>
+                                </HBox>
+                            </GridPane>
+
+                            <VBox spacing="10">
+                                <CheckBox text="Tôi đồng ý với điều khoản sử dụng và chính sách bảo mật" styleClass="check-auth"/>
+                                <CheckBox text="Tôi muốn nhận thông báo về phiên đấu giá và tài sản mới" styleClass="check-auth"/>
+                            </VBox>
+
+                            <HBox spacing="12">
+                                <Button text="Tạo tài khoản" onAction="#handleRegister" styleClass="primary-btn"/>
+                                <Button text="Làm mới biểu mẫu" styleClass="secondary-btn"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- Sidebar -->
+                        <VBox prefWidth="380" spacing="16">
+                            <VBox spacing="14" styleClass="side-info-card">
+                                <padding><Insets top="22" right="22" bottom="22" left="22"/></padding>
+                                <Label text="📋  Quy trình kích hoạt" styleClass="partner-title"/>
+                                <Label text="1. Điền thông tin cá nhân&#10;2. Xác thực email / số điện thoại&#10;3. Hoàn thiện hồ sơ&#10;4. Bắt đầu tham gia đấu giá"
+                                       wrapText="true" styleClass="partner-text"/>
+                            </VBox>
+
+                            <VBox spacing="14" styleClass="side-info-card">
+                                <padding><Insets top="22" right="22" bottom="22" left="22"/></padding>
+                                <Label text="✨  Lợi ích khi đăng ký" styleClass="partner-title"/>
+                                <Label text="• Theo dõi tài sản yêu thích&#10;• Nhận thông báo nhắc lịch&#10;• Quản lý lịch sử tham gia&#10;• Truy cập hồ sơ và biên bản"
+                                       wrapText="true" styleClass="partner-text"/>
+                            </VBox>
+
+                            <VBox spacing="14" styleClass="side-info-card-dark">
+                                <padding><Insets top="22" right="22" bottom="22" left="22"/></padding>
+                                <Label text="Đã có tài khoản?" styleClass="section-title"/>
+                                <Label text="Đăng nhập để tiếp tục theo dõi các phiên đang mở."
+                                       wrapText="true" styleClass="footer-text"/>
+                                <Hyperlink text="→  Chuyển sang trang đăng nhập" onAction="#goToLogin" styleClass="auth-link-light"/>
+                            </VBox>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>
