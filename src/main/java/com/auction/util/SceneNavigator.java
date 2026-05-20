@@ -35,7 +35,7 @@ public final class SceneNavigator {
      */
     public static void switchScene(ActionEvent event, String fxmlFile) {
         try {
-            Parent root = FXMLLoader.load(SceneNavigator.class.getResource("/" + fxmlFile));
+            Parent root = FXMLLoader.load(SceneNavigator.class.getResource("/fxml/" + fxmlFile));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
             root.setOpacity(0);
@@ -82,7 +82,7 @@ public final class SceneNavigator {
     public static void navigateToAssetDetail(Stage stage, Auction auction) {
         if (auction == null) return;
         try {
-            FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource("/asset-detail.fxml"));
+            FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource("/fxml/asset-detail.fxml"));
             Parent root = loader.load();
 
             AssetDetailController ctrl = loader.getController();
@@ -110,7 +110,7 @@ public final class SceneNavigator {
     public static void navigateToAuctionDetailOrSummary(Stage stage, Auction auction) {
         if (auction == null) return;
         try {
-            String fxml = auction.isFinished() ? "/auction-summary.fxml" : "/product-detail.fxml";
+            String fxml = auction.isFinished() ? "/fxml/auction-summary.fxml" : "/fxml/product-detail.fxml";
             FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource(fxml));
             Parent root = loader.load();
 

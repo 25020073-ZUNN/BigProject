@@ -26,7 +26,7 @@ public class Main extends Application {
         logDatabaseConfiguration();
 
         // 3. Nạp giao diện chính từ file FXML
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/giaodien.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/giaodien.fxml"));
         Scene scene = new Scene(loader.load());
 
         // 4. Thiết lập các thông số cho cửa sổ ứng dụng

@@ -71,7 +71,7 @@ public class AuctionListController implements Initializable {
     private void openDetailWindow(Item item) {
         try {
             // Nạp file FXML cho giao diện chi tiết
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/product-detail.fxml"));
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/product-detail.fxml"));
             javafx.scene.Parent root = loader.load();
 
             // Lấy Controller của màn hình chi tiết và truyền dữ liệu mặt hàng sang
