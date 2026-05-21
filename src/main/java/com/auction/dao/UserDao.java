@@ -99,21 +99,24 @@ public class UserDao {
      * Xác thực đăng nhập bằng lệnh SELECT với cả username và password.
      */
     public User login(String username, String password) {
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ? AND active = TRUE";
+        String sql = "SELECT * FROM users WHERE (username = ? OR email = ?) AND active = TRUE";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, username);
-            stmt.setString(2, hashPassword(password));
+            stmt.setString(2, username);
             
             try (ResultSet rs = stmt.executeQuery()) {
                 if (!rs.next()) return null; // Không tìm thấy hoặc sai thông tin
-                return mapUser(rs); // Chuyển dòng dữ liệu hiện tại thành đối tượng User
+                String dbHash = rs.getString("password");
+                if (checkPassword(password, dbHash)) {
+                    return mapUser(rs);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
 
     /**
@@ -317,8 +320,50 @@ public class UserDao {
         return user;
     }
 
+    private boolean checkPassword(String password, String dbHash) {
+        if (password == null || dbHash == null) return false;
+        if (dbHash.startsWith("$2a$") || dbHash.startsWith("$2b$") || dbHash.startsWith("$2y$")) {
+            try {
+                return org.mindrot.jbcrypt.BCrypt.checkpw(password, dbHash);
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return dbHash.equals(String.valueOf(password.hashCode()));
+    }
+
     private String hashPassword(String password) {
-        return (password == null) ? null : String.valueOf(password.hashCode());
+        if (password == null) return null;
+        return org.mindrot.jbcrypt.BCrypt.hashpw(password, org.mindrot.jbcrypt.BCrypt.gensalt());
+    }
+
+    public boolean updatePassword(String email, String newPasswordHash) {
+        String sql = "UPDATE users SET password = ? WHERE email = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newPasswordHash);
+            stmt.setString(2, email);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public User findByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapUser(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private boolean isBlank(String value) {

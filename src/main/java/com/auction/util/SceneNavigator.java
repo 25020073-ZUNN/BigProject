@@ -62,6 +62,7 @@ public final class SceneNavigator {
 
     public static void goToHome(ActionEvent event) { switchScene(event, "giaodien.fxml"); }
     public static void goToLogin(ActionEvent event) { switchScene(event, "login.fxml"); }
+    public static void goToForgotPassword(ActionEvent event) { switchScene(event, "forgot-password.fxml"); }
     public static void goToRegister(ActionEvent event) { switchScene(event, "register.fxml"); }
     public static void goToAuctionList(ActionEvent event) { switchScene(event, "auction-detail.fxml"); }
     public static void goToProductDetail(ActionEvent event) { switchScene(event, "product-detail.fxml"); }

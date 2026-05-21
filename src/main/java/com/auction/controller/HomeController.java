@@ -104,6 +104,18 @@ public class HomeController {
     @FXML
     private Button toggleConfirmPasswordButton;
 
+    // --- Các trường dữ liệu cho chức năng Quên mật khẩu ---
+    @FXML
+    private TextField forgotEmailOrUsernameField;
+    @FXML
+    private TextField forgotTokenField;
+    @FXML
+    private PasswordField forgotNewPasswordField;
+    @FXML
+    private PasswordField forgotConfirmPasswordField;
+    @FXML
+    private Label forgotStatusLabel;
+
     // --- Các thành phần hỗ trợ chức năng nhanh (như đặt giá nhanh từ trang chủ) ---
     @FXML
     private TextField bidAmountField;
@@ -598,6 +610,11 @@ public class HomeController {
     }
 
     @FXML
+    public void goToForgotPassword(ActionEvent event) {
+        SceneNavigator.goToForgotPassword(event);
+    }
+
+    @FXML
     public void goToRegister(ActionEvent event) {
         SceneNavigator.goToRegister(event);
     }
@@ -757,5 +774,108 @@ public class HomeController {
         title.getStyleClass().add("partner-title");
         box.getChildren().add(title);
         return box;
+    }
+
+    @FXML
+    public void handleSendResetToken(ActionEvent event) {
+        if (forgotEmailOrUsernameField == null) return;
+        String emailOrUsername = forgotEmailOrUsernameField.getText().trim();
+        if (emailOrUsername.isEmpty()) {
+            showForgotStatus("Vui lòng nhập tên đăng nhập hoặc email.", true);
+            return;
+        }
+
+        Button sourceBtn = (event.getSource() instanceof Button) ? (Button) event.getSource() : null;
+        final String originalText = sourceBtn != null ? sourceBtn.getText() : "";
+        if (sourceBtn != null) {
+            sourceBtn.setDisable(true);
+            sourceBtn.setText("Đang gửi...");
+        }
+
+        FxAsync.run(
+                () -> networkService.requestPasswordReset(emailOrUsername),
+                targetEmail -> {
+                    if (sourceBtn != null) {
+                        sourceBtn.setDisable(false);
+                        sourceBtn.setText(originalText);
+                    }
+                    showForgotStatus("Mã OTP đã được gửi tới: " + targetEmail + " (Có hiệu lực trong 5 phút)", false);
+                },
+                error -> {
+                    if (sourceBtn != null) {
+                        sourceBtn.setDisable(false);
+                        sourceBtn.setText(originalText);
+                    }
+                    showForgotStatus("Lỗi: " + error, true);
+                }
+        );
+    }
+
+    @FXML
+    public void handleConfirmResetPassword(ActionEvent event) {
+        if (forgotEmailOrUsernameField == null || forgotTokenField == null || 
+            forgotNewPasswordField == null || forgotConfirmPasswordField == null) {
+            return;
+        }
+
+        String emailOrUsername = forgotEmailOrUsernameField.getText().trim();
+        String token = forgotTokenField.getText().trim();
+        String newPassword = forgotNewPasswordField.getText().trim();
+        String confirmPassword = forgotConfirmPasswordField.getText().trim();
+
+        if (emailOrUsername.isEmpty() || token.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
+            showForgotStatus("Vui lòng điền đầy đủ tất cả các trường.", true);
+            return;
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            showForgotStatus("Mật khẩu mới và xác nhận mật khẩu không khớp.", true);
+            return;
+        }
+
+        if (!ValidationUtil.isPasswordValid(newPassword)) {
+            showForgotStatus("Mật khẩu phải từ 8 ký tự trở lên, bao gồm chữ hoa, chữ thường và chữ số.", true);
+            return;
+        }
+
+        Button sourceBtn = (event.getSource() instanceof Button) ? (Button) event.getSource() : null;
+        final String originalText = sourceBtn != null ? sourceBtn.getText() : "";
+        if (sourceBtn != null) {
+            sourceBtn.setDisable(true);
+            sourceBtn.setText("Đang đổi mật khẩu...");
+        }
+
+        FxAsync.run(
+                () -> {
+                    networkService.resetPassword(emailOrUsername, token, newPassword);
+                    return null;
+                },
+                ignored -> {
+                    if (sourceBtn != null) {
+                        sourceBtn.setDisable(false);
+                        sourceBtn.setText(originalText);
+                    }
+                    AlertHelper.showInformation("Thành công", "Đổi mật khẩu thành công! Bạn có thể đăng nhập bằng mật khẩu mới.");
+                    SceneNavigator.goToLogin(event);
+                },
+                error -> {
+                    if (sourceBtn != null) {
+                        sourceBtn.setDisable(false);
+                        sourceBtn.setText(originalText);
+                    }
+                    showForgotStatus("Lỗi: " + error, true);
+                }
+        );
+    }
+
+    private void showForgotStatus(String message, boolean isError) {
+        if (forgotStatusLabel != null) {
+            forgotStatusLabel.setText(message);
+            forgotStatusLabel.setStyle(isError 
+                    ? "-fx-text-fill: #ff6b6b; -fx-font-size: 13px; -fx-font-weight: bold;" 
+                    : "-fx-text-fill: #4ade80; -fx-font-size: 13px; -fx-font-weight: bold;");
+            forgotStatusLabel.setVisible(true);
+            forgotStatusLabel.setManaged(true);
+        }
     }
 }

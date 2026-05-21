@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * NetworkService - Singleton giao tiếp mạng giữa Client và Server.
@@ -24,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class NetworkService {
 
-    private static final String DEFAULT_HOST = System.getProperty("auction.server.host", "100.69.190.79");
+    private static final String DEFAULT_HOST = System.getProperty("auction.server.host", "127.0.0.1");
     private static final int DEFAULT_PORT = Integer.getInteger("auction.server.port", 5050);
 
     private static final NetworkService instance = new NetworkService();
@@ -58,7 +60,8 @@ public class NetworkService {
                 sharedConnection.close();
                 sharedConnection = null;
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         IOException closedException = new IOException("Kết nối tới server đã đóng");
         pendingResponses.values().forEach(future -> future.completeExceptionally(closedException));
         pendingResponses.clear();
@@ -82,8 +85,7 @@ public class NetworkService {
     public User login(String username, String password) throws IOException {
         Message response = send(Message.Type.LOGIN, Map.of(
                 "username", username,
-                "password", password
-        ));
+                "password", password));
         ensureSuccess(response);
         return toUser(response.getPayload());
     }
@@ -94,8 +96,7 @@ public class NetworkService {
                 "username", username,
                 "fullName", fullName,
                 "email", email,
-                "password", password
-        ));
+                "password", password));
         ensureSuccess(response);
         return toUser(response.getPayload());
     }
@@ -104,31 +105,42 @@ public class NetworkService {
         Message response = send(Message.Type.UPDATE_PROFILE, Map.of(
                 "username", username,
                 "fullName", fullName,
-                "email", email
-        ));
+                "email", email));
         ensureSuccess(response);
         return toUser(response.getPayload());
     }
 
     public void deleteAccount(String username) throws IOException {
         Message response = send(Message.Type.DELETE_ACCOUNT, Map.of(
-                "username", username
-        ));
+                "username", username));
+        ensureSuccess(response);
+    }
+
+    public String requestPasswordReset(String emailOrUsername) throws IOException {
+        Message response = send(Message.Type.REQUEST_PASSWORD_RESET, Map.of(
+                "emailOrUsername", emailOrUsername));
+        ensureSuccess(response);
+        return (String) response.getPayload().get("email");
+    }
+
+    public void resetPassword(String emailOrUsername, String token, String newPassword) throws IOException {
+        Message response = send(Message.Type.RESET_PASSWORD, Map.of(
+                "emailOrUsername", emailOrUsername,
+                "token", token,
+                "newPassword", newPassword));
         ensureSuccess(response);
     }
 
     public User getCurrentUser(String username) throws IOException {
         Message response = send(Message.Type.GET_CURRENT_USER, Map.of(
-                "username", username
-        ));
+                "username", username));
         ensureSuccess(response);
         return toUser(response.getPayload());
     }
 
     public List<Map<String, Object>> getUsers(String adminUsername) throws IOException {
         Message response = send(Message.Type.GET_USERS, Map.of(
-                "adminUsername", adminUsername
-        ));
+                "adminUsername", adminUsername));
         ensureSuccess(response);
         return decodeMapList(response.getPayload().get("users"));
     }
@@ -137,16 +149,14 @@ public class NetworkService {
         Message response = send(Message.Type.SET_USER_ACTIVE, Map.of(
                 "adminUsername", adminUsername,
                 "targetUsername", targetUsername,
-                "active", active
-        ));
+                "active", active));
         ensureSuccess(response);
     }
 
     public void deleteAuction(String adminUsername, String auctionId) throws IOException {
         Message response = send(Message.Type.DELETE_AUCTION, Map.of(
                 "adminUsername", adminUsername,
-                "auctionId", auctionId
-        ));
+                "auctionId", auctionId));
         ensureSuccess(response);
     }
 
@@ -161,8 +171,7 @@ public class NetworkService {
         Message response = send(Message.Type.PLACE_BID, Map.of(
                 "itemId", itemId,
                 "bidderUsername", bidderUsername,
-                "amount", amount
-        ));
+                "amount", amount));
         ensureSuccess(response);
         return response.getPayload();
     }
@@ -171,9 +180,9 @@ public class NetworkService {
      * Gửi yêu cầu tạo phiên đấu giá mới tới Server.
      */
     public void createAuction(String itemType, String name, String description,
-                              String startingPrice, String bidStep,
-                              String startTime, String endTime,
-                              String sellerUsername, Map<String, Object> attributes)
+            String startingPrice, String bidStep,
+            String startTime, String endTime,
+            String sellerUsername, Map<String, Object> attributes)
             throws IOException {
         Map<String, Object> payload = new HashMap<>();
         payload.put("itemType", itemType);
@@ -200,11 +209,20 @@ public class NetworkService {
         pendingResponses.put(request.getRequestId(), pendingResponse);
         try {
             getConnection().send(request);
-            return pendingResponse.join();
+            return pendingResponse.get(15, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            throw new IOException("Server không phản hồi sau 15 giây. Kiểm tra lại kết nối.");
         } catch (CompletionException e) {
             Throwable cause = e.getCause();
-            if (cause instanceof IOException ioEx) throw ioEx;
+            if (cause instanceof IOException ioEx)
+                throw ioEx;
             throw new IOException(cause == null ? "Server request failed" : cause.getMessage(), cause);
+        } catch (java.util.concurrent.ExecutionException e) {
+            Throwable cause = e.getCause();
+            throw new IOException(cause == null ? "Server request failed" : cause.getMessage(), cause);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Yêu cầu bị gián đoạn");
         } catch (IOException e) {
             closeConnection();
             throw e;
@@ -220,11 +238,13 @@ public class NetworkService {
     }
 
     public void addAuctionUpdateListener(AuctionUpdateListener listener) {
-        if (listener == null) return;
+        if (listener == null)
+            return;
         auctionUpdateListeners.add(listener);
         try {
             getConnection();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         List<Map<String, Object>> snapshot = latestAuctionSnapshot;
         if (!snapshot.isEmpty()) {
             for (Map<String, Object> auction : snapshot) {

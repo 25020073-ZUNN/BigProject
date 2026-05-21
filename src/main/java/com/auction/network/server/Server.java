@@ -53,6 +53,23 @@ public class Server {
     private final ExecutorService executor;
     private final Set<ClientSession> clientSessions;
     private final AuctionObserver auctionBroadcastObserver;
+    private final Map<String, ResetToken> resetTokens = new ConcurrentHashMap<>();
+
+    public static class ResetToken {
+        private final String email;
+        private final String token;
+        private final LocalDateTime expiryTime;
+
+        public ResetToken(String email, String token, LocalDateTime expiryTime) {
+            this.email = email;
+            this.token = token;
+            this.expiryTime = expiryTime;
+        }
+
+        public String getEmail() { return email; }
+        public String getToken() { return token; }
+        public LocalDateTime getExpiryTime() { return expiryTime; }
+    }
 
     private volatile boolean running;
     private ServerSocket serverSocket;
@@ -159,6 +176,8 @@ public class Server {
                 case DELETE_ACCOUNT -> handleDeleteAccount(request);
                 case GET_CURRENT_USER -> handleGetCurrentUser(request);
                 case DB_STATUS -> handleDatabaseStatus(request);
+                case REQUEST_PASSWORD_RESET -> handleRequestPasswordReset(request);
+                case RESET_PASSWORD -> handleResetPassword(request);
                 case AUCTION_SYNC -> Message.failure(request, "Client không được phép gửi AUCTION_SYNC");
                 case ERROR -> Message.failure(request, "Client gửi tin nhắn lỗi");
             };
@@ -251,7 +270,7 @@ public class Server {
         }
 
         User user = new RegisteredUser(username, fullName == null || fullName.isBlank() ? username : fullName, email,
-                String.valueOf(password.hashCode()));
+                org.mindrot.jbcrypt.BCrypt.hashpw(password, org.mindrot.jbcrypt.BCrypt.gensalt()));
 
         boolean created = authService.register(user);
         if (!created) {
@@ -420,6 +439,122 @@ public class Server {
                 "available", available,
                 "dbUrl", DBConnection.getConfiguredUrl(),
                 "dbUser", DBConnection.getConfiguredUser()));
+    }
+
+    private Message handleRequestPasswordReset(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String usernameOrEmail = stringValue(payload.get("emailOrUsername"));
+        if (usernameOrEmail == null || usernameOrEmail.isBlank()) {
+            return Message.failure(request, "Thiếu thông tin tên đăng nhập hoặc email");
+        }
+        User user = userDao.findByUsername(usernameOrEmail);
+        if (user == null) {
+            user = userDao.findByEmail(usernameOrEmail);
+        }
+        if (user == null) {
+            return Message.failure(request, "Không tìm thấy tài khoản tương ứng");
+        }
+        String toEmail = user.getEmail();
+        if (toEmail == null || toEmail.isBlank()) {
+            return Message.failure(request, "Tài khoản không có email hợp lệ");
+        }
+
+        String token = String.format("%06d", new java.util.Random().nextInt(1000000));
+        LocalDateTime expiry = LocalDateTime.now().plusMinutes(5);
+        resetTokens.put(toEmail, new ResetToken(toEmail, token, expiry));
+
+        sendEmail(toEmail, token);
+        return Message.success(request, Map.of("email", toEmail));
+    }
+
+    private Message handleResetPassword(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String usernameOrEmail = stringValue(payload.get("emailOrUsername"));
+        String token = stringValue(payload.get("token"));
+        String newPassword = stringValue(payload.get("newPassword"));
+
+        if (usernameOrEmail == null || usernameOrEmail.isBlank() || token == null || token.isBlank() || newPassword == null || newPassword.isBlank()) {
+            return Message.failure(request, "Thiếu thông tin xác nhận");
+        }
+
+        User user = userDao.findByUsername(usernameOrEmail);
+        if (user == null) {
+            user = userDao.findByEmail(usernameOrEmail);
+        }
+        if (user == null) {
+            return Message.failure(request, "Không tìm thấy tài khoản tương ứng");
+        }
+        String email = user.getEmail();
+
+        ResetToken storedToken = resetTokens.get(email);
+        if (storedToken == null || !storedToken.getToken().equals(token)) {
+            return Message.failure(request, "Mã xác nhận không đúng");
+        }
+        if (LocalDateTime.now().isAfter(storedToken.getExpiryTime())) {
+            resetTokens.remove(email);
+            return Message.failure(request, "Mã xác nhận đã hết hạn (chỉ có hiệu lực trong 5 phút)");
+        }
+
+        String newPasswordHash = org.mindrot.jbcrypt.BCrypt.hashpw(newPassword, org.mindrot.jbcrypt.BCrypt.gensalt());
+        boolean success = userDao.updatePassword(email, newPasswordHash);
+        resetTokens.remove(email);
+
+        if (success) {
+            return Message.success(request, Map.of("success", true));
+        } else {
+            return Message.failure(request, "Không thể cập nhật mật khẩu mới");
+        }
+    }
+
+    private void sendEmail(String toEmail, String token) {
+        // Luôn in ra console để developer/tester có thể lấy mã ngay (kể cả khi SMTP fail)
+        System.out.println("[EMAIL] GỬI MÃ XÁC NHẬN ĐẾN: " + toEmail + " | MÃ OTP: " + token + " (Hết hạn sau 5 phút)");
+
+        new Thread(() -> {
+            try {
+                // Đọc cấu hình SMTP từ file smtp.properties trên classpath
+                java.util.Properties smtpConfig = new java.util.Properties();
+                try (var is = getClass().getClassLoader().getResourceAsStream("smtp.properties")) {
+                    if (is == null) {
+                        System.err.println("[EMAIL] Không tìm thấy smtp.properties trên classpath!");
+                        return;
+                    }
+                    smtpConfig.load(is);
+                }
+
+                final String smtpUser = smtpConfig.getProperty("smtp.user");
+                final String smtpPassword = smtpConfig.getProperty("smtp.password");
+
+                java.util.Properties props = new java.util.Properties();
+                props.put("mail.smtp.host", smtpConfig.getProperty("smtp.host", "smtp.gmail.com"));
+                props.put("mail.smtp.port", smtpConfig.getProperty("smtp.port", "587"));
+                props.put("mail.smtp.auth", smtpConfig.getProperty("smtp.auth", "true"));
+                props.put("mail.smtp.starttls.enable", smtpConfig.getProperty("smtp.starttls", "true"));
+
+                javax.mail.Session session = javax.mail.Session.getInstance(props,
+                        new javax.mail.Authenticator() {
+                            protected javax.mail.PasswordAuthentication getPasswordAuthentication() {
+                                return new javax.mail.PasswordAuthentication(smtpUser, smtpPassword);
+                            }
+                        });
+
+                javax.mail.Message message = new javax.mail.internet.MimeMessage(session);
+                message.setFrom(new javax.mail.internet.InternetAddress(smtpUser));
+                message.setRecipients(
+                        javax.mail.Message.RecipientType.TO,
+                        javax.mail.internet.InternetAddress.parse(toEmail));
+                message.setSubject("Aurex Auction - Reset Password");
+                message.setText(
+                        "Token reset password của bạn:\n\n" + token + "\n\n" +
+                        "Mã này có hiệu lực trong 5 phút.\n" +
+                        "Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.");
+
+                javax.mail.Transport.send(message);
+                System.out.println("[EMAIL] Đã gửi mail thành công qua SMTP tới: " + toEmail);
+            } catch (Exception e) {
+                System.err.println("[EMAIL] Lỗi gửi mail qua SMTP: " + e.getMessage());
+            }
+        }, "email-sender").start();
     }
 
     // ===== Payload builders =====

@@ -3,6 +3,7 @@ target/
 .idea/
 *.iml
 .env.local
+smtp.properties
 project_overview.md
 uploads/*
 !uploads/.gitkeep

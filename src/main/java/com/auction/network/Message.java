@@ -47,6 +47,10 @@ public class Message {
         AUCTION_SYNC,
         /** Kiểm tra kết nối (Ping) */
         PING,
+        /** Yêu cầu sinh mã reset mật khẩu gửi qua email */
+        REQUEST_PASSWORD_RESET,
+        /** Đặt lại mật khẩu mới với mã xác nhận */
+        RESET_PASSWORD,
         /** Thông báo lỗi */
         ERROR
     }
