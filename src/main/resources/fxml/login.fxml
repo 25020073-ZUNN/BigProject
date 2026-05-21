@@ -129,7 +129,7 @@
                 <HBox alignment="CENTER_LEFT">
                     <CheckBox text="Ghi nhớ đăng nhập" styleClass="check-auth"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Hyperlink text="Quên mật khẩu?" styleClass="auth-link"/>
+                    <Hyperlink text="Quên mật khẩu?" onAction="#goToForgotPassword" styleClass="auth-link"/>
                 </HBox>
 
                 <!-- Nút thao tác chính: Đăng nhập -->
