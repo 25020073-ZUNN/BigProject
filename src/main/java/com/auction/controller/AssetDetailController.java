@@ -6,6 +6,7 @@ import com.auction.util.LoginStateHelper;
 import com.auction.util.PriceFormatter;
 import com.auction.util.SceneNavigator;
 import com.auction.util.UserSession;
+import com.auction.util.AuctionImageLoader;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -13,7 +14,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
@@ -148,7 +148,7 @@ public class AssetDetailController {
         itemImageView.setManaged(hasImage);
         updateImagePlaceholder(!hasImage);
         if (hasImage) {
-            itemImageView.setImage(new Image(imageUrl, true));
+            itemImageView.setImage(AuctionImageLoader.detail(imageUrl));
         } else {
             itemImageView.setImage(null);
         }

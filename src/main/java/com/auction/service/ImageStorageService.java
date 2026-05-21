@@ -1,5 +1,8 @@
 package com.auction.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.Transformation;
+import com.cloudinary.utils.ObjectUtils;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -11,11 +14,16 @@ import java.net.InetSocketAddress;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 /**
- * Lưu ảnh người dùng upload vào thư mục dùng chung và public qua HTTP.
+ * Stores uploaded images and returns a URL that every connected client can load.
+ * Cloudinary is used when configured; local HTTP storage remains as a fallback.
  */
 public class ImageStorageService {
 
@@ -28,20 +36,30 @@ public class ImageStorageService {
     private final Path storageRoot;
     private final String publicHost;
     private final int publicPort;
+    private final CloudImageUploader cloudImageUploader;
 
     private HttpServer httpServer;
 
     public ImageStorageService() {
-        this(DEFAULT_STORAGE_ROOT, System.getProperty("auction.public.host", DEFAULT_PUBLIC_HOST), DEFAULT_PORT);
+        this(DEFAULT_STORAGE_ROOT, System.getProperty("auction.public.host", DEFAULT_PUBLIC_HOST), DEFAULT_PORT,
+                CloudinaryImageUploader.fromEnvironment());
     }
 
     public ImageStorageService(Path storageRoot, String publicHost, int publicPort) {
+        this(storageRoot, publicHost, publicPort, null);
+    }
+
+    ImageStorageService(Path storageRoot, String publicHost, int publicPort, CloudImageUploader cloudImageUploader) {
         this.storageRoot = storageRoot.toAbsolutePath().normalize();
         this.publicHost = normalizeHost(publicHost);
         this.publicPort = publicPort;
+        this.cloudImageUploader = cloudImageUploader;
     }
 
     public synchronized void start() throws IOException {
+        if (isCloudinaryEnabled()) {
+            return;
+        }
         if (httpServer != null) {
             return;
         }
@@ -61,7 +79,11 @@ public class ImageStorageService {
 
     public String storeImage(byte[] content, String originalFileName) throws IOException {
         if (content == null || content.length == 0) {
-            throw new IOException("Ảnh tải lên bị rỗng");
+            throw new IOException("Anh tai len bi rong");
+        }
+
+        if (isCloudinaryEnabled()) {
+            return cloudImageUploader.upload(content, originalFileName);
         }
 
         Files.createDirectories(storageRoot);
@@ -69,10 +91,14 @@ public class ImageStorageService {
         String storedFileName = UUID.randomUUID() + extension;
         Path target = storageRoot.resolve(storedFileName).normalize();
         if (!target.startsWith(storageRoot)) {
-            throw new IOException("Đường dẫn lưu ảnh không hợp lệ");
+            throw new IOException("Duong dan luu anh khong hop le");
         }
         Files.write(target, content);
         return buildPublicUrl(storedFileName);
+    }
+
+    private boolean isCloudinaryEnabled() {
+        return cloudImageUploader != null;
     }
 
     String buildPublicUrl(String storedFileName) {
@@ -96,6 +122,172 @@ public class ImageStorageService {
             return DEFAULT_PUBLIC_HOST;
         }
         return host.trim();
+    }
+
+    @FunctionalInterface
+    interface CloudImageUploader {
+        String upload(byte[] content, String originalFileName) throws IOException;
+    }
+
+    private static final class CloudinaryImageUploader implements CloudImageUploader {
+        private static final String DEFAULT_FOLDER = "auction-items";
+        private static final int MAX_DELIVERY_WIDTH = 1200;
+
+        private final Cloudinary cloudinary;
+        private final String folder;
+
+        private CloudinaryImageUploader(Cloudinary cloudinary, String folder) {
+            this.cloudinary = cloudinary;
+            this.folder = folder;
+        }
+
+        private static CloudinaryImageUploader fromEnvironment() {
+            Map<String, String> config = loadLocalEnv();
+            String cloudinaryUrl = getConfig(config, "CLOUDINARY_URL", "cloudinary.url");
+            String cloudName = getConfig(config, "CLOUDINARY_CLOUD_NAME", "cloudinary.cloudName");
+            String apiKey = getConfig(config, "CLOUDINARY_API_KEY", "cloudinary.apiKey");
+            String apiSecret = getConfig(config, "CLOUDINARY_API_SECRET", "cloudinary.apiSecret");
+            String folder = getConfig(config, "CLOUDINARY_FOLDER", "cloudinary.folder");
+            if (folder == null || folder.isBlank()) {
+                folder = DEFAULT_FOLDER;
+            }
+
+            if (cloudinaryUrl != null && !cloudinaryUrl.isBlank()) {
+                return new CloudinaryImageUploader(new Cloudinary(cloudinaryUrl), folder);
+            }
+            if (cloudName != null && !cloudName.isBlank()
+                    && apiKey != null && !apiKey.isBlank()
+                    && apiSecret != null && !apiSecret.isBlank()) {
+                return new CloudinaryImageUploader(new Cloudinary(ObjectUtils.asMap(
+                        "cloud_name", cloudName,
+                        "api_key", apiKey,
+                        "api_secret", apiSecret,
+                        "secure", true)), folder);
+            }
+            return null;
+        }
+
+        @Override
+        @SuppressWarnings("rawtypes")
+        public String upload(byte[] content, String originalFileName) throws IOException {
+            try {
+                Transformation deliveryTransformation = optimizedDeliveryTransformation();
+                Map result = cloudinary.uploader().upload(content, ObjectUtils.asMap(
+                        "folder", folder,
+                        "resource_type", "image",
+                        "use_filename", true,
+                        "unique_filename", true,
+                        "filename_override", originalFileName,
+                        "eager", List.of(deliveryTransformation)));
+                return buildOptimizedDeliveryUrl(result, deliveryTransformation);
+            } catch (IOException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new IOException("Upload anh len Cloudinary that bai: " + e.getMessage(), e);
+            }
+        }
+
+        private String buildOptimizedDeliveryUrl(Map result, Transformation deliveryTransformation) throws IOException {
+            Object publicId = result.get("public_id");
+            if (publicId != null && !String.valueOf(publicId).isBlank()) {
+                return cloudinary.url()
+                        .secure(true)
+                        .transformation(deliveryTransformation)
+                        .generate(String.valueOf(publicId));
+            }
+
+            Object secureUrl = result.get("secure_url");
+            if (secureUrl == null || String.valueOf(secureUrl).isBlank()) {
+                throw new IOException("Cloudinary khong tra ve secure_url");
+            }
+            return String.valueOf(secureUrl);
+        }
+
+        private Transformation optimizedDeliveryTransformation() {
+            return new Transformation()
+                    .width(MAX_DELIVERY_WIDTH)
+                    .crop("limit")
+                    .quality("auto");
+        }
+    }
+
+    private static String getConfig(Map<String, String> localEnv, String envKey, String propertyKey) {
+        String envValue = System.getenv(envKey);
+        if (envValue != null && !envValue.isBlank()) {
+            return envValue;
+        }
+        String localValue = localEnv.get(envKey);
+        if (localValue != null && !localValue.isBlank()) {
+            return localValue;
+        }
+        String propertyValue = System.getProperty(propertyKey);
+        if (propertyValue != null && !propertyValue.isBlank()) {
+            return propertyValue;
+        }
+        return null;
+    }
+
+    private static Map<String, String> loadLocalEnv() {
+        for (Path envFile : getLocalEnvCandidates()) {
+            if (Files.isRegularFile(envFile)) {
+                return readLocalEnv(envFile);
+            }
+        }
+        return Map.of();
+    }
+
+    private static Map<String, String> readLocalEnv(Path envFile) {
+        Map<String, String> values = new HashMap<>();
+        try {
+            for (String rawLine : Files.readAllLines(envFile)) {
+                String line = rawLine.trim();
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
+                int separatorIndex = line.indexOf('=');
+                if (separatorIndex <= 0) {
+                    continue;
+                }
+                String key = line.substring(0, separatorIndex).trim();
+                String value = stripQuotes(line.substring(separatorIndex + 1).trim());
+                if (!key.isEmpty() && !value.isEmpty()) {
+                    values.put(key, value);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("[ImageStorage] Khong the doc file " + envFile + ": " + e.getMessage());
+        }
+        return Map.copyOf(values);
+    }
+
+    private static Iterable<Path> getLocalEnvCandidates() {
+        Map<Path, Boolean> candidates = new LinkedHashMap<>();
+        addLocalEnvCandidates(candidates, Path.of(System.getProperty("user.dir", ".")));
+        addLocalEnvCandidates(candidates, Path.of("").toAbsolutePath());
+        return candidates.keySet();
+    }
+
+    private static void addLocalEnvCandidates(Map<Path, Boolean> candidates, Path start) {
+        Path current = start.toAbsolutePath().normalize();
+        if (Files.isRegularFile(current)) {
+            current = current.getParent();
+        }
+
+        while (current != null) {
+            candidates.put(current.resolve(".env.local"), true);
+            current = current.getParent();
+        }
+    }
+
+    private static String stripQuotes(String value) {
+        if (value.length() >= 2) {
+            boolean wrappedInDoubleQuotes = value.startsWith("\"") && value.endsWith("\"");
+            boolean wrappedInSingleQuotes = value.startsWith("'") && value.endsWith("'");
+            if (wrappedInDoubleQuotes || wrappedInSingleQuotes) {
+                return value.substring(1, value.length() - 1);
+            }
+        }
+        return value;
     }
 
     private static final class ImageHttpHandler implements HttpHandler {

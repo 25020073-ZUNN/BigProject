@@ -8,6 +8,7 @@ import com.auction.network.client.NetworkService;
 import com.auction.util.SceneNavigator;
 import com.auction.util.LoginStateHelper;
 import com.auction.util.PriceFormatter;
+import com.auction.util.AuctionImageLoader;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -21,7 +22,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.Node;
 import javafx.scene.layout.FlowPane;
@@ -359,7 +359,7 @@ public class AuctionCatalogController {
             imagePane.setPrefHeight(160);
             imagePane.setMaxWidth(Double.MAX_VALUE);
 
-            ImageView imageView = new ImageView(new Image(imageUrl, true));
+            ImageView imageView = new ImageView(AuctionImageLoader.thumbnail(imageUrl));
             imageView.setFitWidth(260);
             imageView.setFitHeight(160);
             imageView.setPreserveRatio(true);

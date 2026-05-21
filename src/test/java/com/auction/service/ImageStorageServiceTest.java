@@ -28,4 +28,15 @@ class ImageStorageServiceTest {
         assertTrue(Files.exists(storedFile));
         assertEquals(3L, Files.size(storedFile));
     }
+
+    @Test
+    void storeImageReturnsCloudinaryUrlWhenUploaderIsConfigured() throws Exception {
+        ImageStorageService storageService = new ImageStorageService(
+                tempDir, "100.64.0.10", 8081,
+                (content, originalFileName) -> "https://res.cloudinary.com/demo/image/upload/auction-items/photo.jpg");
+
+        String imageUrl = storageService.storeImage(new byte[] {1, 2, 3}, "photo.JPG");
+
+        assertEquals("https://res.cloudinary.com/demo/image/upload/auction-items/photo.jpg", imageUrl);
+    }
 }
