@@ -203,55 +203,7 @@
                             <Button onAction="#goToAuctionList" styleClass="secondary-btn" text="Xem tất cả  →"/>
                         </HBox>
 
-                        <FlowPane hgap="20" prefWrapLength="1260" vgap="20">
-                            <VBox prefWidth="290" spacing="14" styleClass="auction-card">
-                                <AnchorPane prefHeight="160" styleClass="thumb thumb-1">
-                                    <children><Label layoutX="14" layoutY="12" styleClass="badge-vip" text="🎨  ART"/></children>
-                                </AnchorPane>
-                                <VBox spacing="6">
-                                    <Label styleClass="card-title" text="Tác phẩm nghệ thuật: Bức tranh Phố Phái"/>
-                                    <Label styleClass="card-sub" text="⏰  07/04/2026 13:00:00" wrapText="true"/>
-                                    <Label styleClass="card-price" text="💰  1,250,000,000 VNĐ" wrapText="true"/>
-                                </VBox>
-                                <Button onAction="#goToProductDetail" styleClass="small-btn" text="Chi tiết  →"/>
-                            </VBox>
-
-                            <VBox prefWidth="290" spacing="14" styleClass="auction-card">
-                                <AnchorPane prefHeight="160" styleClass="thumb thumb-2">
-                                    <children><Label layoutX="14" layoutY="12" styleClass="badge-hot" text="🚗  VEHICLE"/></children>
-                                </AnchorPane>
-                                <VBox spacing="6">
-                                    <Label styleClass="card-title" text="Mercedes-Benz S450 Luxury 2024"/>
-                                    <Label styleClass="card-sub" text="⏰  08/04/2026 09:30:00" wrapText="true"/>
-                                    <Label styleClass="card-price" text="💰  2,500,000,000 VNĐ" wrapText="true"/>
-                                </VBox>
-                                <Button onAction="#goToProductDetail" styleClass="small-btn" text="Chi tiết  →"/>
-                            </VBox>
-
-                            <VBox prefWidth="290" spacing="14" styleClass="auction-card">
-                                <AnchorPane prefHeight="160" styleClass="thumb thumb-3">
-                                    <children><Label layoutX="14" layoutY="12" styleClass="badge-live" text="💻  ELECTRONICS"/></children>
-                                </AnchorPane>
-                                <VBox spacing="6">
-                                    <Label styleClass="card-title" text="Hệ thống Server Dell PowerEdge R750"/>
-                                    <Label styleClass="card-sub" text="⏰  07/04/2026 14:00:00" wrapText="true"/>
-                                    <Label styleClass="card-price" text="💰  850,000,000 VNĐ" wrapText="true"/>
-                                </VBox>
-                                <Button onAction="#goToProductDetail" styleClass="small-btn" text="Chi tiết  →"/>
-                            </VBox>
-
-                            <VBox prefWidth="290" spacing="14" styleClass="auction-card">
-                                <AnchorPane prefHeight="160" styleClass="thumb thumb-4">
-                                    <children><Label layoutX="14" layoutY="12" styleClass="badge-new" text="🏍  VEHICLE"/></children>
-                                </AnchorPane>
-                                <VBox spacing="6">
-                                    <Label styleClass="card-title" text="Ducati Panigale V4 Speciale 2024"/>
-                                    <Label styleClass="card-sub" text="⏰  09/04/2026 14:00:00" wrapText="true"/>
-                                    <Label styleClass="card-price" text="💰  1,850,000,000 VNĐ" wrapText="true"/>
-                                </VBox>
-                                <Button onAction="#goToProductDetail" styleClass="small-btn" text="Chi tiết  →"/>
-                            </VBox>
-                        </FlowPane>
+                        <FlowPane fx:id="upcomingAuctionsContainer" hgap="20" prefWrapLength="1260" vgap="20"/>
                     </VBox>
 
                     <!-- ═══════════════════ NEWS ═══════════════════ -->

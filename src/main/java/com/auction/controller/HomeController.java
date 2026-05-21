@@ -32,6 +32,16 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.io.IOException;
 
+import com.auction.model.Auction;
+import com.auction.network.client.AuctionPayloadMapper;
+import com.auction.util.AuctionImageLoader;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.image.ImageView;
+import javafx.stage.Stage;
+import java.util.Comparator;
+
 /**
  * HomeController - Bộ điều khiển chính cho giao diện người dùng (Trang chủ).
  * Quản lý các tương tác cốt lõi như đăng nhập, đăng ký, hiển thị thông tin người dùng,
@@ -99,6 +109,8 @@ public class HomeController {
     private TextField bidAmountField;
     @FXML
     private Label detailItemNameLabel;
+    @FXML
+    private FlowPane upcomingAuctionsContainer;
 
     // --- Khởi tạo các dịch vụ ---
     private final NetworkService networkService = NetworkService.getInstance();
@@ -114,6 +126,7 @@ public class HomeController {
                 latestAuctions.add(auctionData);
             }
         }
+        renderUpcomingAuctions();
     });
 
     /**
@@ -128,8 +141,10 @@ public class HomeController {
         setupPasswordToggles(); // Cấu hình nút xem mật khẩu
         
         // Đăng ký nhận thông báo thay đổi dữ liệu đấu giá
-        //networkService.addAuctionUpdateListener(auctionUpdateListener);
+        networkService.addAuctionUpdateListener(auctionUpdateListener);
         registerListenerLifecycle(); // Tự động hủy đăng ký khi scene bị đóng
+        
+        renderUpcomingAuctions();
     }
 
     /**
@@ -615,5 +630,132 @@ public class HomeController {
     @FXML
     public void goToAdminDashboard(ActionEvent event) {
         SceneNavigator.goToAdminDashboard(event);
+    }
+
+    private void renderUpcomingAuctions() {
+        if (upcomingAuctionsContainer == null) {
+            return;
+        }
+
+        FxAsync.run(
+                () -> {
+                    List<Map<String, Object>> rawAuctions = getKnownAuctions();
+                    List<Auction> auctions = AuctionPayloadMapper.toAuctions(rawAuctions);
+                    
+                    LocalDateTime now = LocalDateTime.now();
+                    return auctions.stream()
+                            .filter(auction -> now.isBefore(auction.getItem().getStartTime()))
+                            .sorted(Comparator.comparing(auction -> auction.getItem().getStartTime()))
+                            .limit(4)
+                            .toList();
+                },
+                upcoming -> {
+                    upcomingAuctionsContainer.getChildren().clear();
+                    if (upcoming.isEmpty()) {
+                        upcomingAuctionsContainer.getChildren().add(createEmptyState("Không có tài sản nào sắp diễn ra."));
+                        return;
+                    }
+                    for (Auction auction : upcoming) {
+                        upcomingAuctionsContainer.getChildren().add(createAuctionCard(auction));
+                    }
+                },
+                error -> {
+                    System.err.println("Lỗi tải tài sản sắp đấu giá: " + error);
+                    upcomingAuctionsContainer.getChildren().clear();
+                    upcomingAuctionsContainer.getChildren().add(createEmptyState("Không thể tải dữ liệu tài sản."));
+                }
+        );
+    }
+
+    private VBox createAuctionCard(Auction auction) {
+        VBox card = new VBox(14);
+        card.setPrefWidth(290);
+        card.getStyleClass().add("auction-card");
+
+        AnchorPane imagePane = new AnchorPane();
+        imagePane.setPrefHeight(160);
+        imagePane.getStyleClass().add("thumb");
+
+        String imageUrl = auction.getItem().getImageUrl();
+        if (imageUrl != null && !imageUrl.isBlank()) {
+            try {
+                ImageView imageView = new ImageView(AuctionImageLoader.thumbnail(imageUrl));
+                imageView.setFitWidth(258);
+                imageView.setFitHeight(160);
+                imageView.setPreserveRatio(true);
+                imageView.setSmooth(true);
+                AnchorPane.setTopAnchor(imageView, 0.0);
+                AnchorPane.setBottomAnchor(imageView, 0.0);
+                AnchorPane.setLeftAnchor(imageView, 0.0);
+                AnchorPane.setRightAnchor(imageView, 0.0);
+                imagePane.getChildren().add(imageView);
+            } catch (Exception e) {
+                int idx = (int) (Math.abs(auction.getId().hashCode()) % 4) + 1;
+                imagePane.getStyleClass().add("thumb-" + idx);
+            }
+        } else {
+            int idx = (int) (Math.abs(auction.getId().hashCode()) % 4) + 1;
+            imagePane.getStyleClass().add("thumb-" + idx);
+        }
+
+        Label badgeLabel = new Label();
+        badgeLabel.setLayoutX(14);
+        badgeLabel.setLayoutY(12);
+        String category = auction.getItem().getCategory();
+        if ("Art".equalsIgnoreCase(category)) {
+            badgeLabel.setText("🎨  ART");
+            badgeLabel.getStyleClass().add("badge-vip");
+        } else if ("Vehicle".equalsIgnoreCase(category)) {
+            badgeLabel.setText("🚗  VEHICLE");
+            badgeLabel.getStyleClass().add("badge-hot");
+        } else if ("Electronics".equalsIgnoreCase(category)) {
+            badgeLabel.setText("💻  ELECTRONICS");
+            badgeLabel.getStyleClass().add("badge-live");
+        } else {
+            badgeLabel.setText("🏛  " + (category != null ? category.toUpperCase() : "ITEM"));
+            badgeLabel.getStyleClass().add("badge-new");
+        }
+        imagePane.getChildren().add(badgeLabel);
+
+        VBox infoBox = new VBox(6);
+        Label titleLabel = new Label(auction.getItem().getName());
+        titleLabel.getStyleClass().add("card-title");
+        titleLabel.setWrapText(true);
+        titleLabel.setMinHeight(50);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        String timeStr = "⏰  " + auction.getItem().getStartTime().format(formatter);
+        Label timeLabel = new Label(timeStr);
+        timeLabel.getStyleClass().add("card-sub");
+        timeLabel.setWrapText(true);
+
+        String priceStr = "💰  " + PriceFormatter.formatPrice(auction.getCurrentPrice());
+        Label priceLabel = new Label(priceStr);
+        priceLabel.getStyleClass().add("card-price");
+        priceLabel.setWrapText(true);
+
+        infoBox.getChildren().addAll(titleLabel, timeLabel, priceLabel);
+
+        Button detailButton = new Button("Chi tiết  →");
+        detailButton.getStyleClass().add("small-btn");
+        detailButton.setOnAction(event -> {
+            Stage stage = (Stage) upcomingAuctionsContainer.getScene().getWindow();
+            SceneNavigator.navigateToAssetDetail(stage, auction);
+        });
+
+        card.getChildren().addAll(imagePane, infoBox, detailButton);
+        return card;
+    }
+
+    private VBox createEmptyState(String message) {
+        VBox box = new VBox(8);
+        box.getStyleClass().add("content-card");
+        box.setPrefWidth(1220);
+        box.setPadding(new javafx.geometry.Insets(24));
+        box.setAlignment(javafx.geometry.Pos.CENTER);
+        Label title = new Label(message);
+        title.getStyleClass().add("partner-title");
+        box.getChildren().add(title);
+        return box;
     }
 }
