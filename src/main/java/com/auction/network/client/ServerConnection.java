@@ -20,7 +20,8 @@ public class ServerConnection implements Closeable {
     private final Thread readerThread;
 
     public ServerConnection(String host, int port, Consumer<Message> messageHandler) throws IOException {
-        this.socket = new Socket(host, port);
+        this.socket = new Socket();
+        this.socket.connect(new java.net.InetSocketAddress(host, port), 3000); // 3 seconds connection timeout
         this.writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
         this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
         this.messageHandler = messageHandler;

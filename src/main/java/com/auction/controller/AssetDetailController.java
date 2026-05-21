@@ -74,6 +74,7 @@ public class AssetDetailController {
 
     /** Timeline cho countdown timer, chạy mỗi giây */
     private Timeline countdownTimeline;
+    private boolean navigatedToSummary = false;
 
     @FXML
     public void initialize() {
@@ -223,6 +224,17 @@ public class AssetDetailController {
                 lblSeconds.setText("0");
                 lblCountdownTitle.setText("🏁  Phiên đấu giá đã kết thúc");
                 countdownTimeline.stop();
+
+                // Tự động chuyển sang trang tổng kết sau 2 giây
+                if (!navigatedToSummary) {
+                    navigatedToSummary = true;
+                    new Timeline(new KeyFrame(Duration.seconds(2), ev -> {
+                        if (breadcrumbName.getScene() != null && breadcrumbName.getScene().getWindow() != null) {
+                            Stage stage = (Stage) breadcrumbName.getScene().getWindow();
+                            SceneNavigator.navigateToAuctionDetailOrSummary(stage, auction);
+                        }
+                    })).play();
+                }
                 return;
             }
 
@@ -231,6 +243,18 @@ public class AssetDetailController {
                 totalSecs = 0;
                 // Trạng thái thay đổi → cập nhật lại nút
                 configureActionButtons(resolveStatus());
+
+                // Tự động chuyển sang trang tổng kết sau 2 giây
+                if (!navigatedToSummary) {
+                    navigatedToSummary = true;
+                    countdownTimeline.stop();
+                    new Timeline(new KeyFrame(Duration.seconds(2), ev -> {
+                        if (breadcrumbName.getScene() != null && breadcrumbName.getScene().getWindow() != null) {
+                            Stage stage = (Stage) breadcrumbName.getScene().getWindow();
+                            SceneNavigator.navigateToAuctionDetailOrSummary(stage, auction);
+                        }
+                    })).play();
+                }
             }
 
             long days = totalSecs / 86400;

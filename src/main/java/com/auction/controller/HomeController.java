@@ -271,16 +271,37 @@ public class HomeController {
             return;
         }
 
+        Button sourceBtn = null;
+        if (event.getSource() instanceof Button) {
+            sourceBtn = (Button) event.getSource();
+        }
+        final Button finalBtn = sourceBtn;
+        final String originalText = finalBtn != null ? finalBtn.getText() : "";
+        if (finalBtn != null) {
+            finalBtn.setDisable(true);
+            finalBtn.setText("Đang đăng nhập...");
+        }
+
         // Chạy tác vụ mạng bất đồng bộ để tránh làm đơ giao diện
         FxAsync.run(
                 () -> networkService.login(username, password),
                 user -> {
+                    if (finalBtn != null) {
+                        finalBtn.setDisable(false);
+                        finalBtn.setText(originalText);
+                    }
                     UserSession.login(user); // Lưu thông tin người dùng vào session
                     AlertHelper.showInformation("Đăng nhập thành công",
                             "Chào mừng " + user.getUsername() + " quay trở lại!");
                     SceneNavigator.goToHome(event); // Quay về trang chủ
                 },
-                errorMsg -> AlertHelper.showError("Lỗi đăng nhập", "Không thể đăng nhập: " + errorMsg));
+                errorMsg -> {
+                    if (finalBtn != null) {
+                        finalBtn.setDisable(false);
+                        finalBtn.setText(originalText);
+                    }
+                    AlertHelper.showError("Lỗi đăng nhập", "Không thể đăng nhập: " + errorMsg);
+                });
     }
 
     /**
@@ -320,14 +341,35 @@ public class HomeController {
             return;
         }
 
+        Button sourceBtn = null;
+        if (event.getSource() instanceof Button) {
+            sourceBtn = (Button) event.getSource();
+        }
+        final Button finalBtn = sourceBtn;
+        final String originalText = finalBtn != null ? finalBtn.getText() : "";
+        if (finalBtn != null) {
+            finalBtn.setDisable(true);
+            finalBtn.setText("Đang đăng ký...");
+        }
+
         // Thực hiện gửi yêu cầu đăng ký bất đồng bộ
         FxAsync.run(
                 () -> networkService.register(username, fullName, email, password),
                 user -> {
+                    if (finalBtn != null) {
+                        finalBtn.setDisable(false);
+                        finalBtn.setText(originalText);
+                    }
                     AlertHelper.showInformation("Đăng ký thành công", "Tài khoản đã được tạo. Vui lòng đăng nhập.");
                     SceneNavigator.goToLogin(event);
                 },
-                errorMsg -> AlertHelper.showError("Lỗi đăng ký", "Không thể đăng ký: " + errorMsg));
+                errorMsg -> {
+                    if (finalBtn != null) {
+                        finalBtn.setDisable(false);
+                        finalBtn.setText(originalText);
+                    }
+                    AlertHelper.showError("Lỗi đăng ký", "Không thể đăng ký: " + errorMsg);
+                });
     }
 
     /**

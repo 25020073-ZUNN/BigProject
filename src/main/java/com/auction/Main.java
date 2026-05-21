@@ -25,6 +25,16 @@ public class Main extends Application {
         // 2. Kiểm tra và in thông tin cấu hình Database ra console
         logDatabaseConfiguration();
 
+        // Khởi động kết nối tới server chạy ngầm để "warm up" (loại bỏ độ trễ lazy-connect ở lần nhấn nút đầu tiên)
+        com.auction.util.FxAsync.run(
+            () -> {
+                com.auction.network.client.NetworkService.getInstance().isServerReachable();
+                return null;
+            },
+            ignored -> {},
+            ignored -> {}
+        );
+
         // 3. Nạp giao diện chính từ file FXML
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/giaodien.fxml"));
         Scene scene = new Scene(loader.load());

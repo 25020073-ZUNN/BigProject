@@ -70,6 +70,7 @@ public class CreateAuctionController {
     @FXML private Label hintLabel;                  // Nhãn gợi ý định dạng
     @FXML private Label selectedImageLabel;         // Hiển thị tên file ảnh đã chọn
     @FXML private Button loginButton;               // Nút Đăng nhập/Đăng xuất
+    @FXML private Button createButton;              // Nút Tạo phiên đấu giá
 
     private File selectedImageFile;                 // Lưu file ảnh đã chọn
 
@@ -159,20 +160,65 @@ public class CreateAuctionController {
             }
 
             // Gửi dữ liệu bất đồng bộ lên server qua NetworkService
+            if (createButton != null) {
+                createButton.setDisable(true);
+                createButton.setText("Đang tạo phiên...");
+            }
+
             FxAsync.run(
                     () -> {
+                        // 1. Kiểm tra trùng phiên (cùng tên, cùng người bán)
+                        java.util.List<java.util.Map<String, Object>> existing = networkService.getAuctions();
+                        boolean isDuplicate = existing.stream().anyMatch(a -> {
+                            String existingName = String.valueOf(a.getOrDefault("itemName", ""));
+                            String existingSeller = String.valueOf(a.getOrDefault("sellerName", ""));
+                            return name.equalsIgnoreCase(existingName) && sellerUsername.equalsIgnoreCase(existingSeller);
+                        });
+                        if (isDuplicate) {
+                            throw new RuntimeException("Phiên đấu giá cho tài sản \"" + name + "\" đã được bạn tạo trước đó.");
+                        }
+
+                        // 2. Tạo phiên đấu giá mới
                         networkService.createAuction(
                                 category, name, description,
                                 startingPrice.toPlainString(), bidStep.toPlainString(),
                                 startTime.format(ISO_FORMATTER), endTime.format(ISO_FORMATTER),
                                 sellerUsername, attributes
                         );
+
+                        // 3. Lấy lại danh sách và chuyển đổi sang Auction
+                        java.util.List<java.util.Map<String, Object>> updated = networkService.getAuctions();
+                        java.util.Map<String, Object> matchedPayload = updated.stream()
+                                .filter(a -> name.equalsIgnoreCase(String.valueOf(a.getOrDefault("itemName", "")))
+                                        && sellerUsername.equalsIgnoreCase(String.valueOf(a.getOrDefault("sellerName", ""))))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (matchedPayload != null) {
+                            return com.auction.network.client.AuctionPayloadMapper.toAuction(matchedPayload);
+                        }
+                        return null;
                     },
-                    () -> {
+                    (newAuction) -> {
+                        if (createButton != null) {
+                            createButton.setDisable(false);
+                            createButton.setText("Lưu phiên đấu giá");
+                        }
                         AlertHelper.showInformation("Tạo phiên thành công", "Tài sản và phiên đấu giá đã được lưu vào CSDL.");
-                        clearFormForNextEntry(); // Xóa trắng form để nhập tài sản tiếp theo
+                        if (newAuction != null) {
+                            javafx.stage.Stage stage = (javafx.stage.Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+                            SceneNavigator.navigateToAssetDetail(stage, newAuction);
+                        } else {
+                            clearFormForNextEntry(); // Xóa trắng form để nhập tài sản tiếp theo
+                        }
                     },
-                    errorMsg -> AlertHelper.showError("Lỗi", "Không thể tạo phiên đấu giá: " + errorMsg)
+                    errorMsg -> {
+                        if (createButton != null) {
+                            createButton.setDisable(false);
+                            createButton.setText("Lưu phiên đấu giá");
+                        }
+                        AlertHelper.showError("Lỗi", "Không thể tạo phiên đấu giá: " + errorMsg);
+                    }
             );
         } catch (IllegalArgumentException ex) {
             // Bắt lỗi do dữ liệu nhập vào không hợp lệ (đã được ném ra từ các hàm parse/require)

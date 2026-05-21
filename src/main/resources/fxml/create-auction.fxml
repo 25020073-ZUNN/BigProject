@@ -131,7 +131,7 @@
                             </VBox>
 
                             <HBox spacing="12">
-                                <Button text="Lưu phiên đấu giá" onAction="#handleCreateAuction" styleClass="primary-btn"/>
+                                <Button fx:id="createButton" text="Lưu phiên đấu giá" onAction="#handleCreateAuction" styleClass="primary-btn"/>
                                 <Button text="Xem danh sách" onAction="#goToAuctionList" styleClass="secondary-btn"/>
                             </HBox>
                         </VBox>
