@@ -14,6 +14,8 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.auction.controller.AdminDashboardController"
@@ -25,10 +27,25 @@
     <!-- ── LEFT SIDEBAR: Premium Navigation ── -->
     <left>
         <VBox prefWidth="280" spacing="10" styleClass="sidebar">
-            <VBox styleClass="sidebar-logo-box" spacing="2">
-                <Label text="AUREX" styleClass="sidebar-brand"/>
-                <Label text="ADMIN CENTER" styleClass="sidebar-subbrand"/>
-            </VBox>
+            <HBox alignment="CENTER_LEFT" spacing="12">
+
+                <ImageView fitHeight="60" fitWidth="60" preserveRatio="true">
+
+                    <image>
+                        <Image backgroundLoading="true" url="@../images/uet-logo.png" />
+                    </image>
+
+                </ImageView>
+
+                <VBox spacing="0">
+
+                    <Label style="-fx-font-size: 34;                        -fx-font-weight: 900;                        -fx-text-fill: #1976D2;" text="UET" />
+
+                    <Label styleClass="logo-sub" text="AUCTION TEAM6  " />
+
+                </VBox>
+
+            </HBox>
             
             <VBox spacing="6" styleClass="sidebar-menu-list" VBox.vgrow="ALWAYS">
                 <Button text="📊 Overview Dashboard" styleClass="sidebar-menu-item-active"/>

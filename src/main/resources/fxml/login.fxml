@@ -20,6 +20,8 @@
     - Controller xử lý logic là HomeController.
     - File CSS áp dụng là style.css.
 -->
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.auction.controller.HomeController"
             prefWidth="1380" prefHeight="860" stylesheets="@../style.css" styleClass="root">
@@ -31,10 +33,25 @@
             <padding><Insets top="12" right="36" bottom="12" left="36"/></padding>
             
             <!-- Logo và Tên ứng dụng -->
-            <VBox spacing="0">
-                <Label text="AUREX" styleClass="logo-main"/>
-                <Label text="AUCTION PLATFORM" styleClass="logo-sub"/>
-            </VBox>
+            <HBox alignment="CENTER_LEFT" spacing="12">
+
+                <ImageView fitHeight="60" fitWidth="60" preserveRatio="true">
+
+                    <image>
+                        <Image backgroundLoading="true" url="@../images/uet-logo.png" />
+                    </image>
+
+                </ImageView>
+
+                <VBox spacing="0">
+
+                    <Label style="-fx-font-size: 34;                        -fx-font-weight: 900;                        -fx-text-fill: #1976D2;" text="UET" />
+
+                    <Label styleClass="logo-sub" text="AUCTION TEAM6  " />
+
+                </VBox>
+
+            </HBox>
             
             <!-- Vùng đệm để đẩy các nút điều hướng sang phải -->
             <Region HBox.hgrow="ALWAYS"/>

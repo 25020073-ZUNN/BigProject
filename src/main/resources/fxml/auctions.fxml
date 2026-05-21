@@ -15,6 +15,8 @@
 <?import javafx.scene.layout.VBox?>
 
 <!-- 1.Phần đầu ( Root ) và Cấu hình chung   -->
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <BorderPane xmlns= "http://javafx.com/javafx/21"
             xmlns:fx= "http://javafx.com/fxml/1"
             fx:controller= "com.auction.controller.HomeController"
@@ -29,10 +31,29 @@
                 <Insets top="14" right="28" bottom="14" left="28"/>
             </padding>
 
-            <VBox spacing="0">
+            <!--<VBox spacing="0">
                 <Label text="AUREX" styleClass="logo-main"/>
                 <Label text="AUCTION PLATFORM" styleClass="logo-sub"/>
-            </VBox>
+            </VBox>-->
+            <HBox alignment="CENTER_LEFT" spacing="12">
+
+                <ImageView fitHeight="60" fitWidth="60" preserveRatio="true">
+
+                    <image>
+                        <Image backgroundLoading="true" url="@../images/uet-logo.png" />
+                    </image>
+
+                </ImageView>
+
+                <VBox spacing="0">
+
+                    <Label style="-fx-font-size: 34;                        -fx-font-weight: 900;                        -fx-text-fill: #1976D2;" text="UET" />
+
+                    <Label styleClass="logo-sub" text="AUCTION TEAM6  " />
+
+                </VBox>
+
+            </HBox>
 
             <Region HBox.hgrow="ALWAYS"/>
 
