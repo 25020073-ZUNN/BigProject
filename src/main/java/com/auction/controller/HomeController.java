@@ -40,6 +40,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.Priority;
+import javafx.geometry.Pos;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 
 /**
@@ -81,6 +86,16 @@ public class HomeController {
     private TextField visiblePasswordField; // Trường hiển thị mật khẩu dạng văn bản thuần
     @FXML
     private Button togglePasswordButton;    // Nút ẩn/hiện mật khẩu
+
+    // --- Các trường dữ liệu cho chức năng Đăng nhập nhanh ở Trang chủ ---
+    @FXML
+    private TextField quickUsernameField;
+    @FXML
+    private PasswordField quickPasswordField;
+    @FXML
+    private TextField visibleQuickPasswordField;
+    @FXML
+    private Button toggleQuickPasswordButton;
 
     // --- Các trường dữ liệu cho chức năng Đăng ký ---
     @FXML
@@ -166,6 +181,7 @@ public class HomeController {
         setupPasswordToggle(passwordField, visiblePasswordField, togglePasswordButton);
         setupPasswordToggle(regPasswordField, visibleRegPasswordField, toggleRegPasswordButton);
         setupPasswordToggle(confirmPasswordField, visibleConfirmPasswordField, toggleConfirmPasswordButton);
+        setupPasswordToggle(quickPasswordField, visibleQuickPasswordField, toggleQuickPasswordButton);
     }
 
     /**
@@ -321,6 +337,58 @@ public class HomeController {
                     AlertHelper.showInformation("Đăng nhập thành công",
                             "Chào mừng " + user.getUsername() + " quay trở lại!");
                     SceneNavigator.goToHome(event); // Quay về trang chủ
+                },
+                errorMsg -> {
+                    if (finalBtn != null) {
+                        finalBtn.setDisable(false);
+                        finalBtn.setText(originalText);
+                    }
+                    AlertHelper.showError("Lỗi đăng nhập", "Không thể đăng nhập: " + errorMsg);
+                });
+    }
+
+    /**
+     * Xử lý xác thực đăng nhập nhanh trực tiếp từ Trang chủ.
+     */
+    @FXML
+    public void handleQuickLogin(ActionEvent event) {
+        String username = quickUsernameField != null ? quickUsernameField.getText().trim() : "";
+        String password = quickPasswordField != null ? quickPasswordField.getText().trim() : "";
+
+        if (username.isEmpty() || password.isEmpty()) {
+            AlertHelper.showError("Lỗi đăng nhập", "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.");
+            return;
+        }
+
+        // Kiểm tra định dạng tên đăng nhập (3-16 ký tự)
+        if (!ValidationUtil.isUsernameValid(username)) {
+            AlertHelper.showError("Lỗi đăng nhập", "Tên đăng nhập không hợp lệ (3-16 ký tự, chỉ chữ và số).");
+            return;
+        }
+
+        Button sourceBtn = null;
+        if (event.getSource() instanceof Button) {
+            sourceBtn = (Button) event.getSource();
+        }
+        final Button finalBtn = sourceBtn;
+        final String originalText = finalBtn != null ? finalBtn.getText() : "";
+        if (finalBtn != null) {
+            finalBtn.setDisable(true);
+            finalBtn.setText("Đang đăng nhập...");
+        }
+
+        // Chạy tác vụ mạng bất đồng bộ để tránh làm đơ giao diện
+        FxAsync.run(
+                () -> networkService.login(username, password),
+                user -> {
+                    if (finalBtn != null) {
+                        finalBtn.setDisable(false);
+                        finalBtn.setText(originalText);
+                    }
+                    UserSession.login(user); // Lưu thông tin người dùng vào session
+                    AlertHelper.showInformation("Đăng nhập thành công",
+                            "Chào mừng " + user.getUsername() + " quay trở lại!");
+                    updateLoginState(); // Cập nhật trực tiếp UI Trang chủ mà không cần reload scene
                 },
                 errorMsg -> {
                     if (finalBtn != null) {
@@ -734,24 +802,74 @@ public class HomeController {
         }
         imagePane.getChildren().add(badgeLabel);
 
-        VBox infoBox = new VBox(6);
         Label titleLabel = new Label(auction.getItem().getName());
         titleLabel.getStyleClass().add("card-title");
         titleLabel.setWrapText(true);
-        titleLabel.setMinHeight(50);
+        titleLabel.setMinHeight(52);
+        titleLabel.setPrefHeight(52);
+        titleLabel.setMaxHeight(52);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        String timeStr = "⏰  " + auction.getItem().getStartTime().format(formatter);
-        Label timeLabel = new Label(timeStr);
-        timeLabel.getStyleClass().add("card-sub");
-        timeLabel.setWrapText(true);
+        boolean isEnded = "Đã kết thúc".equals(resolveStatusLabel(auction));
+        boolean isUpcoming = "Sắp diễn ra".equals(resolveStatusLabel(auction));
 
-        String priceStr = "💰  " + PriceFormatter.formatPrice(auction.getCurrentPrice());
-        Label priceLabel = new Label(priceStr);
-        priceLabel.getStyleClass().add("card-price");
-        priceLabel.setWrapText(true);
+        // Price VBox
+        VBox priceBox = new VBox(2);
+        priceBox.getStyleClass().add("home-price-container");
 
-        infoBox.getChildren().addAll(titleLabel, timeLabel, priceLabel);
+        String priceTitle = isEnded ? "GIÁ CHỐT" : (isUpcoming ? "GIÁ KHỞI ĐIỂM" : "GIÁ HIỆN TẠI");
+        Label priceLabel = new Label(priceTitle);
+        priceLabel.getStyleClass().add("home-price-label");
+
+        Label priceValue = new Label(PriceFormatter.formatPrice(auction.getCurrentPrice()));
+        priceValue.getStyleClass().add("home-price-value");
+
+        priceBox.getChildren().addAll(priceLabel, priceValue);
+
+        // Stats HBox capsule badge
+        HBox statsBox = new HBox();
+        statsBox.getStyleClass().add("home-stats-box");
+
+        // Left column in stats: Countdown / Status time
+        String timeText;
+        LocalDateTime now = LocalDateTime.now();
+        if (isUpcoming) {
+            timeText = "📅 " + auction.getItem().getStartTime().format(DateTimeFormatter.ofPattern("dd/MM HH:mm"));
+        } else if (isEnded) {
+            timeText = "🏁 Đã kết thúc";
+        } else {
+            timeText = "⏳ " + formatDurationShort(now, auction.getItem().getEndTime());
+        }
+        Label timeBadge = new Label(timeText);
+        timeBadge.getStyleClass().add("home-stats-text");
+
+        // Right column in stats: Bids count or Status
+        String rightText;
+        if (isUpcoming) {
+            rightText = "⏳ Chờ mở";
+        } else {
+            rightText = "🔨 " + auction.getBidHistory().size() + " lượt";
+        }
+        Label rightBadge = new Label(rightText);
+        rightBadge.getStyleClass().add("home-stats-text");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        statsBox.getChildren().addAll(timeBadge, spacer, rightBadge);
+
+        // Footer details (Bước giá & Người bán)
+        HBox footerBox = new HBox(12);
+        footerBox.setAlignment(Pos.CENTER_LEFT);
+
+        Label stepLabel = new Label("Bước giá: " + PriceFormatter.formatPrice(auction.getMinimumBidStep()));
+        stepLabel.getStyleClass().add("home-footer-stat");
+
+        Label sellerLabel = new Label("Người bán: " + auction.getSeller().getUsername());
+        sellerLabel.getStyleClass().add("home-footer-stat");
+
+        Region footerSpacer = new Region();
+        HBox.setHgrow(footerSpacer, Priority.ALWAYS);
+
+        footerBox.getChildren().addAll(stepLabel, footerSpacer, sellerLabel);
 
         Button detailButton = new Button("Chi tiết  →");
         detailButton.getStyleClass().add("small-btn");
@@ -760,8 +878,38 @@ public class HomeController {
             SceneNavigator.navigateToAssetDetail(stage, auction);
         });
 
-        card.getChildren().addAll(imagePane, infoBox, detailButton);
+        card.getChildren().addAll(imagePane, titleLabel, priceBox, statsBox, footerBox, detailButton);
         return card;
+    }
+
+    private String formatDurationShort(LocalDateTime from, LocalDateTime to) {
+        if (from.isAfter(to)) {
+            return "0 phút";
+        }
+        long days = from.until(to, ChronoUnit.DAYS);
+        LocalDateTime temp = from.plusDays(days);
+        long hours = temp.until(to, ChronoUnit.HOURS);
+        temp = temp.plusHours(hours);
+        long minutes = temp.until(to, ChronoUnit.MINUTES);
+
+        if (days > 0) {
+            return days + " ngày " + hours + "h";
+        } else if (hours > 0) {
+            return hours + " giờ " + minutes + "p";
+        } else {
+            return minutes + " phút";
+        }
+    }
+
+    private String resolveStatusLabel(Auction auction) {
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(auction.getItem().getStartTime())) {
+            return "Sắp diễn ra";
+        }
+        if (now.isBefore(auction.getItem().getEndTime()) && !auction.isFinished()) {
+            return "Đang diễn ra";
+        }
+        return "Đã kết thúc";
     }
 
     private VBox createEmptyState(String message) {

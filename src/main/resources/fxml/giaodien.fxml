@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
@@ -110,11 +111,15 @@
                             <Label styleClass="login-panel-text"
                                    text="Truy cập tài khoản để theo dõi phiên và lịch sử tham gia." wrapText="true"/>
 
-                            <TextField promptText="Email hoặc tên đăng nhập" styleClass="mail-field"/>
-                            <TextField promptText="Mật khẩu" styleClass="mail-field"/>
+                            <TextField fx:id="quickUsernameField" promptText="Email hoặc tên đăng nhập" styleClass="mail-field"/>
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <PasswordField fx:id="quickPasswordField" promptText="Mật khẩu" styleClass="mail-field" HBox.hgrow="ALWAYS"/>
+                                <TextField fx:id="visibleQuickPasswordField" promptText="Mật khẩu" styleClass="mail-field" visible="false" managed="false" HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="toggleQuickPasswordButton" text="👁" styleClass="password-eye-btn"/>
+                            </HBox>
 
                             <Button fx:id="mainLoginButton" maxWidth="1.7976931348623157E308"
-                                    onAction="#goToLogin" styleClass="primary-btn" text="Đăng nhập hệ thống"/>
+                                    onAction="#handleQuickLogin" styleClass="primary-btn" text="Đăng nhập hệ thống"/>
                             <Button maxWidth="1.7976931348623157E308"
                                     onAction="#goToRegister" styleClass="secondary-btn" text="Tạo tài khoản mới"/>
 

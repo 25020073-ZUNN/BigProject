@@ -28,11 +28,15 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.Priority;
+import javafx.geometry.Pos;
 import javafx.stage.Stage;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -316,7 +320,9 @@ public class AuctionCatalogController {
         Label titleLabel = new Label(auction.getItem().getName());
         titleLabel.getStyleClass().add("catalog-product-title");
         titleLabel.setWrapText(true);
-        titleLabel.setMinHeight(72);
+        titleLabel.setMinHeight(52);
+        titleLabel.setPrefHeight(52);
+        titleLabel.setMaxHeight(52);
 
         // Hình ảnh đại diện
         Node imageBox = createImageNode(auction);
@@ -330,21 +336,96 @@ public class AuctionCatalogController {
 
         HBox badgeRow = new HBox(8, statusBadge, categoryBadge);
 
-        // Các dòng thông tin chi tiết
-        Label startingPriceRow = createCatalogInfoRow("Giá khởi điểm:", formatPrice(auction.getStartingPrice()));
-        Label currentPriceRow = createCatalogInfoRow(auction.isFinished() ? "Giá chốt:" : "Giá hiện tại:", formatPrice(auction.getCurrentPrice()));
-        Label timeRow = createCatalogInfoRow("Thời gian tổ chức:", auction.getItem().getStartTime().format(DATE_TIME_FORMATTER));
-        Label sellerRow = createCatalogInfoRow("Người bán:", auction.getSeller().getUsername());
+        // Thành phần: Giá và các dòng thông tin chi tiết
+        boolean isEnded = "Đã kết thúc".equals(resolveStatusLabel(auction));
+        boolean isUpcoming = "Sắp diễn ra".equals(resolveStatusLabel(auction));
 
-        // Nút bấm để xem thông tin chi tiết
-        Button detailButton = new Button(auction.isFinished() ? "Xem tổng kết" : "Xem chi tiết");
+        // Price VBox
+        VBox priceBox = new VBox(2);
+        priceBox.getStyleClass().add("catalog-price-container");
+
+        String priceTitle = isEnded ? "GIÁ CHỐT" : (isUpcoming ? "GIÁ KHỞI ĐIỂM" : "GIÁ HIỆN TẠI");
+        Label priceLabel = new Label(priceTitle);
+        priceLabel.getStyleClass().add("catalog-price-label");
+
+        Label priceValue = new Label(formatPrice(isUpcoming ? auction.getStartingPrice() : auction.getCurrentPrice()));
+        priceValue.getStyleClass().add("catalog-price-value");
+
+        priceBox.getChildren().addAll(priceLabel, priceValue);
+
+        // Stats HBox capsule badge
+        HBox statsBox = new HBox();
+        statsBox.getStyleClass().add("catalog-stats-box");
+
+        // Left column in stats: Countdown / Status time
+        String timeText;
+        LocalDateTime now = LocalDateTime.now();
+        if (isUpcoming) {
+            timeText = "📅 " + auction.getItem().getStartTime().format(DateTimeFormatter.ofPattern("dd/MM HH:mm"));
+        } else if (isEnded) {
+            timeText = "🏁 Đã kết thúc";
+        } else {
+            timeText = "⏳ " + formatDurationShort(now, auction.getItem().getEndTime());
+        }
+        Label timeBadge = new Label(timeText);
+        timeBadge.getStyleClass().add("catalog-stats-text");
+
+        // Right column in stats: Bids count or Status
+        String rightText;
+        if (isUpcoming) {
+            rightText = "⏳ Chờ mở";
+        } else {
+            rightText = "🔨 " + auction.getBidHistory().size() + " lượt";
+        }
+        Label rightBadge = new Label(rightText);
+        rightBadge.getStyleClass().add("catalog-stats-text");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        statsBox.getChildren().addAll(timeBadge, spacer, rightBadge);
+
+        // Footer details (Bước giá & Người bán)
+        HBox footerBox = new HBox(12);
+        footerBox.setAlignment(Pos.CENTER_LEFT);
+
+        Label stepLabel = new Label("Bước giá: " + formatPrice(auction.getMinimumBidStep()));
+        stepLabel.getStyleClass().add("catalog-footer-stat");
+
+        Label sellerLabel = new Label("Người bán: " + auction.getSeller().getUsername());
+        sellerLabel.getStyleClass().add("catalog-footer-stat");
+
+        Region footerSpacer = new Region();
+        HBox.setHgrow(footerSpacer, Priority.ALWAYS);
+
+        footerBox.getChildren().addAll(stepLabel, footerSpacer, sellerLabel);
+
+        // Nút hành động
+        Button detailButton = new Button(isEnded ? "Xem tổng kết" : "Xem chi tiết");
         detailButton.getStyleClass().add("catalog-card-btn");
         detailButton.setMaxWidth(Double.MAX_VALUE);
         detailButton.setOnAction(event -> openAuctionDetail(auction));
 
-        // Thêm tất cả vào card
-        card.getChildren().addAll(imageBox, badgeRow, titleLabel, startingPriceRow, currentPriceRow, timeRow, sellerRow, detailButton);
+        card.getChildren().addAll(imageBox, badgeRow, titleLabel, priceBox, statsBox, footerBox, detailButton);
         return card;
+    }
+
+    private String formatDurationShort(LocalDateTime from, LocalDateTime to) {
+        if (from.isAfter(to)) {
+            return "0 phút";
+        }
+        long days = from.until(to, ChronoUnit.DAYS);
+        LocalDateTime temp = from.plusDays(days);
+        long hours = temp.until(to, ChronoUnit.HOURS);
+        temp = temp.plusHours(hours);
+        long minutes = temp.until(to, ChronoUnit.MINUTES);
+
+        if (days > 0) {
+            return days + " ngày " + hours + "h";
+        } else if (hours > 0) {
+            return hours + " giờ " + minutes + "p";
+        } else {
+            return minutes + " phút";
+        }
     }
 
     /**
