@@ -224,17 +224,6 @@ public class AssetDetailController {
                 lblSeconds.setText("0");
                 lblCountdownTitle.setText("🏁  Phiên đấu giá đã kết thúc");
                 countdownTimeline.stop();
-
-                // Tự động chuyển sang trang tổng kết sau 2 giây
-                if (!navigatedToSummary) {
-                    navigatedToSummary = true;
-                    new Timeline(new KeyFrame(Duration.seconds(2), ev -> {
-                        if (breadcrumbName.getScene() != null && breadcrumbName.getScene().getWindow() != null) {
-                            Stage stage = (Stage) breadcrumbName.getScene().getWindow();
-                            SceneNavigator.navigateToAuctionDetailOrSummary(stage, auction);
-                        }
-                    })).play();
-                }
                 return;
             }
 

@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -43,37 +44,69 @@
     <center>
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
             <content>
-                <VBox spacing="22" styleClass="page-section">
-                    <padding>
-                        <Insets top="28" right="48" bottom="36" left="48"/>
-                    </padding>
+                <VBox spacing="0">
 
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="TỔNG KẾT PHIÊN ĐẤU GIÁ" styleClass="section-title-dark"/>
-                        <Label text="Phiên đấu giá đã kết thúc thành công." styleClass="auction-notice"/>
+                    <!-- ═══ Breadcrumb ═══ -->
+                    <HBox spacing="6" alignment="CENTER_LEFT" style="-fx-background-color: #fafafa; -fx-border-color: transparent transparent #e0e0e0 transparent; -fx-border-width: 0 0 1 0;">
+                        <padding><Insets top="14" right="48" bottom="14" left="48"/></padding>
+                        <Label text="🏠" style="-fx-font-size: 13px;"/>
+                        <Button text="Trang chủ" onAction="#goToHome" styleClass="auth-link" style="-fx-font-size: 13px;"/>
+                        <Label text="›" styleClass="muted-text"/>
+                        <Button text="Tài sản đấu giá" onAction="#goToAuctionList" styleClass="auth-link" style="-fx-font-size: 13px;"/>
+                        <Label text="›" styleClass="muted-text"/>
+                        <Label fx:id="lblBreadcrumbName" text="Tên tài sản" style="-fx-text-fill: #0078d4; -fx-font-size: 13px; -fx-font-weight: 600;"/>
+                        <Label text="›" styleClass="muted-text"/>
+                        <Label text="Tổng kết phiên" style="-fx-text-fill: #7a7a7a; -fx-font-size: 13px; -fx-font-weight: 600;"/>
                     </HBox>
 
-                    <HBox spacing="22">
-                        <!-- Cột  Trái: Thông  tin người chiến thắng & Top Bidders -->
-                        <VBox spacing="16" prefWidth="420" styleClass="detail-side-card">
+                    <!-- ═══ Header ═══ -->
+                    <HBox alignment="CENTER_LEFT" style="-fx-background-color: #ffffff;">
+                        <padding><Insets top="20" right="48" bottom="20" left="48"/></padding>
+                        <VBox spacing="8">
+                            <Label text="Tổng kết phiên đấu giá" styleClass="hero-title-small"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="Trạng thái:" styleClass="field-label"/>
+                                <Label text="🏁  Đã kết thúc thành công" styleClass="badge-live" style="-fx-background-color: #107c10; -fx-text-fill: white;"/>
+                            </HBox>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="← Quay lại chi tiết tài sản" onAction="#handleBackToDetail" styleClass="secondary-btn"/>
+                    </HBox>
+
+                    <Separator/>
+
+                    <!-- ═══ Main Content: 2 columns ═══ -->
+                    <HBox spacing="28" styleClass="page-section">
+                        <padding><Insets top="32" right="48" bottom="48" left="48"/></padding>
+
+                        <!-- ═══ CỘT TRÁI: Thông tin đấu giá & Top Bidders ═══ -->
+                        <VBox spacing="20" prefWidth="440" styleClass="detail-side-card">
                             <padding>
                                 <Insets top="22" right="20" bottom="22" left="20"/>
                             </padding>
 
-                            <VBox spacing="6">
-                                <Label fx:id="lblName" text="Tên tài sản" styleClass="hero-title-small" wrapText="true"/>
-                                <Label text="ĐÃ KẾT THÚC" styleClass="badge-live" style="-fx-background-color: #6c757d; -fx-text-fill: white;"/>
+                            <!-- Ảnh sản phẩm bo góc 12px giống asset-detail.fxml nhưng nhỏ gọn hơn để vừa side card -->
+                            <VBox alignment="CENTER" prefHeight="260" minHeight="260" styleClass="detail-image-container"
+                                  style="-fx-background-color: linear-gradient(to bottom right, #f0f7ff, #e8e8e8); -fx-background-radius: 12;">
+                                <ImageView fx:id="itemImageView" fitWidth="400" fitHeight="240" preserveRatio="true" smooth="true"/>
+                                <Label text="🖼" style="-fx-font-size: 50;"/>
+                                <Label text="Hình ảnh tài sản" styleClass="muted-text"/>
                             </VBox>
 
-                            <VBox spacing="4">
+                            <VBox spacing="6">
+                                <Label fx:id="lblName" text="Tên tài sản" styleClass="hero-title-small" wrapText="true"/>
+                                <Label text="🏁  ĐÃ KẾT THÚC" styleClass="badge-live" style="-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                            </VBox>
+
+                            <VBox spacing="4" styleClass="detail-price-box" style="-fx-background-color: linear-gradient(to right, #f0f7ff, #ffffff); -fx-background-radius: 10; -fx-padding: 10 14; -fx-border-color: #deecf9; -fx-border-radius: 10;">
                                 <Label text="Giá chốt (Final Price)" styleClass="field-label"/>
                                 <Label fx:id="lblFinalPrice" text="0 VND" styleClass="detail-price"/>
                             </VBox>
 
                             <HBox spacing="16">
                                 <VBox spacing="4" HBox.hgrow="ALWAYS">
-                                    <Label text="Người chiến thắng (Winner)" styleClass="field-label"/>
-                                    <Label fx:id="lblWinner" text="Chưa xác định" styleClass="partner-text-strong" wrapText="true"/>
+                                    <Label text="Người thắng (Winner)" styleClass="field-label"/>
+                                    <Label fx:id="lblWinner" text="Chưa xác định" styleClass="partner-text-strong" style="-fx-text-fill: #107c10; -fx-font-size: 14px;" wrapText="true"/>
                                 </VBox>
                                 <VBox spacing="4" HBox.hgrow="ALWAYS">
                                     <Label text="Người bán" styleClass="field-label"/>
@@ -84,29 +117,30 @@
                             <Separator/>
 
                             <VBox spacing="10" VBox.vgrow="ALWAYS">
-                                <Label text="Bảng xếp hạng (Top 10  Bidders)" styleClass="partner-title"/>
-                                <ListView fx:id="lvTopBidders" prefHeight="350" VBox.vgrow="ALWAYS" styleClass="auction-history-list"/>
+                                <Label text="📊 Bảng xếp hạng (Top 10 Bidders)" styleClass="partner-title"/>
+                                <ListView fx:id="lvTopBidders" prefHeight="260" VBox.vgrow="ALWAYS" styleClass="auction-history-list"/>
                             </VBox>
                         </VBox>
 
-                        <!-- Cột Phải: Biểu đồ lịch  sử giá -->
+                        <!-- ═══ CỘT PHẢI: Biểu đồ lịch sử giá ═══ -->
                         <VBox spacing="18" HBox.hgrow="ALWAYS">
-                            <VBox spacing="14" styleClass="content-card">
+                            <VBox spacing="14" styleClass="content-card" HBox.hgrow="ALWAYS">
                                 <padding>
-                                    <Insets top="22"  right="24" bottom="22" left="24"/>
+                                    <Insets top="22" right="24" bottom="22" left="24"/>
                                 </padding>
-                                <Label text="Diễn biến giá trong suốt phiên đấu giá" styleClass="partner-title"/>
+                                <Label text="📈 Diễn biến giá trong suốt phiên đấu giá" styleClass="partner-title"/>
                                 <LineChart fx:id="priceChart"
                                            animated="true"
                                            createSymbols="true"
                                            legendVisible="false"
-                                           prefHeight="620"
-                                           styleClass="auction-chart">
+                                           prefHeight="690"
+                                           styleClass="auction-chart"
+                                           VBox.vgrow="ALWAYS">
                                     <xAxis>
-                                        <NumberAxis fx:id="xAxis"  label="Lượt đặt giá (Bid Order)"/>
+                                        <NumberAxis fx:id="xAxis" label="Lượt đặt giá (Bid Order)"/>
                                     </xAxis>
                                     <yAxis>
-                                        <NumberAxis fx:id="yAxis"  label="Mức giá (VND)"/>
+                                        <NumberAxis fx:id="yAxis" label="Mức giá (VND)"/>
                                     </yAxis>
                                 </LineChart>
                             </VBox>

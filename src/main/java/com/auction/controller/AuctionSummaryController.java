@@ -9,6 +9,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.application.Platform;
+import javafx.scene.image.ImageView;
+import javafx.scene.Node;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import java.util.List;
 import java.util.Comparator;
@@ -16,10 +20,12 @@ import java.util.stream.Collectors;
 import java.math.BigDecimal;
 
 import com.auction.model.Auction;
+import com.auction.model.item.Item;
 import com.auction.model.BidTransaction;
 import com.auction.util.SceneNavigator;
 import com.auction.util.LoginStateHelper;
 import com.auction.util.PriceFormatter;
+import com.auction.util.AuctionImageLoader;
 
 public class AuctionSummaryController {
 
@@ -32,12 +38,22 @@ public class AuctionSummaryController {
     @FXML private LineChart<Number, Number> priceChart;
     @FXML private NumberAxis xAxis;
     @FXML private NumberAxis yAxis;
+    @FXML private Label lblBreadcrumbName;
+    @FXML private ImageView itemImageView;
 
     private Auction auctionData;
 
     @FXML
     public void initialize() {
         LoginStateHelper.updateLoginButton(loginButton);
+        if (itemImageView != null) {
+            itemImageView.setPreserveRatio(true);
+            itemImageView.setSmooth(true);
+            itemImageView.setFitWidth(400);
+            itemImageView.setFitHeight(240);
+            itemImageView.setVisible(false);
+            itemImageView.setManaged(false);
+        }
     }
 
     /**
@@ -51,8 +67,15 @@ public class AuctionSummaryController {
     private void populateData() {
         if (auctionData == null) return;
 
+        Item item = auctionData.getItem();
+
+        // Cập nhật Breadcrumb
+        if (lblBreadcrumbName != null) {
+            lblBreadcrumbName.setText(item.getName());
+        }
+
         // Cập nhật thông tin cơ bản
-        lblName.setText(auctionData.getItem().getName());
+        lblName.setText(item.getName());
         lblSeller.setText(auctionData.getSeller().getUsername());
         
         String finalPriceStr = auctionData.getCurrentPrice().toPlainString();
@@ -64,13 +87,46 @@ public class AuctionSummaryController {
             lblWinner.setText("Không có ai đặt giá");
         }
 
+        renderItemImage(item);
+
         // Lấy lịch sử đặt giá
         List<BidTransaction> bidHistory = getChronologicalBidHistory();
         if (bidHistory != null && !bidHistory.isEmpty()) {
             populateChart(bidHistory);
             populateTopBidders(bidHistory);
         } else {
+            lvTopBidders.getItems().clear();
             lvTopBidders.getItems().add("Chưa có lượt đặt giá nào.");
+        }
+    }
+
+    private void renderItemImage(Item item) {
+        if (itemImageView == null) {
+            return;
+        }
+
+        String imageUrl = item.getImageUrl();
+        boolean hasImage = imageUrl != null && !imageUrl.isBlank();
+        itemImageView.setVisible(hasImage);
+        itemImageView.setManaged(hasImage);
+        updateImagePlaceholder(!hasImage);
+        if (hasImage) {
+            itemImageView.setImage(AuctionImageLoader.detail(imageUrl));
+        } else {
+            itemImageView.setImage(null);
+        }
+    }
+
+    private void updateImagePlaceholder(boolean visible) {
+        if (!(itemImageView.getParent() instanceof VBox imageContainer)) {
+            return;
+        }
+
+        for (Node child : imageContainer.getChildren()) {
+            if (child instanceof Label) {
+                child.setVisible(visible);
+                child.setManaged(visible);
+            }
         }
     }
 
@@ -129,4 +185,11 @@ public class AuctionSummaryController {
     @FXML public void goToSessions(ActionEvent event) { SceneNavigator.goToSessions(event); }
     @FXML public void goToNews(ActionEvent event) { SceneNavigator.goToNews(event); }
     @FXML public void goToContact(ActionEvent event) { SceneNavigator.goToContact(event); }
+
+    @FXML
+    public void handleBackToDetail(ActionEvent event) {
+        if (auctionData == null) return;
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        SceneNavigator.navigateToAssetDetail(stage, auctionData);
+    }
 }

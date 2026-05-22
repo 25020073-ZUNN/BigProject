@@ -91,11 +91,11 @@ public class CreateAuctionController {
 
         // Gợi ý thời gian mặc định (bắt đầu sau 5 phút, kết thúc sau 3 tháng)
         startTimeField.setText(LocalDateTime.now().plusMinutes(5).format(DATE_TIME_FORMATTER));
-        endTimeField.setText(LocalDateTime.now().plusMonths(3).format(DATE_TIME_FORMATTER));
-        bidStepField.setText("500000");
+        endTimeField.setText(LocalDateTime.now().plusDays(1).format(DATE_TIME_FORMATTER));
+        bidStepField.setText("50000");
         configureSelectedImageLabel();
         
-        hintLabel.setText("Định dạng thời gian: yyyy-MM-dd HH:mm:ss. Bạn có thể đặt phiên kéo dài 3 tháng để làm mẫu.");
+        hintLabel.setText("Định dạng thời gian: yyyy-MM-dd HH:mm:ss. Bạn có thể đặt phiên kéo dài 1 ngày để làm mẫu.");
         
         // Khởi tạo hiển thị các trường theo danh mục mặc định
         updateCategoryFields(categoryComboBox.getValue());
