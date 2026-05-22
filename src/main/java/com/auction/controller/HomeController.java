@@ -717,6 +717,11 @@ public class HomeController {
         SceneNavigator.goToAdminDashboard(event);
     }
 
+    @FXML
+    public void goToAuctionHistory(ActionEvent event) {
+        SceneNavigator.goToAuctionHistory(event);
+    }
+
     private void renderUpcomingAuctions() {
         if (upcomingAuctionsContainer == null) {
             return;

@@ -73,6 +73,7 @@ public final class SceneNavigator {
     public static void goToAuctionSummary(ActionEvent event) { switchScene(event, "auction-summary.fxml"); }
     public static void goToUserProfile(ActionEvent event) { switchScene(event, "user-profile.fxml"); }
     public static void goToAdminDashboard(ActionEvent event) { switchScene(event, "admin-dashboard.fxml"); }
+    public static void goToAuctionHistory(ActionEvent event) { switchScene(event, "auction-history.fxml"); }
 
     /**
      * Điều hướng tới trang chi tiết tài sản (asset-detail.fxml).

@@ -161,7 +161,7 @@
                                     visible="false"/>
                             <Button maxWidth="1.7976931348623157E308" onAction="#goToUserProfile"
                                     styleClass="primary-btn" text="Quản lý hồ sơ"/>
-                            <Button maxWidth="1.7976931348623157E308" onAction="#handleComingSoon"
+                            <Button maxWidth="1.7976931348623157E308" onAction="#goToAuctionHistory"
                                     styleClass="secondary-btn" text="Lịch sử đấu giá"/>
                             <Button maxWidth="1.7976931348623157E308" onAction="#handleLogout"
                                     style="-fx-background-color: #d13438; -fx-text-fill: white;"
