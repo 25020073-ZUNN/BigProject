@@ -14,7 +14,9 @@ import com.auction.util.UserSession;
 import com.auction.util.AlertHelper;
 import com.auction.util.PriceFormatter;
 import com.auction.util.SceneNavigator;
+import com.auction.util.AuctionImageLoader;
 import javafx.application.Platform;
+import javafx.scene.image.ImageView;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
@@ -86,6 +88,7 @@ public class AuctionDetailController {
     private boolean navigatingToSummary;
 
     // Các thành phần giao diện FXML
+    @FXML private ImageView imgProduct;     // Ảnh sản phẩm
     @FXML private Label lblName;            // Tên sản phẩm
     @FXML private Label lblStatus;          // Trạng thái phiên (Đang chạy, kết thúc...)
     @FXML private Label lblPrice;           // Giá hiện tại
@@ -326,6 +329,19 @@ public class AuctionDetailController {
 
         lblName.setText(auction.getItem().getName());
         lblSeller.setText(auction.getSeller().getUsername());
+
+        // Tải ảnh sản phẩm bằng ImageLoader
+        if (imgProduct != null) {
+            String imageUrl = auction.getItem().getImageUrl();
+            boolean hasImage = imageUrl != null && !imageUrl.isBlank();
+            imgProduct.setVisible(hasImage);
+            imgProduct.setManaged(hasImage);
+            if (hasImage) {
+                imgProduct.setImage(AuctionImageLoader.detail(imageUrl));
+            } else {
+                imgProduct.setImage(null);
+            }
+        }
         
         // Gợi ý mức giá đặt tối thiểu tiếp theo trong ô nhập liệu
         txtBidAmount.setText(formatInputSuggestion(auction.getCurrentPrice().add(resolveMinimumIncrement())));
