@@ -1,16 +1,21 @@
 package com.auction.util;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.Interpolator;
+import javafx.animation.PauseTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.net.URL;
 
 import com.auction.model.Auction;
 import com.auction.controller.AssetDetailController;
@@ -19,45 +24,68 @@ import com.auction.controller.AuctionSummaryController;
 
 /**
  * Tiện ích điều hướng giữa các màn hình (Scene) trong ứng dụng.
- *
- * Hiệu ứng: Fade-in cực nhanh (120ms) — đủ mượt để mắt nhận biết
- * nhưng không gây cảm giác lag. Không dùng Scale vì tốn tài nguyên render.
  */
 public final class SceneNavigator {
 
-    /** 120ms = gần như tức thì, chỉ đủ để mắt nhận biết sự chuyển đổi mượt */
-    private static final double FADE_MS = 120;
+    private static final double LOADING_DELAY_MS = 80;
 
     private SceneNavigator() {}
 
     /**
-     * Chuyển sang Scene mới. Load FXML → set root → fade-in nhanh.
+     * Chuyển sang Scene mới. Hiển thị loading tạm thời, load FXML rồi set root trực tiếp.
      */
     public static void switchScene(ActionEvent event, String fxmlFile) {
-        try {
-            Parent root = FXMLLoader.load(SceneNavigator.class.getResource("/fxml/" + fxmlFile));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        switchScene(stage, "Không thể tải giao diện: " + fxmlFile, () ->
+                FXMLLoader.load(SceneNavigator.class.getResource("/fxml/" + fxmlFile)));
+    }
 
-            root.setOpacity(0);
+    private static void switchScene(Stage stage, String errorMessage, PageLoader loader) {
+        if (stage == null) return;
 
-            Scene currentScene = stage.getScene();
-            if (currentScene == null) {
-                stage.setScene(new Scene(root, 1380, 920));
-            } else {
-                currentScene.setRoot(root);
+        Parent previousRoot = stage.getScene() == null ? null : stage.getScene().getRoot();
+        showLoading(stage);
+
+        PauseTransition delay = new PauseTransition(Duration.millis(LOADING_DELAY_MS));
+        delay.setOnFinished(event -> {
+            try {
+                Parent root = loader.load();
+                applyRoot(stage, root);
+            } catch (IOException e) {
+                e.printStackTrace();
+                if (previousRoot != null) {
+                    applyRoot(stage, previousRoot);
+                }
+                AlertHelper.showError("Lỗi chuyển trang", errorMessage);
             }
-            stage.setMinWidth(1280);
-            stage.setMinHeight(820);
+        });
+        delay.play();
+    }
 
-            FadeTransition ft = new FadeTransition(Duration.millis(FADE_MS), root);
-            ft.setFromValue(0);
-            ft.setToValue(1);
-            ft.setInterpolator(Interpolator.EASE_IN);
-            ft.play();
-        } catch (IOException e) {
-            e.printStackTrace();
-            AlertHelper.showError("Lỗi chuyển trang", "Không thể tải giao diện: " + fxmlFile);
+    private static void showLoading(Stage stage) {
+        StackPane loadingRoot = new StackPane();
+        loadingRoot.getStyleClass().addAll("root", "page-loading-root");
+        URL stylesheet = SceneNavigator.class.getResource("/style.css");
+        if (stylesheet != null) {
+            loadingRoot.getStylesheets().add(stylesheet.toExternalForm());
         }
+
+        ProgressIndicator spinner = new ProgressIndicator();
+        spinner.setMaxSize(72, 72);
+        spinner.getStyleClass().add("page-loading-spinner");
+
+        Label brand = new Label("AUREX");
+        brand.getStyleClass().add("page-loading-brand");
+
+        Label status = new Label("Đang chuyển trang...");
+        status.getStyleClass().add("page-loading-text");
+
+        VBox content = new VBox(14, spinner, brand, status);
+        content.setAlignment(Pos.CENTER);
+        content.getStyleClass().add("page-loading-card");
+        loadingRoot.getChildren().add(content);
+
+        applyRoot(stage, loadingRoot);
     }
 
     public static void goToHome(ActionEvent event) { switchScene(event, "giaodien.fxml"); }
@@ -84,25 +112,15 @@ public final class SceneNavigator {
      */
     public static void navigateToAssetDetail(Stage stage, Auction auction) {
         if (auction == null) return;
-        try {
+        switchScene(stage, "Không thể tải trang chi tiết tài sản.", () -> {
             FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource("/fxml/asset-detail.fxml"));
             Parent root = loader.load();
 
             AssetDetailController ctrl = loader.getController();
             ctrl.setAuctionData(auction);
 
-            root.setOpacity(0);
-            applyRoot(stage, root);
-
-            FadeTransition ft = new FadeTransition(Duration.millis(FADE_MS), root);
-            ft.setFromValue(0);
-            ft.setToValue(1);
-            ft.setInterpolator(Interpolator.EASE_IN);
-            ft.play();
-        } catch (IOException e) {
-            e.printStackTrace();
-            AlertHelper.showError("Lỗi chuyển trang", "Không thể tải trang chi tiết tài sản.");
-        }
+            return root;
+        });
     }
 
     /**
@@ -112,7 +130,7 @@ public final class SceneNavigator {
      */
     public static void navigateToAuctionDetailOrSummary(Stage stage, Auction auction) {
         if (auction == null) return;
-        try {
+        switchScene(stage, "Không thể tải giao diện chi tiết/tổng kết.", () -> {
             String fxml = auction.isFinished() ? "/fxml/auction-summary.fxml" : "/fxml/product-detail.fxml";
             FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource(fxml));
             Parent root = loader.load();
@@ -121,18 +139,8 @@ public final class SceneNavigator {
             if (ctrl instanceof AuctionSummaryController s) s.setAuctionData(auction);
             else if (ctrl instanceof AuctionDetailController d) d.setAuctionData(auction);
 
-            root.setOpacity(0);
-            applyRoot(stage, root);
-
-            FadeTransition ft = new FadeTransition(Duration.millis(FADE_MS), root);
-            ft.setFromValue(0);
-            ft.setToValue(1);
-            ft.setInterpolator(Interpolator.EASE_IN);
-            ft.play();
-        } catch (IOException e) {
-            e.printStackTrace();
-            AlertHelper.showError("Lỗi chuyển trang", "Không thể tải giao diện chi tiết/tổng kết.");
-        }
+            return root;
+        });
     }
 
     private static void applyRoot(Stage stage, Parent root) {
@@ -141,5 +149,10 @@ public final class SceneNavigator {
         else s.setRoot(root);
         stage.setMinWidth(1280);
         stage.setMinHeight(820);
+    }
+
+    @FunctionalInterface
+    private interface PageLoader {
+        Parent load() throws IOException;
     }
 }
