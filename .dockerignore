@@ -1,0 +1,9 @@
+.git
+.github
+.idea
+target
+logs
+uploads
+.env.local
+*.iml
+*.log
