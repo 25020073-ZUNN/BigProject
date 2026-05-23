@@ -170,7 +170,7 @@ public class AuctionDetailController {
     @FXML public void goToHome(ActionEvent event) { switchScene(event, "giaodien.fxml"); }
     @FXML public void goToLogin(ActionEvent event) { switchScene(event, "login.fxml"); }
     @FXML public void goToAuctionList(ActionEvent event) { switchScene(event, "auction-detail.fxml"); }
-    @FXML public void goToSessions(ActionEvent event) { switchScene(event, "sessions.fxml"); }
+    @FXML public void goToSessions(ActionEvent event) { SceneNavigator.goToAuctionList(event); }
     @FXML public void goToNews(ActionEvent event) { switchScene(event, "news.fxml"); }
     @FXML public void goToContact(ActionEvent event) { switchScene(event, "contact.fxml"); }
 

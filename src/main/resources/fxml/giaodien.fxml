@@ -31,7 +31,6 @@
 
                 <Button onAction="#goToHome" styleClass="nav-btn-active" text="Trang chủ"/>
                 <Button onAction="#goToAuctionList" styleClass="nav-btn" text="Tài sản đấu giá"/>
-                <Button onAction="#goToSessions" styleClass="nav-btn" text="Phiên đấu giá"/>
                 <Button onAction="#goToNews" styleClass="nav-btn" text="Tin tức"/>
                 <Button onAction="#goToContact" styleClass="nav-btn" text="Liên hệ"/>
 
@@ -64,7 +63,6 @@
 
                             <HBox spacing="14" style="-fx-padding: 8 0 0 0;">
                                 <Button onAction="#goToAuctionList" styleClass="primary-btn" text="🔍  Khám phá ngay"/>
-                                <Button onAction="#goToSessions" styleClass="secondary-btn" text="📋  Xem phiên đấu giá"/>
                             </HBox>
 
                             <HBox spacing="16" style="-fx-padding: 12 0 0 0;">

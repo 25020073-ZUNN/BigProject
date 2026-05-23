@@ -66,7 +66,7 @@ public final class SceneNavigator {
     public static void goToRegister(ActionEvent event) { switchScene(event, "register.fxml"); }
     public static void goToAuctionList(ActionEvent event) { switchScene(event, "auction-detail.fxml"); }
     public static void goToProductDetail(ActionEvent event) { switchScene(event, "product-detail.fxml"); }
-    public static void goToSessions(ActionEvent event) { switchScene(event, "sessions.fxml"); }
+    public static void goToSessions(ActionEvent event) { goToAuctionList(event); }
     public static void goToNews(ActionEvent event) { switchScene(event, "news.fxml"); }
     public static void goToContact(ActionEvent event) { switchScene(event, "contact.fxml"); }
     public static void goToCreateAuction(ActionEvent event) { switchScene(event, "create-auction.fxml"); }
