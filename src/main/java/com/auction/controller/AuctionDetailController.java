@@ -22,9 +22,6 @@ import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -32,11 +29,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.Node;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -167,31 +162,12 @@ public class AuctionDetailController {
 
     // --- Các phương thức chuyển hướng giao diện ---
 
-    @FXML public void goToHome(ActionEvent event) { switchScene(event, "giaodien.fxml"); }
-    @FXML public void goToLogin(ActionEvent event) { switchScene(event, "login.fxml"); }
-    @FXML public void goToAuctionList(ActionEvent event) { switchScene(event, "auction-detail.fxml"); }
+    @FXML public void goToHome(ActionEvent event) { SceneNavigator.goToHome(event); }
+    @FXML public void goToLogin(ActionEvent event) { SceneNavigator.goToLogin(event); }
+    @FXML public void goToAuctionList(ActionEvent event) { SceneNavigator.goToAuctionList(event); }
     @FXML public void goToSessions(ActionEvent event) { SceneNavigator.goToAuctionList(event); }
-    @FXML public void goToNews(ActionEvent event) { switchScene(event, "news.fxml"); }
-    @FXML public void goToContact(ActionEvent event) { switchScene(event, "contact.fxml"); }
-
-    /**
-     * Chuyển đổi giữa các file FXML.
-     */
-    private void switchScene(ActionEvent event, String fxmlFile) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/" + fxmlFile));
-            Parent root = loader.load();
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene currentScene = stage.getScene();
-            if (currentScene == null) {
-                stage.setScene(new Scene(root, 1380, 920));
-            } else {
-                currentScene.setRoot(root);
-            }
-        } catch (IOException e) {
-            showError("Không thể tải giao diện: " + fxmlFile);
-        }
-    }
+    @FXML public void goToNews(ActionEvent event) { SceneNavigator.goToNews(event); }
+    @FXML public void goToContact(ActionEvent event) { SceneNavigator.goToContact(event); }
 
 
     /**

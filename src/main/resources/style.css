@@ -15,6 +15,33 @@
     -fx-background-color: #f5f5f5;
 }
 
+/* ── Page Loading ── */
+.page-loading-root {
+    -fx-background-color: radial-gradient(center 50% 42%, radius 70%, #f0f7ff 0%, #ffffff 48%, #edf2f7 100%);
+}
+.page-loading-card {
+    -fx-background-color: rgba(255,255,255,0.88);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(0,120,212,0.18);
+    -fx-border-radius: 18;
+    -fx-border-width: 1.2;
+    -fx-padding: 34 46;
+    -fx-effect: dropshadow(gaussian, rgba(0,40,80,0.16), 28, 0.22, 0, 10);
+}
+.page-loading-spinner {
+    -fx-progress-color: #0078d4;
+}
+.page-loading-brand {
+    -fx-text-fill: #0f172a;
+    -fx-font-size: 24px;
+    -fx-font-weight: 900;
+}
+.page-loading-text {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
 /* ── ScrollPane ── */
 .main-scroll { -fx-background: #f5f5f5; -fx-background-color: #f5f5f5; -fx-border-color: transparent; }
 .main-scroll > .viewport { -fx-background-color: transparent; }
