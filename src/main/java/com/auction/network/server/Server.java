@@ -543,7 +543,7 @@ public class Server {
                 message.setRecipients(
                         javax.mail.Message.RecipientType.TO,
                         javax.mail.internet.InternetAddress.parse(toEmail));
-                message.setSubject("Aurex Auction - Reset Password");
+                message.setSubject("Team 6 - UET - Reset Password");
                 message.setText(
                         "Token reset password của bạn:\n\n" + token + "\n\n" +
                         "Mã này có hiệu lực trong 5 phút.\n" +

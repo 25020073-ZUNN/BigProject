@@ -6,6 +6,8 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
@@ -29,10 +31,17 @@
                 <Insets top="14" right="28" bottom="14" left="28"/>
             </padding>
 
-            <VBox spacing="0">
-                <Label text="AUREX" styleClass="logo-main"/>
-                <Label text="AUCTION PLATFORM" styleClass="logo-sub"/>
-            </VBox>
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                    <ImageView fitHeight="42" preserveRatio="true">
+                        <image>
+                            <Image url="@../images/d33812d6433b838f8d0f44c71287e89a.jpg"/>
+                        </image>
+                    </ImageView>
+                    <VBox spacing="0">
+                        <Label text="UET" styleClass="logo-main" style="-fx-font-size: 20px;"/>
+                        <Label text="AUCTION PLATFORM" styleClass="logo-sub" style="-fx-font-size: 9px;"/>
+                    </VBox>
+                </HBox>
 
             <Region HBox.hgrow="ALWAYS"/>
 

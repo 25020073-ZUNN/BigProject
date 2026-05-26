@@ -74,7 +74,7 @@ public final class SceneNavigator {
         spinner.setMaxSize(72, 72);
         spinner.getStyleClass().add("page-loading-spinner");
 
-        Label brand = new Label("AUREX");
+        Label brand = new Label("UET - TEAM 6");
         brand.getStyleClass().add("page-loading-brand");
 
         Label status = new Label("Đang chuyển trang...");

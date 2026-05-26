@@ -473,7 +473,7 @@ public class AuctionCatalogController {
         return switch (auction.getItem().getCategory()) {
             case "Vehicle" -> "VEHICLE";
             case "Art" -> "ART";
-            default -> "AUREX";
+            default -> "UET";
         };
     }
 
