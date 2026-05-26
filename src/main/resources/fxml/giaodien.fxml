@@ -15,6 +15,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Rectangle?>
 
 <BorderPane prefHeight="920" prefWidth="1380" styleClass="root" stylesheets="@../style.css"
             xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
@@ -230,7 +232,16 @@
 
                         <HBox spacing="22">
                             <VBox prefWidth="400" spacing="14" styleClass="news-card" HBox.hgrow="ALWAYS">
-                                <AnchorPane prefHeight="175" styleClass="news-thumb news-thumb-1"/>
+                                <StackPane prefHeight="175" styleClass="news-thumb">
+                                    <ImageView fitWidth="368" fitHeight="175" preserveRatio="false">
+                                        <clip>
+                                            <Rectangle width="368" height="175" arcWidth="20" arcHeight="20"/>
+                                        </clip>
+                                        <image>
+                                            <Image url="@../images/news_featured.jpg"/>
+                                        </image>
+                                    </ImageView>
+                                </StackPane>
                                 <VBox spacing="6">
                                     <padding><Insets bottom="16" left="16" right="16" top="4"/></padding>
                                     <Label styleClass="news-title"
@@ -241,7 +252,16 @@
                             </VBox>
 
                             <VBox prefWidth="400" spacing="14" styleClass="news-card" HBox.hgrow="ALWAYS">
-                                <AnchorPane prefHeight="175" styleClass="news-thumb news-thumb-2"/>
+                                <StackPane prefHeight="175" styleClass="news-thumb">
+                                    <ImageView fitWidth="368" fitHeight="175" preserveRatio="false">
+                                        <clip>
+                                            <Rectangle width="368" height="175" arcWidth="20" arcHeight="20"/>
+                                        </clip>
+                                        <image>
+                                            <Image url="@../images/news_security.jpg"/>
+                                        </image>
+                                    </ImageView>
+                                </StackPane>
                                 <VBox spacing="6">
                                     <padding><Insets bottom="16" left="16" right="16" top="4"/></padding>
                                     <Label styleClass="news-title"
@@ -252,7 +272,16 @@
                             </VBox>
 
                             <VBox prefWidth="400" spacing="14" styleClass="news-card" HBox.hgrow="ALWAYS">
-                                <AnchorPane prefHeight="175" styleClass="news-thumb news-thumb-3"/>
+                                <StackPane prefHeight="175" styleClass="news-thumb">
+                                    <ImageView fitWidth="368" fitHeight="175" preserveRatio="false">
+                                        <clip>
+                                            <Rectangle width="368" height="175" arcWidth="20" arcHeight="20"/>
+                                        </clip>
+                                        <image>
+                                            <Image url="@../images/news_mobile.jpg"/>
+                                        </image>
+                                    </ImageView>
+                                </StackPane>
                                 <VBox spacing="6">
                                     <padding><Insets bottom="16" left="16" right="16" top="4"/></padding>
                                     <Label styleClass="news-title"

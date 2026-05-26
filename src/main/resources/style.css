@@ -61,33 +61,35 @@
 .logo-sub { -fx-text-fill: #8a8a8a; -fx-font-size: 10px; -fx-font-weight: 700; }
 
 .nav-btn, .nav-btn-active {
-    -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 10 16; -fx-background-radius: 8; -fx-border-radius: 8; -fx-font-weight: 600;
+    -fx-font-size: 13.5px; -fx-cursor: hand; -fx-padding: 8 18; -fx-background-radius: 20; -fx-border-radius: 20; -fx-font-weight: 700;
 }
-.nav-btn { -fx-background-color: transparent; -fx-text-fill: #616161; }
-.nav-btn:hover { -fx-background-color: #f0f0f0; -fx-text-fill: #0078d4; }
-.nav-btn-active { -fx-background-color: #deecf9; -fx-text-fill: #0078d4; -fx-border-color: transparent; }
+.nav-btn { -fx-background-color: transparent; -fx-text-fill: #5f6b7a; }
+.nav-btn:hover { -fx-background-color: #f1f5f9; -fx-text-fill: #1e293b; }
+.nav-btn-active { -fx-background-color: #eff6ff; -fx-text-fill: #2563eb; -fx-border-color: transparent; }
 
 .clock-label { -fx-text-fill: #8a8a8a; -fx-font-size: 11px; -fx-alignment: center; }
 
 /* ── Buttons ── */
 .login-btn, .primary-btn, .small-btn {
-    -fx-background-color: #0078d4;
+    -fx-background-color: linear-gradient(to right, #3b82f6, #1d4ed8);
     -fx-text-fill: #ffffff;
     -fx-font-weight: 700;
-    -fx-background-radius: 8;
-    -fx-padding: 12 24;
+    -fx-background-radius: 10;
+    -fx-padding: 11 26;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.15), 10, 0, 0, 3);
 }
 .login-btn:hover, .primary-btn:hover, .small-btn:hover {
-    -fx-background-color: #005a9e;
-    -fx-translate-y: -1;
-    -fx-effect: dropshadow(gaussian, rgba(0,120,212,0.3), 10, 0.2, 0, 3);
+    -fx-background-color: linear-gradient(to right, #2563eb, #1e40af);
+    -fx-translate-y: -1.5;
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.35), 14, 0, 0, 5);
 }
 .login-btn:pressed, .primary-btn:pressed, .small-btn:pressed {
-    -fx-background-color: #004578;
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #1e3a8a);
     -fx-translate-y: 0;
     -fx-effect: none;
 }
+
 
 .secondary-btn, .secondary-btn-small {
     -fx-background-color: #ffffff;
@@ -233,8 +235,39 @@
 
 /* ── Auth ── */
 .check-auth { -fx-text-fill: #616161; -fx-font-size: 13px; }
-.auth-link { -fx-text-fill: #0078d4; -fx-font-size: 13px; -fx-border-color: transparent; -fx-underline: false; }
-.auth-link:hover { -fx-text-fill: #005a9e; -fx-underline: true; }
+.auth-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2563eb;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: 600;
+    -fx-border-color: transparent;
+    -fx-underline: false;
+    -fx-cursor: hand;
+    -fx-padding: 2 4;
+}
+.auth-link:hover {
+    -fx-text-fill: #1d4ed8;
+    -fx-underline: true;
+}
+
+.news-category-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #475569;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: 600;
+    -fx-padding: 10 16;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-alignment: center-left;
+    -fx-max-width: 1.7976931348623157E308;
+    -fx-cursor: hand;
+}
+.news-category-btn:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #2563eb;
+    -fx-underline: false;
+}
+
 .auth-link-light { -fx-text-fill: #8ab4f8; -fx-font-size: 13px; -fx-border-color: transparent; }
 .auth-link-light:hover { -fx-text-fill: #ffffff; }
 .auth-left { -fx-background-color: #f0f7ff; }
@@ -263,13 +296,18 @@
 
 /* ── Thumbnails ── */
 .thumb, .news-thumb { -fx-background-radius: 12; }
-.thumb-1 { -fx-background-image: url("images/thumb1.png"); -fx-background-size: cover; -fx-background-position: center; }
-.thumb-2 { -fx-background-image: url("images/thumb2.png"); -fx-background-size: cover; -fx-background-position: center; }
-.thumb-3 { -fx-background-image: url("images/thumb1.png"); -fx-background-size: cover; -fx-background-position: center; }
-.thumb-4 { -fx-background-image: url("images/thumb2.png"); -fx-background-size: cover; -fx-background-position: center; }
-.news-thumb-1 { -fx-background-color: linear-gradient(to bottom right, #deecf9, #c7ddf0); -fx-background-radius: 12; }
-.news-thumb-2 { -fx-background-color: linear-gradient(to bottom right, #e8e8e8, #d0d0d0); -fx-background-radius: 12; }
-.news-thumb-3 { -fx-background-color: linear-gradient(to bottom right, #dff0d8, #c3e6cb); -fx-background-radius: 12; }
+.thumb-1 { -fx-background-image: url("/images/thumb1.jpg"); -fx-background-size: cover; -fx-background-position: center; }
+.thumb-2 { -fx-background-image: url("/images/thumb2.jpg"); -fx-background-size: cover; -fx-background-position: center; }
+.thumb-3 { -fx-background-image: url("/images/thumb1.jpg"); -fx-background-size: cover; -fx-background-position: center; }
+.thumb-4 { -fx-background-image: url("/images/thumb2.jpg"); -fx-background-size: cover; -fx-background-position: center; }
+.news-thumb-1 { -fx-background-image: url("/images/news_featured.jpg"); -fx-background-size: cover; -fx-background-position: center; -fx-background-radius: 12; }
+.news-thumb-2 { -fx-background-image: url("/images/news_security.jpg"); -fx-background-size: cover; -fx-background-position: center; -fx-background-radius: 12; }
+.news-thumb-3 { -fx-background-image: url("/images/news_mobile.jpg"); -fx-background-size: cover; -fx-background-position: center; -fx-background-radius: 12; }
+.news-thumb-4 { -fx-background-image: url("/images/news_blockchain.jpg"); -fx-background-size: cover; -fx-background-position: center; -fx-background-radius: 12; }
+.news-thumb-5 { -fx-background-image: url("/images/news_escrow.jpg"); -fx-background-size: cover; -fx-background-position: center; -fx-background-radius: 12; }
+
+
+
 
 /* ── Badges ── */
 .badge-hot, .badge-new, .badge-vip, .badge-live {
