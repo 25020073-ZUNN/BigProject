@@ -85,7 +85,7 @@
 
                                 <VBox prefWidth="160" styleClass="mini-info-card">
                                     <padding><Insets bottom="16" left="16" right="16" top="16"/></padding>
-                                    <Label styleClass="mini-info-number" text="99.9%"/>
+                                    <Label styleClass="mini-info-number" text="90%"/>
                                     <Label styleClass="mini-info-text" text="Hệ thống ổn định"/>
                                 </VBox>
 

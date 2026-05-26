@@ -1,6 +1,7 @@
 package com.auction.model.item;
 
 import java.math.BigDecimal;
+import java.sql.SQLOutput;
 import java.time.LocalDateTime;
 
 /**
@@ -34,7 +35,7 @@ public class Art extends Item {
     }
 
     @Override
-    public void printInfo() {
+        public void printInfo(){
         System.out.println("🎨 Art: " + name
                 + " | Artist: " + artist
                 + " | Price: " + currentPrice);

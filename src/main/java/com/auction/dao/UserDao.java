@@ -63,7 +63,7 @@ public class UserDao {
     }
 
     /**
-     * Đăng ký người dùng mới bằng lệnh INSERT.
+     * Đăng ký người dùng mới bằng lệnh INSERT.-tạo tài khoản mới
      */
     public boolean register(String username, String password, String fullName, String email) {
         return insertUser(
@@ -302,7 +302,7 @@ public class UserDao {
     User mapRowToUser(String username, String fullName, String email, String passwordHash,
                       String role, long balance, boolean active) {
         String normalizedRole = role.toUpperCase(Locale.ROOT);
-
+        /*sử dụng khả năng đa hình và kế thừa  */
         User user;
         if ("ADMIN".equals(normalizedRole)) {
             user = new Admin(username, email, passwordHash, "SYSTEM_ADMIN");
@@ -319,7 +319,7 @@ public class UserDao {
         if (balance > 0) user.deposit(balance);
         return user;
     }
-
+    /*Kiểm tra mật khẩu người dùng nhập với mật khẩu đã hash trong database*/
     private boolean checkPassword(String password, String dbHash) {
         if (password == null || dbHash == null) return false;
         if (dbHash.startsWith("$2a$") || dbHash.startsWith("$2b$") || dbHash.startsWith("$2y$")) {
@@ -370,3 +370,6 @@ public class UserDao {
         return value == null || value.isBlank();
     }
 }
+/*UserDao là lớp DAO dùng để thao tác trực tiếp với bảng users trong MySQL.
+Nó hỗ trợ các chức năng như đăng ký, đăng nhập, tìm user, cập nhật thông tin, khóa tài khoản và đổi mật khẩu.
+Lớp này sử dụng DBConnection để lấy kết nối database, dùng PreparedStatement để chống SQL Injection, dùng BCrypt để hash password, và ánh xạ dữ liệu từ ResultSet thành các object như Admin, Seller, Bidder.*/

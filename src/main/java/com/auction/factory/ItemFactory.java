@@ -186,3 +186,5 @@ public final class ItemFactory {
         throw new IllegalArgumentException("THUỘC TÍNH BẮT BUỘC BỊ THIẾU HOẶC KHÔNG HỢP LỆ: " + key);
     }
 }
+/*ItemFactory áp dụng Factory Pattern để tập trung việc khởi tạo các loại tài sản đấu giá như Electronics, Vehicle và Art.
+Thay vì Controller tạo object trực tiếp, toàn bộ logic tạo được gom vào Factory giúp giảm phụ thuộc, dễ mở rộng và tận dụng đa hình thông qua lớp cha Item.*/

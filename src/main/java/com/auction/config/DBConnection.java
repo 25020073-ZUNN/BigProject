@@ -34,6 +34,7 @@ public final class DBConnection {
      * @return Connection đối tượng kết nối JDBC.
      * @throws SQLException Nếu có lỗi xảy ra khi kết nối.
      */
+    /*hàm kết nối chính */
     public static Connection getConnection() throws SQLException {
         // DriverManager sẽ dùng URL, Username và Password để mở một "đường truyền" tới MySQL
         return DriverManager.getConnection(getUrl(), getUser(), getPassword());
@@ -177,3 +178,7 @@ public final class DBConnection {
         return value;
     }
 }
+/*DBConnection dùng để tạo và quản lý cấu hình kết nối từ Java tới MySQL.
+Các lớp DAO sẽ gọi DBConnection.getConnection() để lấy kết nối và thực hiện truy vấn database.*/
+/*File DBConnection là lớp cấu hình dùng để tạo kết nối tới MySQL thông qua JDBC.
+Các lớp DAO gọi getConnection() để lấy connection và thực hiện truy vấn. Lớp này hỗ trợ lấy cấu hình từ biến môi trường, file .env.local, system property hoặc giá trị mặc định, giúp project dễ chạy trên nhiều máy khác nhau và tránh hardcode cấu hình database ở nhiều nơi.*/
