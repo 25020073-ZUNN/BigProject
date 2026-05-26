@@ -32,6 +32,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.Priority;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
+import javafx.scene.CacheHint;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -315,6 +316,8 @@ public class AuctionCatalogController {
     private VBox createAuctionCard(Auction auction) {
         VBox card = new VBox(12);
         card.getStyleClass().add("catalog-product-card");
+        card.setCache(true);
+        card.setCacheHint(CacheHint.SPEED);
 
         // Tiêu đề tài sản đấu giá
         Label titleLabel = new Label(auction.getItem().getName());
@@ -444,7 +447,9 @@ public class AuctionCatalogController {
             imageView.setFitWidth(260);
             imageView.setFitHeight(160);
             imageView.setPreserveRatio(true);
-            imageView.setSmooth(true);
+            imageView.setSmooth(false);
+            imageView.setCache(true);
+            imageView.setCacheHint(CacheHint.SPEED);
             imagePane.getChildren().add(imageView);
             return imagePane;
         }

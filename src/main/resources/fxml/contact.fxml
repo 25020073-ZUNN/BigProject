@@ -56,9 +56,9 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" cache="true" cacheHint="SPEED">
             <content>
-                <VBox spacing="30">
+                <VBox spacing="30" cache="true" cacheHint="SPEED">
 
                     <!-- HERO SECTION -->
                     <!-- HERO: Tiêu đề trang liên hệ -->

@@ -55,9 +55,9 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" cache="true" cacheHint="SPEED">
             <content>
-                <VBox spacing="24">
+                <VBox spacing="24" cache="true" cacheHint="SPEED">
                     <padding><Insets top="30" right="56" bottom="56" left="56"/></padding>
 
                     <TabPane tabClosingPolicy="UNAVAILABLE" styleClass="tab-pane">

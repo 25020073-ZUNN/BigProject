@@ -2,6 +2,7 @@ package com.auction.controller;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -49,6 +50,7 @@ import javafx.scene.layout.Priority;
 import javafx.geometry.Pos;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
+import javafx.scene.CacheHint;
 
 /**
  * HomeController - Bộ điều khiển chính cho giao diện người dùng (Trang chủ).
@@ -145,6 +147,7 @@ public class HomeController {
     // --- Khởi tạo các dịch vụ ---
     private final NetworkService networkService = NetworkService.getInstance();
     private final List<Map<String, Object>> latestAuctions = new ArrayList<>();
+    private PauseTransition renderDebounce;  // Debounce timer for auction rendering
     
     // Bộ lắng nghe cập nhật từ Server: Cập nhật danh sách tài sản đấu giá mới nhất vào bộ nhớ tạm
     private final AuctionUpdateListener auctionUpdateListener = auctionData -> Platform.runLater(() -> {
@@ -156,7 +159,7 @@ public class HomeController {
                 latestAuctions.add(auctionData);
             }
         }
-        renderUpcomingAuctions();
+        scheduleRenderUpcomingAuctions();
     });
 
     /**
@@ -725,6 +728,19 @@ public class HomeController {
         SceneNavigator.goToAuctionHistory(event);
     }
 
+    /**
+     * Debounce mechanism: Nếu nhiều cập nhật đến liên tiếp (ví dụ 10 auction updates trong 100ms),
+     * chỉ render lại 1 lần sau khi hết timer 300ms. Tránh rebuild UI liên tục gây lag.
+     */
+    private void scheduleRenderUpcomingAuctions() {
+        if (renderDebounce != null) {
+            renderDebounce.stop();
+        }
+        renderDebounce = new PauseTransition(Duration.millis(300));
+        renderDebounce.setOnFinished(e -> renderUpcomingAuctions());
+        renderDebounce.play();
+    }
+
     private void renderUpcomingAuctions() {
         if (upcomingAuctionsContainer == null) {
             return;
@@ -764,6 +780,8 @@ public class HomeController {
         VBox card = new VBox(14);
         card.setPrefWidth(290);
         card.getStyleClass().add("auction-card");
+        card.setCache(true);
+        card.setCacheHint(CacheHint.SPEED);
 
         StackPane imagePane = new StackPane();
         imagePane.setPrefHeight(160);
@@ -784,7 +802,9 @@ public class HomeController {
                 imageView.setFitWidth(258);
                 imageView.setFitHeight(160);
                 imageView.setPreserveRatio(true);
-                imageView.setSmooth(true);
+                imageView.setSmooth(false);
+                imageView.setCache(true);
+                imageView.setCacheHint(CacheHint.SPEED);
                 imagePane.getChildren().add(imageView);
                 StackPane.setAlignment(imageView, Pos.CENTER);
             } catch (Exception e) {

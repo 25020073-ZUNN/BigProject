@@ -49,9 +49,9 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" cache="true" cacheHint="SPEED">
             <content>
-                <VBox spacing="0">
+                <VBox spacing="0" cache="true" cacheHint="SPEED">
 
                     <!-- ═══ Breadcrumb ═══ -->
                     <HBox spacing="6" alignment="CENTER_LEFT" style="-fx-background-color: #fafafa; -fx-border-color: transparent transparent #e0e0e0 transparent; -fx-border-width: 0 0 1 0;">

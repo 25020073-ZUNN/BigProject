@@ -53,9 +53,9 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" cache="true" cacheHint="SPEED">
             <content>
-                <VBox spacing="0">
+                <VBox spacing="0" cache="true" cacheHint="SPEED">
 
                     <!-- ═══════════════════ HERO SECTION ═══════════════════ -->
                     <HBox spacing="32" styleClass="hero-section">

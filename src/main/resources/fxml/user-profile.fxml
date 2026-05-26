@@ -52,9 +52,9 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" cache="true" cacheHint="SPEED">
             <content>
-                <VBox spacing="0" alignment="TOP_CENTER">
+                <VBox spacing="0" alignment="TOP_CENTER" cache="true" cacheHint="SPEED">
                     <padding><Insets top="36" right="56" bottom="56" left="56"/></padding>
 
                     <HBox spacing="28" alignment="TOP_CENTER">

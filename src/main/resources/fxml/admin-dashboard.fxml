@@ -62,9 +62,9 @@
     <!-- ── CENTER CONTENT: Metrics Deck & Tabs ── -->
     <center>
         <VBox spacing="0" VBox.vgrow="ALWAYS">
-            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" VBox.vgrow="ALWAYS">
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" VBox.vgrow="ALWAYS" cache="true" cacheHint="SPEED">
                 <content>
-                    <VBox spacing="28" styleClass="page-section">
+                    <VBox spacing="28" styleClass="page-section" cache="true" cacheHint="SPEED">
                         <padding>
                             <Insets top="32" right="40" bottom="32" left="40"/>
                         </padding>

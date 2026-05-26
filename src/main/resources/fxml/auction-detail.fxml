@@ -63,9 +63,9 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" cache="true" cacheHint="SPEED">
             <content>
-                <VBox spacing="24" styleClass="page-section">
+                <VBox spacing="24" styleClass="page-section" cache="true" cacheHint="SPEED">
                     <padding>
                         <Insets top="28" right="48" bottom="36" left="48"/>
                     </padding>
