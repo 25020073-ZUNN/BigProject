@@ -38,6 +38,9 @@ import com.auction.util.AuctionImageLoader;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Rectangle;
+import javafx.geometry.Insets;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.scene.layout.HBox;
@@ -762,9 +765,17 @@ public class HomeController {
         card.setPrefWidth(290);
         card.getStyleClass().add("auction-card");
 
-        AnchorPane imagePane = new AnchorPane();
+        StackPane imagePane = new StackPane();
         imagePane.setPrefHeight(160);
+        imagePane.setMinHeight(160);
+        imagePane.setMaxHeight(160);
         imagePane.getStyleClass().add("thumb");
+        
+        // Set a rounded clip for the entire image container (corners bo góc 12px)
+        Rectangle clip = new Rectangle(258, 160);
+        clip.setArcWidth(24);
+        clip.setArcHeight(24);
+        imagePane.setClip(clip);
 
         String imageUrl = auction.getItem().getImageUrl();
         if (imageUrl != null && !imageUrl.isBlank()) {
@@ -774,11 +785,8 @@ public class HomeController {
                 imageView.setFitHeight(160);
                 imageView.setPreserveRatio(true);
                 imageView.setSmooth(true);
-                AnchorPane.setTopAnchor(imageView, 0.0);
-                AnchorPane.setBottomAnchor(imageView, 0.0);
-                AnchorPane.setLeftAnchor(imageView, 0.0);
-                AnchorPane.setRightAnchor(imageView, 0.0);
                 imagePane.getChildren().add(imageView);
+                StackPane.setAlignment(imageView, Pos.CENTER);
             } catch (Exception e) {
                 int idx = (int) (Math.abs(auction.getId().hashCode()) % 4) + 1;
                 imagePane.getStyleClass().add("thumb-" + idx);
@@ -789,8 +797,6 @@ public class HomeController {
         }
 
         Label badgeLabel = new Label();
-        badgeLabel.setLayoutX(14);
-        badgeLabel.setLayoutY(12);
         String category = auction.getItem().getCategory();
         if ("Art".equalsIgnoreCase(category)) {
             badgeLabel.setText("🎨  ART");
@@ -806,6 +812,8 @@ public class HomeController {
             badgeLabel.getStyleClass().add("badge-new");
         }
         imagePane.getChildren().add(badgeLabel);
+        StackPane.setAlignment(badgeLabel, Pos.TOP_LEFT);
+        StackPane.setMargin(badgeLabel, new Insets(12, 0, 0, 14));
 
         Label titleLabel = new Label(auction.getItem().getName());
         titleLabel.getStyleClass().add("card-title");

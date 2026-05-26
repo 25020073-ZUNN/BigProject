@@ -295,7 +295,12 @@
 }
 
 /* ── Thumbnails ── */
-.thumb, .news-thumb { -fx-background-radius: 12; }
+.news-thumb { -fx-background-radius: 12; }
+.thumb {
+    -fx-background-color: #202d44;
+    -fx-background-radius: 12;
+}
+
 .thumb-1 { -fx-background-image: url("/images/thumb1.jpg"); -fx-background-size: cover; -fx-background-position: center; }
 .thumb-2 { -fx-background-image: url("/images/thumb2.jpg"); -fx-background-size: cover; -fx-background-position: center; }
 .thumb-3 { -fx-background-image: url("/images/thumb1.jpg"); -fx-background-size: cover; -fx-background-position: center; }
