@@ -1,44 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.auction.controller.AdminDashboardController"
-            prefWidth="1380"
-            prefHeight="920"
-            stylesheets="@../style.css"
-            styleClass="root">
+<BorderPane prefHeight="920" prefWidth="1380" styleClass="root" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.AdminDashboardController">
 
     <!-- ── LEFT SIDEBAR: Premium Navigation ── -->
     <left>
         <VBox prefWidth="280" spacing="10" styleClass="sidebar">
-            <VBox styleClass="sidebar-logo-box" spacing="2">
-                <Label text="AUREX" styleClass="sidebar-brand"/>
-                <Label text="ADMIN CENTER" styleClass="sidebar-subbrand"/>
+            <VBox spacing="2" styleClass="sidebar-logo-box">
+                <Label styleClass="sidebar-brand" text="Team6-UET" />
+                <Label styleClass="sidebar-subbrand" text="ADMIN CENTER" />
             </VBox>
             
             <VBox spacing="6" styleClass="sidebar-menu-list" VBox.vgrow="ALWAYS">
-                <Button text="📊 Overview Dashboard" styleClass="sidebar-menu-item-active"/>
-                <Button text="🏠 Trang chủ Aurex" onAction="#goToHome" styleClass="sidebar-menu-item"/>
-                <Button text="➕ Tạo phiên đấu giá" onAction="#goToCreateAuction" styleClass="sidebar-menu-item"/>
+                <Button styleClass="sidebar-menu-item-active" text="📊 Overview Dashboard" />
+                <Button onAction="#goToHome" styleClass="sidebar-menu-item" text="🏠 Trang chủ Aurex" />
+                <Button onAction="#goToCreateAuction" styleClass="sidebar-menu-item" text="➕ Tạo phiên đấu giá" />
                 
-                <Region VBox.vgrow="ALWAYS"/>
+                <Region VBox.vgrow="ALWAYS" />
                 
                 <!-- Keeps original loginButton FXML reference for logging out -->
-                <Button fx:id="loginButton" text="🚪 Đăng xuất" onAction="#handleLogout" styleClass="sidebar-menu-item" style="-fx-text-fill: #e11d48;"/>
+                <Button fx:id="loginButton" onAction="#handleLogout" style="-fx-text-fill: #e11d48;" styleClass="sidebar-menu-item" text="🚪 Đăng xuất" />
             </VBox>
         </VBox>
     </left>
@@ -47,14 +31,14 @@
     <top>
         <HBox alignment="CENTER_LEFT" spacing="20" styleClass="admin-top-header">
             <VBox spacing="2">
-                <Label text="Hệ thống quản trị" styleClass="admin-breadcrumb-sub"/>
-                <Label text="Bảng điều khiển Aurex Admin Console" styleClass="admin-breadcrumb-title"/>
+                <Label styleClass="admin-breadcrumb-sub" text="Hệ thống quản trị" />
+                <Label styleClass="admin-breadcrumb-title" text="Bảng điều khiển Admin Console" />
             </VBox>
-            <Region HBox.hgrow="ALWAYS"/>
-            <HBox spacing="12" alignment="CENTER_RIGHT">
-                <Label text="Chào mừng," styleClass="muted-text" style="-fx-font-size: 13px;"/>
-                <Label fx:id="adminNameLabel" text="---" style="-fx-font-weight: 800; -fx-text-fill: #0f172a; -fx-font-size: 14px;"/>
-                <Label text="● Active" style="-fx-text-fill: #107c10; -fx-font-weight: 800; -fx-font-size: 12px; -fx-padding: 0 0 0 10;"/>
+            <Region HBox.hgrow="ALWAYS" />
+            <HBox alignment="CENTER_RIGHT" spacing="12">
+                <Label style="-fx-font-size: 13px;" styleClass="muted-text" text="Chào mừng," />
+                <Label fx:id="adminNameLabel" style="-fx-font-weight: 800; -fx-text-fill: #0f172a; -fx-font-size: 14px;" text="---" />
+                <Label style="-fx-text-fill: #107c10; -fx-font-weight: 800; -fx-font-size: 12px; -fx-padding: 0 0 0 10;" text="● Active" />
             </HBox>
         </HBox>
     </top>
@@ -62,38 +46,38 @@
     <!-- ── CENTER CONTENT: Metrics Deck & Tabs ── -->
     <center>
         <VBox spacing="0" VBox.vgrow="ALWAYS">
-            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" VBox.vgrow="ALWAYS" cache="true" cacheHint="SPEED">
+            <ScrollPane cache="true" cacheHint="SPEED" fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" VBox.vgrow="ALWAYS">
                 <content>
-                    <VBox spacing="28" styleClass="page-section" cache="true" cacheHint="SPEED">
+                    <VBox cache="true" cacheHint="SPEED" spacing="28" styleClass="page-section">
                         <padding>
-                            <Insets top="32" right="40" bottom="32" left="40"/>
+                            <Insets bottom="32" left="40" right="40" top="32" />
                         </padding>
 
                         <!-- ═══ 1. Metrics Grid Deck ═══ -->
                         <HBox spacing="20">
                             <!-- Stats Card 1: Users -->
-                            <VBox HBox.hgrow="ALWAYS" styleClass="admin-stat-card, card-blue">
-                                <Label text="👥" styleClass="admin-stat-icon"/>
-                                <Label fx:id="totalUsersLabel" text="0" styleClass="admin-stat-val"/>
-                                <Label text="Tổng số tài khoản" styleClass="admin-stat-desc"/>
+                            <VBox styleClass="admin-stat-card, card-blue" HBox.hgrow="ALWAYS">
+                                <Label styleClass="admin-stat-icon" text="👥" />
+                                <Label fx:id="totalUsersLabel" styleClass="admin-stat-val" text="0" />
+                                <Label styleClass="admin-stat-desc" text="Tổng số tài khoản" />
                             </VBox>
                             <!-- Stats Card 2: Active Users -->
-                            <VBox HBox.hgrow="ALWAYS" styleClass="admin-stat-card, card-green">
-                                <Label text="✅" styleClass="admin-stat-icon"/>
-                                <Label fx:id="activeUsersLabel" text="0" styleClass="admin-stat-val"/>
-                                <Label text="Tài khoản hoạt động" styleClass="admin-stat-desc"/>
+                            <VBox styleClass="admin-stat-card, card-green" HBox.hgrow="ALWAYS">
+                                <Label styleClass="admin-stat-icon" text="✅" />
+                                <Label fx:id="activeUsersLabel" styleClass="admin-stat-val" text="0" />
+                                <Label styleClass="admin-stat-desc" text="Tài khoản hoạt động" />
                             </VBox>
                             <!-- Stats Card 3: Total Auctions -->
-                            <VBox HBox.hgrow="ALWAYS" styleClass="admin-stat-card, card-orange">
-                                <Label text="🏛" styleClass="admin-stat-icon"/>
-                                <Label fx:id="totalAuctionsLabel" text="0" styleClass="admin-stat-val"/>
-                                <Label text="Tổng phiên đấu giá" styleClass="admin-stat-desc"/>
+                            <VBox styleClass="admin-stat-card, card-orange" HBox.hgrow="ALWAYS">
+                                <Label styleClass="admin-stat-icon" text="🏛" />
+                                <Label fx:id="totalAuctionsLabel" styleClass="admin-stat-val" text="0" />
+                                <Label styleClass="admin-stat-desc" text="Tổng phiên đấu giá" />
                             </VBox>
                             <!-- Stats Card 4: Active Auctions -->
-                            <VBox HBox.hgrow="ALWAYS" styleClass="admin-stat-card, card-red">
-                                <Label text="⚡" styleClass="admin-stat-icon"/>
-                                <Label fx:id="runningAuctionsLabel" text="0" styleClass="admin-stat-val"/>
-                                <Label text="Phiên đang diễn ra" styleClass="admin-stat-desc"/>
+                            <VBox styleClass="admin-stat-card, card-red" HBox.hgrow="ALWAYS">
+                                <Label styleClass="admin-stat-icon" text="⚡" />
+                                <Label fx:id="runningAuctionsLabel" styleClass="admin-stat-val" text="0" />
+                                <Label styleClass="admin-stat-desc" text="Phiên đang diễn ra" />
                             </VBox>
                         </HBox>
 
@@ -101,60 +85,60 @@
                         <TabPane styleClass="tab-pane" VBox.vgrow="ALWAYS">
                             <tabs>
                                 <!-- Tab 1: User Accounts -->
-                                <Tab text="Quản lý Người dùng" closable="false">
+                                <Tab closable="false" text="Quản lý Người dùng">
                                     <VBox spacing="16" styleClass="content-card">
                                         <padding>
-                                            <Insets top="24" right="24" bottom="24" left="24"/>
+                                            <Insets bottom="24" left="24" right="24" top="24" />
                                         </padding>
                                         <HBox alignment="CENTER_LEFT" spacing="12">
                                             <VBox spacing="2" HBox.hgrow="ALWAYS">
-                                                <Label text="Danh sách tài khoản thành viên" styleClass="partner-title"/>
-                                                <Label text="Chọn một dòng trong bảng để thực hiện khóa hoặc mở khóa tài khoản." styleClass="partner-text"/>
+                                                <Label styleClass="partner-title" text="Danh sách tài khoản thành viên" />
+                                                <Label styleClass="partner-text" text="Chọn một dòng trong bảng để thực hiện khóa hoặc mở khóa tài khoản." />
                                             </VBox>
                                             <!-- Interactive live search for users -->
-                                            <TextField fx:id="searchUserField" promptText="Tìm kiếm người dùng..." styleClass="search-bar-field" prefWidth="250"/>
-                                            <Button text="🔄 Tải lại" onAction="#handleRefresh" styleClass="secondary-btn-small"/>
-                                            <Button text="🔒 Khóa / Mở khóa" onAction="#handleToggleSelectedUser" styleClass="primary-btn" style="-fx-padding: 8 16;"/>
+                                            <TextField fx:id="searchUserField" prefWidth="250" promptText="Tìm kiếm người dùng..." styleClass="search-bar-field" />
+                                            <Button onAction="#handleRefresh" styleClass="secondary-btn-small" text="🔄 Tải lại" />
+                                            <Button onAction="#handleToggleSelectedUser" style="-fx-padding: 8 16;" styleClass="primary-btn" text="🔒 Khóa / Mở khóa" />
                                         </HBox>
                                         
                                         <TableView fx:id="usersTable" prefHeight="450">
                                             <columns>
-                                                <TableColumn fx:id="usernameColumn" text="Username" prefWidth="180"/>
-                                                <TableColumn fx:id="fullNameColumn" text="Họ tên" prefWidth="240"/>
-                                                <TableColumn fx:id="emailColumn" text="Email" prefWidth="300"/>
-                                                <TableColumn fx:id="roleColumn" text="Vai trò (Role)" prefWidth="140"/>
-                                                <TableColumn fx:id="statusColumn" text="Trạng thái" prefWidth="180"/>
+                                                <TableColumn fx:id="usernameColumn" prefWidth="180" text="Username" />
+                                                <TableColumn fx:id="fullNameColumn" prefWidth="240" text="Họ tên" />
+                                                <TableColumn fx:id="emailColumn" prefWidth="300" text="Email" />
+                                                <TableColumn fx:id="roleColumn" prefWidth="140" text="Vai trò (Role)" />
+                                                <TableColumn fx:id="statusColumn" prefWidth="180" text="Trạng thái" />
                                             </columns>
                                         </TableView>
                                     </VBox>
                                 </Tab>
 
                                 <!-- Tab 2: Products & Auctions -->
-                                <Tab text="Quản lý Sản phẩm &amp; Phiên" closable="false">
+                                <Tab closable="false" text="Quản lý Sản phẩm &amp; Phiên">
                                     <VBox spacing="16" styleClass="content-card">
                                         <padding>
-                                            <Insets top="24" right="24" bottom="24" left="24"/>
+                                            <Insets bottom="24" left="24" right="24" top="24" />
                                         </padding>
                                         <HBox alignment="CENTER_LEFT" spacing="12">
                                             <VBox spacing="2" HBox.hgrow="ALWAYS">
-                                                <Label text="Danh mục sản phẩm &amp; phiên đấu giá" styleClass="partner-title"/>
-                                                <Label text="Giám sát trực tiếp các phiên đấu giá và tài sản của các thành viên trên hệ thống." styleClass="partner-text"/>
+                                                <Label styleClass="partner-title" text="Danh mục sản phẩm &amp; phiên đấu giá" />
+                                                <Label styleClass="partner-text" text="Giám sát trực tiếp các phiên đấu giá và tài sản của các thành viên trên hệ thống." />
                                             </VBox>
                                             <!-- Interactive live search for products -->
-                                            <TextField fx:id="searchAuctionField" promptText="Tìm sản phẩm / phiên..." styleClass="search-bar-field" prefWidth="250"/>
-                                            <Button text="🔄 Tải lại" onAction="#handleRefresh" styleClass="secondary-btn-small"/>
-                                            <Button text="🗑 Xóa phiên" onAction="#handleDeleteSelectedAuction" styleClass="primary-btn" style="-fx-padding: 8 16; -fx-background-color: #d13438;"/>
-                                            <Button text="➕ Tạo phiên mới" onAction="#goToCreateAuction" styleClass="primary-btn" style="-fx-padding: 8 16;"/>
+                                            <TextField fx:id="searchAuctionField" prefWidth="250" promptText="Tìm sản phẩm / phiên..." styleClass="search-bar-field" />
+                                            <Button onAction="#handleRefresh" styleClass="secondary-btn-small" text="🔄 Tải lại" />
+                                            <Button onAction="#handleDeleteSelectedAuction" style="-fx-padding: 8 16; -fx-background-color: #d13438;" styleClass="primary-btn" text="🗑 Xóa phiên" />
+                                            <Button onAction="#goToCreateAuction" style="-fx-padding: 8 16;" styleClass="primary-btn" text="➕ Tạo phiên mới" />
                                         </HBox>
                                         
                                         <TableView fx:id="auctionsTable" prefHeight="450">
                                             <columns>
-                                                <TableColumn fx:id="auctionIdColumn" text="Mã phiên (ID)" prefWidth="140"/>
-                                                <TableColumn fx:id="productNameColumn" text="Tên tài sản / sản phẩm" prefWidth="320"/>
-                                                <TableColumn fx:id="categoryColumn" text="Danh mục" prefWidth="150"/>
-                                                <TableColumn fx:id="sellerColumn" text="Người bán" prefWidth="180"/>
-                                                <TableColumn fx:id="currentPriceColumn" text="Giá hiện tại" prefWidth="210"/>
-                                                <TableColumn fx:id="auctionStatusColumn" text="Trạng thái phiên" prefWidth="180"/>
+                                                <TableColumn fx:id="auctionIdColumn" prefWidth="140" text="Mã phiên (ID)" />
+                                                <TableColumn fx:id="productNameColumn" prefWidth="320" text="Tên tài sản / sản phẩm" />
+                                                <TableColumn fx:id="categoryColumn" prefWidth="150" text="Danh mục" />
+                                                <TableColumn fx:id="sellerColumn" prefWidth="180" text="Người bán" />
+                                                <TableColumn fx:id="currentPriceColumn" prefWidth="210" text="Giá hiện tại" />
+                                                <TableColumn fx:id="auctionStatusColumn" prefWidth="180" text="Trạng thái phiên" />
                                             </columns>
                                         </TableView>
                                     </VBox>
@@ -166,9 +150,9 @@
             </ScrollPane>
             
             <!-- Bottom System Status Bar -->
-            <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 24; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0 transparent transparent transparent; -fx-border-width: 1 0 0 0;">
-                <Label text="Hệ thống:" style="-fx-font-weight: 800; -fx-text-fill: #64748b; -fx-font-size: 11px;"/>
-                <Label fx:id="notificationLabel" text="Đang đồng bộ dữ liệu..." style="-fx-text-fill: #475569; -fx-font-size: 11px; -fx-font-weight: 600;"/>
+            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10 24; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0 transparent transparent transparent; -fx-border-width: 1 0 0 0;">
+                <Label style="-fx-font-weight: 800; -fx-text-fill: #64748b; -fx-font-size: 11px;" text="Hệ thống:" />
+                <Label fx:id="notificationLabel" style="-fx-text-fill: #475569; -fx-font-size: 11px; -fx-font-weight: 600;" text="Đang đồng bộ dữ liệu..." />
             </HBox>
         </VBox>
     </center>

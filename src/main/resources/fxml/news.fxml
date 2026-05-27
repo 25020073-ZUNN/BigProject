@@ -1,80 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.shape.Rectangle?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.auction.controller.HomeController"
-            prefWidth="1380"
-            prefHeight="920"
-            stylesheets="@../style.css"
-            styleClass="root">
+<BorderPane prefHeight="920" prefWidth="1380" styleClass="root" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.HomeController">
 
     <top>
         <VBox>
             <HBox alignment="CENTER_LEFT" spacing="20" styleClass="topbar">
                 <padding>
-                    <Insets top="12" right="36" bottom="12" left="36"/>
+                    <Insets bottom="12" left="36" right="36" top="12" />
                 </padding>
 
                                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <ImageView fitHeight="42" preserveRatio="true">
                         <image>
-                            <Image url="@../images/d33812d6433b838f8d0f44c71287e89a.jpg"/>
+                            <Image url="@../images/d33812d6433b838f8d0f44c71287e89a.jpg" />
                         </image>
                     </ImageView>
                     <VBox spacing="0">
-                        <Label text="UET" styleClass="logo-main" style="-fx-font-size: 20px;"/>
-                        <Label text="AUCTION PLATFORM" styleClass="logo-sub" style="-fx-font-size: 9px;"/>
+                        <Label style="-fx-font-size: 20px;" styleClass="logo-main" text="UET" />
+                        <Label style="-fx-font-size: 9px;" styleClass="logo-sub" text="AUCTION PLATFORM" />
                     </VBox>
                 </HBox>
 
-                <Region HBox.hgrow="ALWAYS"/>
+                <Region HBox.hgrow="ALWAYS" />
 
-                <Button text="Trang chủ" onAction="#goToHome" styleClass="nav-btn"/>
-                <Button text="Tài sản đấu giá" onAction="#goToAuctionList" styleClass="nav-btn"/>
-                <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn-active"/>
-                <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
+                <Button onAction="#goToHome" styleClass="nav-btn" text="Trang chủ" />
+                <Button onAction="#goToAuctionList" styleClass="nav-btn" text="Tài sản đấu giá" />
+                <Button onAction="#goToNews" styleClass="nav-btn-active" text="Tin tức" />
+                <Button onAction="#goToContact" styleClass="nav-btn" text="Liên hệ" />
 
-                <Label fx:id="clockLabel" text="08:30:12&#10;07/04/2026" styleClass="clock-label"/>
+                <Label fx:id="clockLabel" styleClass="clock-label" text="08:30:12&#10;07/04/2026" />
 
-                <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
+                <Button fx:id="loginButton" onAction="#goToLogin" styleClass="login-btn" text="Đăng nhập" />
             </HBox>
         </VBox>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" cache="true" cacheHint="SPEED">
+        <ScrollPane cache="true" cacheHint="SPEED" fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
             <content>
-                <VBox spacing="30" cache="true" cacheHint="SPEED">
+                <VBox cache="true" cacheHint="SPEED" spacing="30">
                     <!-- HERO SECTION FOR NEWS -->
                     <VBox spacing="12" styleClass="page-hero-small">
                         <padding>
-                            <Insets top="44" right="48" bottom="44" left="48"/>
+                            <Insets bottom="44" left="48" right="48" top="44" />
                         </padding>
-                        <Label text="TIN TỨC &amp; THÔNG BÁO" styleClass="hero-small"/>
-                        <Label text="Cập nhật những thông tin mới nhất từ Team 6 - UET" styleClass="hero-title"/>
-                        <Label text="Thông tin về dự án đấu giá trực tuyến, nghiên cứu công nghệ mới và thông tin môn học." styleClass="hero-desc"/>
+                        <Label styleClass="hero-small" text="TIN TỨC &amp; THÔNG BÁO" />
+                        <Label styleClass="hero-title" text="Cập nhật những thông tin mới nhất từ Team 6 - UET" />
+                        <Label styleClass="hero-desc" text="Thông tin về dự án đấu giá trực tuyến, nghiên cứu công nghệ mới và thông tin môn học." />
                     </VBox>
 
                     <!-- MAIN NEWS CONTENT -->
                     <HBox spacing="30">
                         <padding>
-                            <Insets top="0" right="48" bottom="36" left="48"/>
+                            <Insets bottom="36" left="48" right="48" top="0" />
                         </padding>
 
                         <!-- NEWS LIST -->
@@ -82,30 +66,28 @@
                             <!-- Featured News (Premium Row Layout) -->
                             <HBox spacing="24" styleClass="content-card">
                                 <padding>
-                                    <Insets top="24" right="24" bottom="24" left="24"/>
+                                    <Insets bottom="24" left="24" right="24" top="24" />
                                 </padding>
-                                <StackPane prefWidth="380" prefHeight="250" minWidth="380" maxWidth="380" styleClass="news-thumb" HBox.hgrow="NEVER">
-                                    <ImageView fitWidth="380" fitHeight="250" preserveRatio="false">
+                                <StackPane maxWidth="380" minWidth="380" prefHeight="250" prefWidth="380" styleClass="news-thumb" HBox.hgrow="NEVER">
+                                    <ImageView fitHeight="250" fitWidth="380" preserveRatio="false">
                                         <clip>
-                                            <Rectangle width="380" height="250" arcWidth="24" arcHeight="24"/>
+                                            <Rectangle arcHeight="24" arcWidth="24" height="250" width="380" />
                                         </clip>
                                         <image>
-                                            <Image url="@../images/news_featured.jpg"/>
+                                            <Image url="@../images/news_featured.jpg" />
                                         </image>
                                     </ImageView>
                                 </StackPane>
-                                <VBox spacing="12" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-                                    <HBox spacing="8" alignment="CENTER_LEFT">
-                                        <Label text="TIÊU ĐIỂM" styleClass="badge-vip"/>
-                                        <Label text="•" style="-fx-text-fill: #8a8a8a;"/>
-                                        <Label text="07/04/2026" styleClass="muted-text"/>
+                                <VBox alignment="CENTER_LEFT" spacing="12" HBox.hgrow="ALWAYS">
+                                    <HBox alignment="CENTER_LEFT" spacing="8">
+                                        <Label styleClass="badge-vip" text="TIÊU ĐIỂM" />
+                                        <Label style="-fx-text-fill: #8a8a8a;" text="•" />
+                                        <Label styleClass="muted-text" text="07/04/2026" />
                                     </HBox>
-                                    <Label text="Nâng cấp hệ thống bảo mật &amp; Quy trình xác thực đấu giá trực tuyến năm 2026"
-                                           wrapText="true" style="-fx-font-size: 22px; -fx-font-weight: 900; -fx-text-fill: #1a1a1a;"/>
-                                    <Label text="Nhằm mang lại trải nghiệm tối ưu và đảm bảo tính minh bạch pháp lý tuyệt đối cho các thành viên, Team 6 - UET nâng cấp hệ thống ký quỹ tự động và tích hợp xác thực đa nhân tố. Bản cập nhật sẽ giúp tăng 200% tốc độ thực thi giao dịch..."
-                                           wrapText="true" styleClass="news-text" style="-fx-line-spacing: 4px;"/>
-                                    <Region VBox.vgrow="ALWAYS"/>
-                                    <Button text="Đọc bài viết tiêu điểm  →" onAction="#handleComingSoon" styleClass="primary-btn" style="-fx-padding: 10 20;"/>
+                                    <Label style="-fx-font-size: 22px; -fx-font-weight: 900; -fx-text-fill: #1a1a1a;" text="Nâng cấp hệ thống bảo mật &amp; Quy trình xác thực đấu giá trực tuyến năm 2026" wrapText="true" />
+                                    <Label style="-fx-line-spacing: 4px;" styleClass="news-text" text="Nhằm mang lại trải nghiệm tối ưu và đảm bảo tính minh bạch pháp lý tuyệt đối cho các thành viên, Team 6 - UET nâng cấp hệ thống ký quỹ tự động và tích hợp xác thực đa nhân tố. Bản cập nhật sẽ giúp tăng 100% tốc độ thực thi giao dịch..." wrapText="true" />
+                                    <Region VBox.vgrow="ALWAYS" />
+                                    <Button onAction="#handleComingSoon" style="-fx-padding: 10 20;" styleClass="primary-btn" text="Đọc bài viết tiêu điểm  →" />
                                 </VBox>
                             </HBox>
 
@@ -114,58 +96,54 @@
                                 <!-- Card 1 -->
                                 <VBox prefWidth="400" spacing="12" styleClass="news-card" HBox.hgrow="ALWAYS">
                                     <StackPane prefHeight="180" styleClass="news-thumb">
-                                        <ImageView fitWidth="368" fitHeight="180" preserveRatio="false">
+                                        <ImageView fitHeight="180" fitWidth="368" preserveRatio="false">
                                             <clip>
-                                                <Rectangle width="368" height="180" arcWidth="20" arcHeight="20"/>
+                                                <Rectangle arcHeight="20" arcWidth="20" height="180" width="368" />
                                             </clip>
                                             <image>
-                                                <Image url="@../images/news_security.jpg"/>
+                                                <Image url="@../images/news_security.jpg" />
                                             </image>
                                         </ImageView>
                                     </StackPane>
                                     <VBox spacing="8" styleClass="news-info">
                                         <padding>
-                                            <Insets top="16" right="16" bottom="16" left="16"/>
+                                            <Insets bottom="16" left="16" right="16" top="16" />
                                         </padding>
-                                        <HBox spacing="8" alignment="CENTER_LEFT">
-                                            <Label text="THÔNG BÁO" styleClass="badge-live"/>
-                                            <Label text="•  06/04/2026" styleClass="muted-text" style="-fx-font-size: 11px;"/>
+                                        <HBox alignment="CENTER_LEFT" spacing="8">
+                                            <Label styleClass="badge-live" text="THÔNG BÁO" />
+                                            <Label style="-fx-font-size: 11px;" styleClass="muted-text" text="•  06/04/2026" />
                                         </HBox>
-                                        <Label text="Mở rộng danh mục đấu giá tài sản số và thanh lý doanh nghiệp"
-                                               wrapText="true" styleClass="news-title" style="-fx-font-size: 15px;"/>
-                                        <Label text="Hệ thống chính thức bổ sung nhóm tài sản công nghệ, bản quyền số và thiết bị văn phòng từ quý II/2026, mở ra nhiều cơ hội tham gia thực tiễn cho học viên."
-                                               wrapText="true" styleClass="news-text"/>
-                                        <Region prefHeight="8"/>
-                                        <Button text="Xem chi tiết" onAction="#handleComingSoon" styleClass="auth-link" style="-fx-padding: 0;"/>
+                                        <Label style="-fx-font-size: 15px;" styleClass="news-title" text="Mở rộng danh mục đấu giá tài sản số và thanh lý doanh nghiệp" wrapText="true" />
+                                        <Label styleClass="news-text" text="Hệ thống chính thức bổ sung nhóm tài sản công nghệ, bản quyền số và thiết bị văn phòng từ quý II/2026, mở ra nhiều cơ hội tham gia thực tiễn cho học viên." wrapText="true" />
+                                        <Region prefHeight="8" />
+                                        <Button onAction="#handleComingSoon" style="-fx-padding: 0;" styleClass="auth-link" text="Xem chi tiết" />
                                     </VBox>
                                 </VBox>
 
                                 <!-- Card 2 -->
                                 <VBox prefWidth="400" spacing="12" styleClass="news-card" HBox.hgrow="ALWAYS">
                                     <StackPane prefHeight="180" styleClass="news-thumb">
-                                        <ImageView fitWidth="368" fitHeight="180" preserveRatio="false">
+                                        <ImageView fitHeight="180" fitWidth="368" preserveRatio="false">
                                             <clip>
-                                                <Rectangle width="368" height="180" arcWidth="20" arcHeight="20"/>
+                                                <Rectangle arcHeight="20" arcWidth="20" height="180" width="368" />
                                             </clip>
                                             <image>
-                                                <Image url="@../images/news_mobile.jpg"/>
+                                                <Image url="@../images/news_mobile.jpg" />
                                             </image>
                                         </ImageView>
                                     </StackPane>
                                     <VBox spacing="8" styleClass="news-info">
                                         <padding>
-                                            <Insets top="16" right="16" bottom="16" left="16"/>
+                                            <Insets bottom="16" left="16" right="16" top="16" />
                                         </padding>
-                                        <HBox spacing="8" alignment="CENTER_LEFT">
-                                            <Label text="CÔNG NGHỆ" styleClass="badge-new"/>
-                                            <Label text="•  05/04/2026" styleClass="muted-text" style="-fx-font-size: 11px;"/>
+                                        <HBox alignment="CENTER_LEFT" spacing="8">
+                                            <Label styleClass="badge-new" text="CÔNG NGHỆ" />
+                                            <Label style="-fx-font-size: 11px;" styleClass="muted-text" text="•  05/04/2026" />
                                         </HBox>
-                                        <Label text="Ra mắt bản thử nghiệm giao diện di động tối ưu trải nghiệm người dùng"
-                                               wrapText="true" styleClass="news-title" style="-fx-font-size: 15px;"/>
-                                        <Label text="Bản cập nhật giao diện mới hỗ trợ xem luồng đấu giá thời gian thực trên các thiết bị di động, tối ưu hóa độ trễ kết nối socket chỉ còn dưới 50ms."
-                                               wrapText="true" styleClass="news-text"/>
-                                        <Region prefHeight="8"/>
-                                        <Button text="Xem chi tiết" onAction="#handleComingSoon" styleClass="auth-link" style="-fx-padding: 0;"/>
+                                        <Label style="-fx-font-size: 15px;" styleClass="news-title" text="Ra mắt bản thử nghiệm giao diện di động tối ưu trải nghiệm người dùng" wrapText="true" />
+                                        <Label styleClass="news-text" text="Bản cập nhật giao diện mới hỗ trợ xem luồng đấu giá thời gian thực trên các thiết bị di động, tối ưu hóa độ trễ kết nối socket chỉ còn dưới 50ms." wrapText="true" />
+                                        <Region prefHeight="8" />
+                                        <Button onAction="#handleComingSoon" style="-fx-padding: 0;" styleClass="auth-link" text="Xem chi tiết" />
                                     </VBox>
                                 </VBox>
                             </HBox>
@@ -175,90 +153,86 @@
                                 <!-- Card 3 -->
                                 <VBox prefWidth="400" spacing="12" styleClass="news-card" HBox.hgrow="ALWAYS">
                                 <StackPane prefHeight="180" styleClass="news-thumb">
-                                    <ImageView fitWidth="368" fitHeight="180" preserveRatio="false">
+                                    <ImageView fitHeight="180" fitWidth="368" preserveRatio="false">
                                         <clip>
-                                            <Rectangle width="368" height="180" arcWidth="20" arcHeight="20"/>
+                                            <Rectangle arcHeight="20" arcWidth="20" height="180" width="368" />
                                         </clip>
                                         <image>
-                                            <Image url="@../images/news_blockchain.jpg"/>
+                                            <Image url="@../images/news_blockchain.jpg" />
                                         </image>
                                     </ImageView>
                                 </StackPane>
                                     <VBox spacing="8" styleClass="news-info">
                                         <padding>
-                                            <Insets top="16" right="16" bottom="16" left="16"/>
+                                            <Insets bottom="16" left="16" right="16" top="16" />
                                         </padding>
-                                        <HBox spacing="8" alignment="CENTER_LEFT">
-                                            <Label text="THỊ TRƯỜNG" styleClass="badge-vip"/>
-                                            <Label text="•  04/04/2026" styleClass="muted-text" style="-fx-font-size: 11px;"/>
+                                        <HBox alignment="CENTER_LEFT" spacing="8">
+                                            <Label styleClass="badge-vip" text="THỊ TRƯỜNG" />
+                                            <Label style="-fx-font-size: 11px;" styleClass="muted-text" text="•  04/04/2026" />
                                         </HBox>
-                                        <Label text="Xu hướng ứng dụng công nghệ chuỗi khối trong đấu giá tài sản"
-                                               wrapText="true" styleClass="news-title" style="-fx-font-size: 15px;"/>
-                                        <Label text="Phân tích khoa học về việc kết hợp hợp đồng thông minh (Smart Contract) nhằm tăng cường độ tin cậy và tự động hóa biên bản kết quả đấu giá."
-                                               wrapText="true" styleClass="news-text"/>
-                                        <Region prefHeight="8"/>
-                                        <Button text="Xem chi tiết" onAction="#handleComingSoon" styleClass="auth-link" style="-fx-padding: 0;"/>
+                                        <Label style="-fx-font-size: 15px;" styleClass="news-title" text="Xu hướng ứng dụng công nghệ chuỗi khối trong đấu giá tài sản" wrapText="true" />
+                                        <Label styleClass="news-text" text="Phân tích khoa học về việc kết hợp hợp đồng thông minh (Smart Contract) nhằm tăng cường độ tin cậy và tự động hóa biên bản kết quả đấu giá." wrapText="true" />
+                                        <Region prefHeight="8" />
+                                        <Button onAction="#handleComingSoon" style="-fx-padding: 0;" styleClass="auth-link" text="Xem chi tiết" />
                                     </VBox>
                                 </VBox>
 
                                 <!-- Card 4 -->
                                 <VBox prefWidth="400" spacing="12" styleClass="news-card" HBox.hgrow="ALWAYS">
                                 <StackPane prefHeight="180" styleClass="news-thumb">
-                                    <ImageView fitWidth="368" fitHeight="180" preserveRatio="false">
+                                    <ImageView fitHeight="180" fitWidth="368" preserveRatio="false">
                                         <clip>
-                                            <Rectangle width="368" height="180" arcWidth="20" arcHeight="20"/>
+                                            <Rectangle arcHeight="20" arcWidth="20" height="180" width="368" />
                                         </clip>
                                         <image>
-                                            <Image url="@../images/news_escrow.jpg"/>
+                                            <Image url="@../images/news_escrow.jpg" />
                                         </image>
                                     </ImageView>
                                 </StackPane>
                                     <VBox spacing="8" styleClass="news-info">
                                         <padding>
-                                            <Insets top="16" right="16" bottom="16" left="16"/>
+                                            <Insets bottom="16" left="16" right="16" top="16" />
                                         </padding>
-                                        <HBox spacing="8" alignment="CENTER_LEFT">
-                                            <Label text="HƯỚNG DẪN" styleClass="badge-soft"/>
-                                            <Label text="•  03/04/2026" styleClass="muted-text" style="-fx-font-size: 11px;"/>
+                                        <HBox alignment="CENTER_LEFT" spacing="8">
+                                            <Label styleClass="badge-soft" text="HƯỚNG DẪN" />
+                                            <Label style="-fx-font-size: 11px;" styleClass="muted-text" text="•  03/04/2026" />
                                         </HBox>
-                                        <Label text="Cẩm nang tham gia ký quỹ và bảo lãnh tài sản an toàn cho người mới"
-                                               wrapText="true" styleClass="news-title" style="-fx-font-size: 15px;"/>
-                                        <Label text="Hướng dẫn từng bước thực hiện nạp tiền, đặt cọc và hoàn trả quỹ tự động nhanh chóng trong vòng 5 phút sau khi phiên kết thúc."
-                                               wrapText="true" styleClass="news-text"/>
-                                        <Region prefHeight="8"/>
-                                        <Button text="Xem chi tiết" onAction="#handleComingSoon" styleClass="auth-link" style="-fx-padding: 0;"/>
+                                        <Label style="-fx-font-size: 15px;" styleClass="news-title" text="Cẩm nang tham gia ký quỹ và bảo lãnh tài sản an toàn cho người mới" wrapText="true" />
+                                        <Label styleClass="news-text" text="Hướng dẫn từng bước thực hiện nạp tiền, đặt cọc và hoàn trả quỹ tự động nhanh chóng trong vòng 5 phút sau khi phiên kết thúc." wrapText="true" />
+                                        <Region prefHeight="8" />
+                                        <Button onAction="#handleComingSoon" style="-fx-padding: 0;" styleClass="auth-link" text="Xem chi tiết" />
                                     </VBox>
                                 </VBox>
                             </HBox>
                         </VBox>
 
-                        <VBox spacing="25" prefWidth="350" minWidth="350" maxWidth="350">
+                        <VBox maxWidth="350" minWidth="350" prefWidth="350" spacing="25">
                             <!-- Search Bar Card -->
                             <VBox spacing="12" styleClass="detail-side-card">
                                 <padding>
-                                    <Insets top="20" right="20" bottom="20" left="20"/>
+                                    <Insets bottom="20" left="20" right="20" top="20" />
                                 </padding>
-                                <Label text="TÌM KIẾM TIN TỨC" styleClass="section-title-dark"/>
-                                <Separator/>
-                                <HBox spacing="10" alignment="CENTER_LEFT">
-                                    <TextField promptText="Nhập từ khóa tìm kiếm..." HBox.hgrow="ALWAYS" styleClass="search-bar-field"/>
-                                    <Button text="🔍" onAction="#handleComingSoon" styleClass="primary-btn" style="-fx-padding: 10 14; -fx-min-width: 44;"/>
+                                <Label styleClass="section-title-dark" text="TÌM KIẾM TIN TỨC" />
+                                <Separator />
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <TextField promptText="Nhập từ khóa tìm kiếm..." styleClass="search-bar-field" HBox.hgrow="ALWAYS" />
+                                    <Button onAction="#handleComingSoon" style="-fx-padding: 10 14; -fx-min-width: 44;" styleClass="primary-btn" text="🔍" />
                                 </HBox>
                             </VBox>
 
                             <!-- Categories -->
                             <VBox spacing="15" styleClass="detail-side-card">
                                 <padding>
-                                    <Insets top="20" right="20" bottom="20" left="20"/>
+                                    <Insets bottom="20" left="20" right="20" top="20" />
                                 </padding>
-                                <Label text="DANH MỤC TIN TỨC" styleClass="section-title-dark"/>
-                                <Separator/>
+                                <Label styleClass="section-title-dark" text="DANH MỤC TIN TỨC" />
+                                <Separator />
                                 <VBox spacing="10">
-                                    <Button text="• Thông báo mới (12)" onAction="#handleComingSoon" styleClass="news-category-btn"/>
-                                    <Button text="• Thị trường đấu giá (08)" onAction="#handleComingSoon" styleClass="news-category-btn"/>
-                                    <Button text="• Hướng dẫn sử dụng (15)" onAction="#handleComingSoon" styleClass="news-category-btn"/>
-                                    <Button text="• Sự kiện &amp; Tin tức (05)" onAction="#handleComingSoon" styleClass="news-category-btn"/>
-                                    <Button text="• Quy định pháp luật (03)" onAction="#handleComingSoon" styleClass="news-category-btn"/>
+                                    <Button onAction="#handleComingSoon" styleClass="news-category-btn" text="• Thông báo mới (12)" />
+                                    <Button onAction="#handleComingSoon" styleClass="news-category-btn" text="• Thị trường đấu giá (08)" />
+                                    <Button onAction="#handleComingSoon" styleClass="news-category-btn" text="• Hướng dẫn sử dụng (15)" />
+                                    <Button onAction="#handleComingSoon" styleClass="news-category-btn" text="• Sự kiện &amp; Tin tức (05)" />
+                                    <Button onAction="#handleComingSoon" styleClass="news-category-btn" text="• Quy định pháp luật (03)" />
 
                                 </VBox>
                             </VBox>
@@ -266,22 +240,22 @@
                             <!-- Popular News -->
                             <VBox spacing="15" styleClass="detail-side-card">
                                 <padding>
-                                    <Insets top="20" right="20" bottom="20" left="20"/>
+                                    <Insets bottom="20" left="20" right="20" top="20" />
                                 </padding>
-                                <Label text="TIN XEM NHIỀU NHẤT" styleClass="section-title-dark"/>
-                                <Separator/>
+                                <Label styleClass="section-title-dark" text="TIN XEM NHIỀU NHẤT" />
+                                <Separator />
                                 <VBox spacing="15">
                                     <VBox spacing="5">
-                                        <Label text="01/04/2026" styleClass="muted-text" style="-fx-font-size: 11px;"/>
-                                        <Label text="Top 10 tài sản có giá trị đấu giá cao nhất quý I" wrapText="true" styleClass="field-label"/>
+                                        <Label style="-fx-font-size: 11px;" styleClass="muted-text" text="01/04/2026" />
+                                        <Label styleClass="field-label" text="Top 10 tài sản có giá trị đấu giá cao nhất quý I" wrapText="true" />
                                     </VBox>
                                     <VBox spacing="5">
-                                        <Label text="28/03/2026" styleClass="muted-text" style="-fx-font-size: 11px;"/>
-                                        <Label text="Chính sách bảo mật thông tin người tham gia đấu giá" wrapText="true" styleClass="field-label"/>
+                                        <Label style="-fx-font-size: 11px;" styleClass="muted-text" text="28/03/2026" />
+                                        <Label styleClass="field-label" text="Chính sách bảo mật thông tin người tham gia đấu giá" wrapText="true" />
                                     </VBox>
                                     <VBox spacing="5">
-                                        <Label text="25/03/2026" styleClass="muted-text" style="-fx-font-size: 11px;"/>
-                                        <Label text="Lịch nghỉ lễ và hoạt động của hệ thống Team 6 - UET" wrapText="true" styleClass="field-label"/>
+                                        <Label style="-fx-font-size: 11px;" styleClass="muted-text" text="25/03/2026" />
+                                        <Label styleClass="field-label" text="Lịch nghỉ lễ và hoạt động của hệ thống Team 6 - UET" wrapText="true" />
                                     </VBox>
                                 </VBox>
                             </VBox>
@@ -289,13 +263,12 @@
                             <!-- Subscription box -->
                             <VBox spacing="15" styleClass="side-info-card-dark">
                                 <padding>
-                                    <Insets top="25" right="25" bottom="25" left="25"/>
+                                    <Insets bottom="25" left="25" right="25" top="25" />
                                 </padding>
-                                <Label text="ĐĂNG KÝ BẢN TIN" styleClass="banner-title"/>
-                                <Label text="Nhận những tin tức mới nhất trực tiếp vào hộp thư của bạn."
-                                       wrapText="true" styleClass="banner-desc"/>
-                                <TextField promptText="Email của bạn" styleClass="mail-field"/>
-                                <Button text="Gửi đăng ký" maxWidth="1.7976931348623157E308" onAction="#handleSubscribe" styleClass="primary-btn"/>
+                                <Label styleClass="banner-title" text="ĐĂNG KÝ BẢN TIN" />
+                                <Label styleClass="banner-desc" text="Nhận những tin tức mới nhất trực tiếp vào hộp thư của bạn." wrapText="true" />
+                                <TextField promptText="Email của bạn" styleClass="mail-field" />
+                                <Button maxWidth="1.7976931348623157E308" onAction="#handleSubscribe" styleClass="primary-btn" text="Gửi đăng ký" />
                             </VBox>
                         </VBox>
                     </HBox>
@@ -304,32 +277,28 @@
                     <!-- FOOTER -->
                     <VBox spacing="22" styleClass="footer">
                         <padding>
-                            <Insets top="36" right="48" bottom="30" left="48"/>
+                            <Insets bottom="30" left="48" right="48" top="36" />
                         </padding>
                         <HBox spacing="60">
-                            <VBox spacing="10" prefWidth="280">
-                                <Label text="Team 6 - UET" styleClass="footer-title"/>
-                                <Label text="Dự án đấu giá trực tuyến&#10;Môn học: Lập trình nâng cao&#10;Trường Đại học Công nghệ - ĐHQGHN"
-                                       wrapText="true" styleClass="footer-text"/>
+                            <VBox prefWidth="280" spacing="10">
+                                <Label styleClass="footer-title" text="Team 6 - UET" />
+                                <Label styleClass="footer-text" text="Dự án đấu giá trực tuyến&#10;Môn học: Lập trình nâng cao&#10;Trường Đại học Công nghệ - ĐHQGHN" wrapText="true" />
                             </VBox>
-                            <VBox spacing="10" prefWidth="220">
-                                <Label text="Về chúng tôi" styleClass="footer-title"/>
-                                <Label text="Giới thiệu&#10;Quy chế hoạt động&#10;Hướng dẫn sử dụng"
-                                       wrapText="true" styleClass="footer-text"/>
+                            <VBox prefWidth="220" spacing="10">
+                                <Label styleClass="footer-title" text="Về chúng tôi" />
+                                <Label styleClass="footer-text" text="Giới thiệu&#10;Quy chế hoạt động&#10;Hướng dẫn sử dụng" wrapText="true" />
                             </VBox>
-                            <VBox spacing="10" prefWidth="220">
-                                <Label text="Chính sách" styleClass="footer-title"/>
-                                <Label text="Bảo mật&#10;Điều khoản sử dụng&#10;Quy định đấu giá"
-                                       wrapText="true" styleClass="footer-text"/>
+                            <VBox prefWidth="220" spacing="10">
+                                <Label styleClass="footer-title" text="Chính sách" />
+                                <Label styleClass="footer-text" text="Bảo mật&#10;Điều khoản sử dụng&#10;Quy định đấu giá" wrapText="true" />
                             </VBox>
-                            <VBox spacing="10" prefWidth="260">
-                                <Label text="Liên hệ nhanh" styleClass="footer-title"/>
-                                <Label text="📍  Cầu Giấy - Hà Nội&#10;📞  0398106007&#10;✉️  team6ltnc@gmail.com&#10;🕐  Trong giờ hành chính"
-                                       wrapText="true" styleClass="footer-text"/>
+                            <VBox prefWidth="260" spacing="10">
+                                <Label styleClass="footer-title" text="Liên hệ nhanh" />
+                                <Label styleClass="footer-text" text="📍  Cầu Giấy - Hà Nội&#10;📞  0398106007&#10;✉️  team6ltnc@gmail.com&#10;🕐  Trong giờ hành chính" wrapText="true" />
                             </VBox>
                         </HBox>
-                        <Separator styleClass="footer-separator"/>
-                        <Label text="Copyright 2026 © Team 6 - UET. All rights reserved." styleClass="copyright"/>
+                        <Separator styleClass="footer-separator" />
+                        <Label styleClass="copyright" text="Copyright 2026 © Team 6 - UET. All rights reserved." />
                     </VBox>
                 </VBox>
             </content>
