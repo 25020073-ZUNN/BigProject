@@ -16,14 +16,14 @@ import java.util.Set;
  * Lớp DBConnection chịu trách nhiệm thiết lập và quản lý kết nối tới cơ sở dữ liệu MySQL.
  * Hỗ trợ đọc cấu hình từ file môi trường (.env.local) hoặc sử dụng giá trị mặc định.
  */
-public final class DBConnection {
+public final class  DBConnection {
     // Thông số mặc định nếu không tìm thấy cấu hình bên ngoài
     private static final String DEFAULT_URL = "jdbc:mysql://localhost:3307/auction_db";
     private static final String DEFAULT_USER = "root";
     private static final String DEFAULT_PASSWORD = "123456";
     
     // Lưu trữ các biến môi trường đọc từ file .env.local
-    private static final Map<String, String> LOCAL_ENV = loadLocalEnv();
+    private static final Map<String, String> LOCAL_ENV  = loadLocalEnv();
 
     private DBConnection() {
         throw new IllegalStateException("Utility class");
@@ -41,20 +41,20 @@ public final class DBConnection {
     }
 
     /**
-     * Lấy URL kết nối đã cấu hình (dùng để hiển thị trạng thái).
+     *  Lấy URL kết nối đã cấu hình (dùng để hiển thị trạng thái).
      */
     public static String getConfiguredUrl() {
         return getUrl();
     }
 
     /**
-     * Lấy tên đăng nhập DB đã cấu hình.
+     *  Lấy tên đăng nhập DB đã cấu hình.
      */
     public static String getConfiguredUser() {
         return getUser();
     }
 
-    // Các hàm bổ trợ để lấy thông tin cấu hình theo thứ tự ưu tiên: 
+    // Các hàm bổ trợ để lấy thông tin cấu hình theo thứ tự ưu tiên:
     // Hệ thống -> File .env -> Giá trị mặc định
     private static String getUrl() {
         return getConfig("DB_URL", "db.url", DEFAULT_URL);
@@ -69,7 +69,7 @@ public final class DBConnection {
     }
 
     /**
-     * Hàm lấy giá trị cấu hình dựa trên khóa (key).
+     *  Hàm lấy giá trị cấu hình dựa trên khóa (key).
      */
     private static String getConfig(String envKey, String propertyKey, String defaultValue) {
         // 1. Kiểm tra biến môi trường hệ thống (System Environment)
@@ -95,7 +95,7 @@ public final class DBConnection {
     }
 
     /**
-     * Tự động tìm và đọc file .env.local trong các thư mục của dự án.
+     *  Tự động tìm và đọc file .env.local trong các thư mục của dự án.
      */
     private static Map<String, String> loadLocalEnv() {
         for (Path envFile : getLocalEnvCandidates()) {
@@ -107,12 +107,12 @@ public final class DBConnection {
     }
 
     /**
-     * Đọc và phân tích cú pháp file .env.local (định dạng KEY=VALUE).
+     *  Đọc và phân tích cú pháp file .env.local (định dạng KEY=VALUE).
      */
     private static Map<String, String> readLocalEnv(Path envFile) {
-        Map<String, String> values = new HashMap<>();
+        Map<String, String> values  = new HashMap<>();
         try {
-            List<String> lines = Files.readAllLines(envFile);
+            List<String> lines  = Files.readAllLines(envFile);
             for (String rawLine : lines) {
                 String line = rawLine.trim();
                 // Bỏ qua dòng trống hoặc dòng chú thích (bắt đầu bằng #)
