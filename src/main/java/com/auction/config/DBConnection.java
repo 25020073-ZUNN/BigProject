@@ -1,28 +1,28 @@
 package com.auction.config;
 
-import  java.io.IOException;
-import  java.nio.file.Files;
-import  java.nio.file.Path;
-import  java.sql.Connection;
-import  java.sql.DriverManager;
-import  java.sql.SQLException;
-import  java.util.HashMap;
-import  java.util.LinkedHashSet;
-import  java.util.List;
-import  java.util.Map;
-import  java.util.Set;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
- *  Lớp DBConnection chịu trách nhiệm thiết lập và quản lý kết nối tới cơ sở dữ liệu MySQL.
- *  Hỗ trợ đọc cấu hình từ file môi trường (.env.local) hoặc sử dụng giá trị mặc định.
+ * Lớp DBConnection chịu trách nhiệm thiết lập và quản lý kết nối tới cơ sở dữ liệu MySQL.
+ * Hỗ trợ đọc cấu hình từ file môi trường (.env.local) hoặc sử dụng giá trị mặc định.
  */
 public final class  DBConnection {
-    //  Thông số mặc định nếu không tìm thấy cấu hình bên ngoài
-    private static final String DEFAULT_URL  = "jdbc:mysql://localhost:3307/auction_db";
-    private static final String DEFAULT_USER  = "root";
-    private static final String DEFAULT_PASSWORD  = "123456";
+    // Thông số mặc định nếu không tìm thấy cấu hình bên ngoài
+    private static final String DEFAULT_URL = "jdbc:mysql://localhost:3307/auction_db";
+    private static final String DEFAULT_USER = "root";
+    private static final String DEFAULT_PASSWORD = "123456";
     
-    //  Lưu trữ các biến môi trường đọc từ file .env.local
+    // Lưu trữ các biến môi trường đọc từ file .env.local
     private static final Map<String, String> LOCAL_ENV  = loadLocalEnv();
 
     private DBConnection() {
@@ -30,32 +30,32 @@ public final class  DBConnection {
     }
 
     /**
-     *  Tạo và trả về một kết nối mới tới cơ sở dữ liệu.
-     *  @return Connection đối tượng kết nối JDBC.
-     *  @throws SQLException Nếu có lỗi xảy ra khi kết nối.
+     * Tạo và trả về một kết nối mới tới cơ sở dữ liệu.
+     * @return Connection đối tượng kết nối JDBC.
+     * @throws SQLException Nếu có lỗi xảy ra khi kết nối.
      */
     /*hàm kết nối chính */
     public static Connection getConnection() throws SQLException {
-        //  DriverManager sẽ dùng URL, Username và Password để mở một "đường truyền" tới MySQL
+        // DriverManager sẽ dùng URL, Username và Password để mở một "đường truyền" tới MySQL
         return DriverManager.getConnection(getUrl(), getUser(), getPassword());
     }
 
     /**
-     *   Lấy URL kết nối đã cấu hình (dùng để hiển thị trạng thái).
+     *  Lấy URL kết nối đã cấu hình (dùng để hiển thị trạng thái).
      */
     public static String getConfiguredUrl() {
         return getUrl();
     }
 
     /**
-     *   Lấy tên đăng nhập DB đã cấu hình.
+     *  Lấy tên đăng nhập DB đã cấu hình.
      */
     public static String getConfiguredUser() {
         return getUser();
     }
 
-    //  Các hàm bổ trợ để lấy thông tin cấu hình theo thứ tự ưu tiên:
-    //  Hệ thống -> File .env -> Giá trị mặc định
+    // Các hàm bổ trợ để lấy thông tin cấu hình theo thứ tự ưu tiên:
+    // Hệ thống -> File .env -> Giá trị mặc định
     private static String getUrl() {
         return getConfig("DB_URL", "db.url", DEFAULT_URL);
     }
@@ -69,33 +69,33 @@ public final class  DBConnection {
     }
 
     /**
-     *   Hàm lấy giá trị cấu hình dựa trên khóa (key).
+     *  Hàm lấy giá trị cấu hình dựa trên khóa (key).
      */
     private static String getConfig(String envKey, String propertyKey, String defaultValue) {
-        //  1. Kiểm tra biến môi trường hệ thống (System Environment)
-        String envValue  = System.getenv(envKey);
-        if (envValue  != null && !envValue.isBlank()) {
+        // 1. Kiểm tra biến môi trường hệ thống (System Environment)
+        String envValue = System.getenv(envKey);
+        if (envValue != null && !envValue.isBlank()) {
             return envValue;
         }
 
-        //  2. Kiểm tra biến từ file .env.local
-        String localEnvValue  = LOCAL_ENV.get(envKey);
-        if (localEnvValue  != null && !localEnvValue.isBlank()) {
+        // 2. Kiểm tra biến từ file .env.local
+        String localEnvValue = LOCAL_ENV.get(envKey);
+        if (localEnvValue != null && !localEnvValue.isBlank()) {
             return localEnvValue;
         }
 
-        //  3. Kiểm tra thuộc tính hệ thống Java (-Dkey=value)
-        String propertyValue  = System.getProperty(propertyKey);
-        if (propertyValue  != null && !propertyValue.isBlank()) {
+        // 3. Kiểm tra thuộc tính hệ thống Java (-Dkey=value)
+        String propertyValue = System.getProperty(propertyKey);
+        if (propertyValue != null && !propertyValue.isBlank()) {
             return propertyValue;
         }
 
-        //  4. Trả về giá trị mặc định nếu không tìm thấy ở đâu
+        // 4. Trả về giá trị mặc định nếu không tìm thấy ở đâu
         return defaultValue;
     }
 
     /**
-     *   Tự động tìm và đọc file .env.local trong các thư mục của dự án.
+     *  Tự động tìm và đọc file .env.local trong các thư mục của dự án.
      */
     private static Map<String, String> loadLocalEnv() {
         for (Path envFile : getLocalEnvCandidates()) {
@@ -107,7 +107,7 @@ public final class  DBConnection {
     }
 
     /**
-     *   Đọc và phân tích cú pháp file .env.local (định dạng KEY=VALUE).
+     *  Đọc và phân tích cú pháp file .env.local (định dạng KEY=VALUE).
      */
     private static Map<String, String> readLocalEnv(Path envFile) {
         Map<String, String> values  = new HashMap<>();
