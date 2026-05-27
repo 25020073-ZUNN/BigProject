@@ -701,3 +701,6 @@ public class Server {
         }
     }
 }
+/*Server.java là trung tâm điều phối của hệ thống đấu giá.
+Nó nhận request JSON từ client qua TCP, xác thực dữ liệu, gọi các Service xử lý nghiệp vụ, truy cập database thông qua DAO và trả response.
+Server hỗ trợ đa client bằng thread pool, cập nhật realtime bằng Observer và broadcast, đồng thời tích hợp xác thực, reset mật khẩu và quản lý ảnh.*/

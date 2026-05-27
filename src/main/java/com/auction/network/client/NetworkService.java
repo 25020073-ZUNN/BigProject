@@ -26,7 +26,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class NetworkService {
 
-    private static final String DEFAULT_HOST = System.getProperty("auction.server.host", "100.69.190.79");
+    private static final String DEFAULT_HOST = System.getProperty("auction.server.host", "127.0.0.1");
     private static final int DEFAULT_PORT = Integer.getInteger("auction.server.port", 5050);
 
     private static final NetworkService instance = new NetworkService();
@@ -338,3 +338,5 @@ public class NetworkService {
         return result;
     }
 }
+/*NetworkService là lớp Singleton chịu trách nhiệm giao tiếp giữa Client và Server bằng JSON qua TCP.
+Nó quản lý kết nối dùng chung, gửi request bất đồng bộ bằng CompletableFuture, hỗ trợ realtime update thông qua listener và đảm bảo thread-safe khi nhiều thao tác mạng diễn ra đồng thời.*/

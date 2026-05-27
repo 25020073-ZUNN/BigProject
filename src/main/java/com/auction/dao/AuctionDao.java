@@ -655,3 +655,6 @@ public class AuctionDao {
         }
     }
 }
+/*AuctionDao là lớp DAO quản lý toàn bộ dữ liệu đấu giá trong MySQL.
+Nó xử lý tạo phiên, đặt giá, đồng bộ trạng thái theo thời gian thực, lưu lịch sử bid và xóa dữ liệu.
+File sử dụng transaction để đảm bảo toàn vẹn dữ liệu, dùng FOR UPDATE để tránh race condition khi nhiều người đặt giá đồng thời, và triển khai anti-sniping nhằm gia hạn phiên trong các phút cuối.*/
