@@ -29,3 +29,7 @@ public class AuctionSubject {
         }
     }
 }
+/*Quản lý danh sách các observer và gửi thông báo khi dữ liệu đấu giá thay đổi.*/
+/*AuctionSubject là lớp Subject trong Observer Pattern, chịu trách nhiệm quản lý danh sách observer và gửi thông báo khi dữ liệu đấu giá thay đổi.
+Lớp sử dụng CopyOnWriteArrayList để đảm bảo thread-safe khi nhiều client cùng đăng ký hoặc nhận cập nhật realtime.
+Việc dùng Observer giúp giảm phụ thuộc giữa nghiệp vụ đấu giá và giao diện hiển thị.*/

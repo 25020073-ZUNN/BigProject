@@ -12,7 +12,7 @@ import java.util.UUID;
  */
 public abstract class Entity {
 
-    protected String id;                  // ID duy nhất của object
+    protected String id;               // ID duy nhất của object
     protected LocalDateTime createdAt;    // Thời điểm tạo
     protected LocalDateTime updatedAt;    // Thời điểm cập nhật gần nhất
 
