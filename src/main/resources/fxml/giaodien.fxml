@@ -7,8 +7,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
+
 <BorderPane prefHeight="920" prefWidth="1380" styleClass="root" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.HomeController">
     <top>
         <VBox>
@@ -49,11 +48,11 @@
 
                     <!-- ═══════════════════ HERO SECTION ═══════════════════ -->
                     <!--<HBox spacing="32" styleClass="hero-section">-->
-                    <HBox spacing="50" alignment="CENTER" styleClass="hero-section">
+                    <HBox alignment="CENTER" spacing="50" styleClass="hero-section">
                         <padding><Insets bottom="56" left="56" right="56" top="56" /></padding>
 
                         <!--<VBox prefWidth="540" spacing="20" style="-fx-alignment: center-left;">-->
-                        <VBox minWidth="360" prefWidth="520" maxWidth="700" spacing="20" style="-fx-alignment: center-left;" HBox.hgrow="ALWAYS">
+                        <VBox maxWidth="700" minWidth="360" prefWidth="520" spacing="20" style="-fx-alignment: center-left;" HBox.hgrow="ALWAYS">
                             <Label styleClass="hero-small" text="🏛  HỆ THỐNG ĐẤU GIÁ TRỰC TUYẾN - TEAM 6 - UET" />
 
                             <Label styleClass="hero-title" text="Đấu giá trực tuyến&#10;Dự án học tập môn học&#10;Lập trình nâng cao" wrapText="true" />
@@ -67,7 +66,7 @@
                             <HBox spacing="16" style="-fx-padding: 12 0 0 0;">
                                 <VBox prefWidth="160" styleClass="mini-info-card">
                                     <padding><Insets bottom="16" left="16" right="16" top="16" /></padding>
-                                    <Label styleClass="mini-info-number" text="3" />
+                                    <Label styleClass="mini-info-number" text="5" />
                                     <Label styleClass="mini-info-text" text="Phiên đang mở" />
                                 </VBox>
 
@@ -87,7 +86,7 @@
 
                         <!-- Banner bên phải -->
                         <!--<AnchorPane prefHeight="380" prefWidth="420" styleClass="hero-banner" HBox.hgrow="NEVER">-->
-                        <AnchorPane minWidth="360" prefWidth="420" maxWidth="480" prefHeight="380" styleClass="hero-banner" HBox.hgrow="SOMETIMES">
+                        <AnchorPane maxWidth="480" minWidth="360" prefHeight="380" prefWidth="420" styleClass="hero-banner" HBox.hgrow="SOMETIMES">
                             <children>
                                 <VBox layoutX="32" layoutY="47.0" prefHeight="169.0" prefWidth="236.0" spacing="14">
                                     <Label styleClass="banner-chip" text="✨  DỰ ÁN MÔN HỌC - UET" />
@@ -103,7 +102,7 @@
 
                         <!-- Panel đăng nhập / thông tin user -->
                         <!--<VBox fx:id="loginPanel" prefWidth="280" spacing="16" styleClass="login-panel">-->
-                        <VBox fx:id="loginPanel" minWidth="300" prefWidth="330" maxWidth="360" spacing="16" styleClass="login-panel" HBox.hgrow="NEVER">
+                        <VBox fx:id="loginPanel" maxWidth="360" minWidth="300" prefWidth="330" spacing="16" styleClass="login-panel" HBox.hgrow="NEVER">
                             <padding><Insets bottom="22" left="22" right="22" top="22" /></padding>
 
                             <Label styleClass="login-panel-title" text="Đăng nhập nhanh" />
@@ -125,7 +124,7 @@
                         </VBox>
 
                         <!--<VBox fx:id="userPanel" managed="false" prefWidth="280" spacing="16" styleClass="login-panel" visible="false">-->
-                        <VBox fx:id="userPanel" managed="false" minWidth="300" prefWidth="330" maxWidth="360" spacing="16" styleClass="login-panel" visible="false" HBox.hgrow="NEVER">
+                        <VBox fx:id="userPanel" managed="false" maxWidth="360" minWidth="300" prefWidth="330" spacing="16" styleClass="login-panel" visible="false" HBox.hgrow="NEVER">
                             <padding><Insets bottom="22" left="22" right="22" top="22" /></padding>
 
                             <Label styleClass="login-panel-title" text="Thông tin tài khoản" />
