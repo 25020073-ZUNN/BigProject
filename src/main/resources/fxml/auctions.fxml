@@ -56,14 +56,14 @@
                         <Insets bottom="26" left="26" right="26" top="26" />
                     </padding>
 
-                    <Label styleClass="login-panel-title" text="Thông tin đăng ký" />
+                    <Label prefHeight="28.0" prefWidth="299.0" styleClass="login-panel-title" text="Thông tin đăng ký" />
 
-                    <GridPane hgap="18" prefHeight="408.0" prefWidth="783.0" vgap="16">
+                    <GridPane hgap="18" prefHeight="282.0" prefWidth="793.0" vgap="16">
                         <Label styleClass="field-label" text="Họ và tên" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                         <TextField prefHeight="43.0" prefWidth="223.0" promptText="Nhập họ và tên" styleClass="mail-field" GridPane.columnIndex="0" GridPane.rowIndex="1" />
 
                         <Label styleClass="field-label" text="Số điện thoại" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                        <TextField prefHeight="43.0" prefWidth="251.0" promptText="Nhập số điện thoại" styleClass="mail-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextField prefHeight="43.0" prefWidth="352.0" promptText="Nhập số điện thoại" styleClass="mail-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
                         <Label styleClass="field-label" text="Email" GridPane.columnIndex="0" GridPane.rowIndex="2" />
 
@@ -71,7 +71,7 @@
                         <ComboBox promptText="Chọn loại tài khoản" styleClass="mail-field" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                         <Label styleClass="field-label" text="Địa chỉ" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                        <TextField prefHeight="43.0" prefWidth="343.0" promptText="Nhập địa chỉ liên hệ" styleClass="mail-field" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <TextField prefHeight="43.0" prefWidth="371.0" promptText="Nhập địa chỉ liên hệ" styleClass="mail-field" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                   <columnConstraints>
                      <ColumnConstraints maxWidth="246.0" minWidth="204.0" prefWidth="224.0" />
                      <ColumnConstraints maxWidth="362.0" minWidth="320.0" prefWidth="342.0" />
@@ -95,7 +95,7 @@
 
                     <HBox prefHeight="39.0" prefWidth="806.0" spacing="12">
                         <Button styleClass="primary-btn" text="Tạo tài khoản" />
-                        <Button styleClass="secondary-btn" text="Làm mới thông tin" />
+                        <Button prefHeight="45.0" prefWidth="242.0" styleClass="secondary-btn" text="Làm mới thông tin" />
                     </HBox>
                 </VBox>
 
