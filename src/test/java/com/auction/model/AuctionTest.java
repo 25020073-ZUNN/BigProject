@@ -79,4 +79,117 @@ class AuctionTest {
         assertTrue(auction.isFinished());
         assertTrue(!auction.isActive());
     }
+
+    @Test
+    void placeBidRejectsBidOnFinishedOrInactiveAuction() {
+        User seller = new Seller("seller", "seller@example.com", "pass");
+        User bidder = new Bidder("bidder", "bidder@example.com", "pass");
+        Item item = ItemFactory.createElectronics(
+                "Phone",
+                "New phone",
+                new BigDecimal("1000"),
+                LocalDateTime.now().minusHours(1),
+                LocalDateTime.now().plusHours(1),
+                seller.getId(),
+                "Apple",
+                12
+        );
+
+        Auction auction = new Auction(item, seller, item.getCurrentPrice());
+        auction.closeAuction();
+
+        // Đặt giá thầu khi đã đóng -> ném ra IllegalStateException
+        assertThrows(IllegalStateException.class, () -> auction.placeBid(bidder, new BigDecimal("1500")));
+
+        // Hoặc khi bị de-active
+        Auction auction2 = new Auction(item, seller, item.getCurrentPrice());
+        auction2.setActive(false);
+        assertThrows(IllegalStateException.class, () -> auction2.placeBid(bidder, new BigDecimal("1500")));
+    }
+
+    @Test
+    void placeBidRejectsBidBySellerOnTheirOwnItem() {
+        User seller = new Seller("seller", "seller@example.com", "pass");
+        Item item = ItemFactory.createElectronics(
+                "Phone",
+                "New phone",
+                new BigDecimal("1000"),
+                LocalDateTime.now().minusHours(1),
+                LocalDateTime.now().plusHours(1),
+                seller.getId(),
+                "Apple",
+                12
+        );
+
+        Auction auction = new Auction(item, seller, item.getCurrentPrice());
+
+        // Người bán tự thầu sản phẩm của mình -> ném ra IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> auction.placeBid(seller, new BigDecimal("1500")));
+    }
+
+    @Test
+    void closeAuctionThrowsIfAlreadyClosed() {
+        User seller = new Seller("seller", "seller@example.com", "pass");
+        Item item = ItemFactory.createElectronics(
+                "Phone",
+                "New phone",
+                new BigDecimal("1000"),
+                LocalDateTime.now().minusHours(1),
+                LocalDateTime.now().plusHours(1),
+                seller.getId(),
+                "Apple",
+                12
+        );
+
+        Auction auction = new Auction(item, seller, item.getCurrentPrice());
+        auction.closeAuction();
+
+        // Đóng lại lần hai -> ném ra IllegalStateException
+        assertThrows(IllegalStateException.class, () -> auction.closeAuction());
+    }
+
+    @Test
+    void getWinnerThrowsIfAuctionNotFinished() {
+        User seller = new Seller("seller", "seller@example.com", "pass");
+        Item item = ItemFactory.createElectronics(
+                "Phone",
+                "New phone",
+                new BigDecimal("1000"),
+                LocalDateTime.now().minusHours(1),
+                LocalDateTime.now().plusHours(1),
+                seller.getId(),
+                "Apple",
+                12
+        );
+
+        Auction auction = new Auction(item, seller, item.getCurrentPrice());
+
+        // Phiên chưa đóng nhưng cố lấy người thắng -> ném ra IllegalStateException
+        assertThrows(IllegalStateException.class, () -> auction.getWinner());
+    }
+
+    @Test
+    void closeAuctionAddsWonAuctionToHighestBidder() {
+        User seller = new Seller("seller", "seller@example.com", "pass");
+        User bidder = new Bidder("bidder", "bidder@example.com", "pass");
+        Item item = ItemFactory.createElectronics(
+                "Phone",
+                "New phone",
+                new BigDecimal("1000"),
+                LocalDateTime.now().minusHours(1),
+                LocalDateTime.now().plusHours(1),
+                seller.getId(),
+                "Apple",
+                12
+        );
+
+        Auction auction = new Auction(item, seller, item.getCurrentPrice());
+        auction.placeBid(bidder, new BigDecimal("1500"));
+        auction.closeAuction();
+
+        // Xác nhận người chiến thắng
+        assertEquals(bidder, auction.getWinner());
+        // Kiểm tra xem ID phiên đấu giá đã được đưa vào danh sách thắng của bidder chưa
+        assertTrue(bidder.getWonAuctionIds().contains(auction.getId()));
+    }
 }
