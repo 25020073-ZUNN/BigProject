@@ -353,6 +353,18 @@ public class AuctionDetailController {
         Auction latestAuction = findAuctionById(currentAuctionId);
         if (latestAuction != null) {
             currentAuction = latestAuction;
+        } else {
+            // Phiên đấu giá không còn tồn tại (bị xóa)
+            stopCountdown();
+            networkService.removeAuctionUpdateListener(auctionUpdateListener);
+            Platform.runLater(() -> {
+                AlertHelper.showInformation("Phiên không tồn tại", "Phiên đấu giá này đã bị xóa hoặc không còn tồn tại.");
+                if (lblName != null && lblName.getScene() != null && lblName.getScene().getWindow() != null) {
+                    Stage stage = (Stage) lblName.getScene().getWindow();
+                    SceneNavigator.goToAuctionList(stage);
+                }
+            });
+            return;
         }
 
         // Cập nhật lại countdown nếu thời gian kết thúc thay đổi

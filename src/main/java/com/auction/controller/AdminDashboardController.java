@@ -242,10 +242,6 @@ public class AdminDashboardController {
         }
 
         String auctionId = String.valueOf(selectedAuction.get("auctionId"));
-        if (!isAuctionFinished(selectedAuction)) {
-            AlertHelper.showError("Lỗi xóa phiên", "Chỉ được phép xóa những phiên đấu giá đã kết thúc.");
-            return;
-        }
 
         String adminUsername = UserSession.getLoggedInUser().getUsername();
         boolean confirm = AlertHelper.showConfirmation("Xác nhận xóa", "Bạn có chắc chắn muốn xóa phiên đấu giá này không? Dữ liệu đấu giá và thầu liên quan cũng sẽ bị xóa vĩnh viễn.");

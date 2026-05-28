@@ -96,6 +96,10 @@ public final class SceneNavigator {
     public static void goToForgotPassword(ActionEvent event) { switchScene(event, "forgot-password.fxml"); }
     public static void goToRegister(ActionEvent event) { switchScene(event, "register.fxml"); }
     public static void goToAuctionList(ActionEvent event) { switchScene(event, "auction-detail.fxml"); }
+    public static void goToAuctionList(Stage stage) {
+        switchScene(stage, "Không thể tải trang tài sản đấu giá.", () ->
+                FXMLLoader.load(SceneNavigator.class.getResource("/fxml/auction-detail.fxml")));
+    }
     public static void goToProductDetail(ActionEvent event) { switchScene(event, "product-detail.fxml"); }
     public static void goToSessions(ActionEvent event) { goToAuctionList(event); }
     public static void goToNews(ActionEvent event) { switchScene(event, "news.fxml"); }
