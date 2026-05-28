@@ -6,7 +6,19 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 
+<<<<<<< HEAD
 <BorderPane prefHeight="920" prefWidth="1380" styleClass="root" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.HomeController">
+=======
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.auction.controller.HomeController"
+            prefWidth="1380"
+            prefHeight="920"
+            stylesheets="@../style.css"
+            styleClass="root">
+>>>>>>> origin/FXML-FIXTHUYET
 
     <top>
         <VBox>
@@ -15,6 +27,7 @@
                     <Insets bottom="12" left="36" right="36" top="12" />
                 </padding>
 
+<<<<<<< HEAD
                                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <ImageView fitHeight="42" preserveRatio="true">
                         <image>
@@ -25,6 +38,26 @@
                         <Label style="-fx-font-size: 20px;" styleClass="logo-main" text="UET" />
                         <Label style="-fx-font-size: 9px;" styleClass="logo-sub" text="AUCTION PLATFORM" />
                     </VBox>
+=======
+                <HBox alignment="CENTER_LEFT" spacing="12">
+
+                    <ImageView fitHeight="60" fitWidth="60" preserveRatio="true">
+
+                        <image>
+                            <Image backgroundLoading="true" url="@../images/uet-logo.png" />
+                        </image>
+
+                    </ImageView>
+
+                    <VBox spacing="0">
+
+                        <Label style="-fx-font-size: 34;                        -fx-font-weight: 900;                        -fx-text-fill: #1976D2;" text="UET" />
+
+                        <Label styleClass="logo-sub" text="AUCTION TEAM6  " />
+
+                    </VBox>
+
+>>>>>>> origin/FXML-FIXTHUYET
                 </HBox>
 
                 <Region HBox.hgrow="ALWAYS" />
