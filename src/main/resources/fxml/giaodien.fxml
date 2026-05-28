@@ -47,10 +47,12 @@
                 <VBox cache="true" cacheHint="SPEED" spacing="0">
 
                     <!-- ═══════════════════ HERO SECTION ═══════════════════ -->
-                    <HBox spacing="32" styleClass="hero-section">
+                    <!--<HBox spacing="32" styleClass="hero-section">-->
+                    <HBox spacing="32" alignment="CENTER" styleClass="hero-section">
                         <padding><Insets bottom="56" left="56" right="56" top="56" /></padding>
 
-                        <VBox prefWidth="540" spacing="20" style="-fx-alignment: center-left;">
+                        <!--<VBox prefWidth="540" spacing="20" style="-fx-alignment: center-left;">-->
+                        <VBox minWidth="360" prefWidth="520" maxWidth="700" spacing="20" style="-fx-alignment: center-left;" HBox.hgrow="ALWAYS">
                             <Label styleClass="hero-small" text="🏛  HỆ THỐNG ĐẤU GIÁ TRỰC TUYẾN - TEAM 6 - UET" />
 
                             <Label styleClass="hero-title" text="Đấu giá trực tuyến&#10;Dự án học tập môn học&#10;Lập trình nâng cao" wrapText="true" />
@@ -83,7 +85,8 @@
                         </VBox>
 
                         <!-- Banner bên phải -->
-                        <AnchorPane prefHeight="380" prefWidth="420" styleClass="hero-banner" HBox.hgrow="NEVER">
+                        <!--<AnchorPane prefHeight="380" prefWidth="420" styleClass="hero-banner" HBox.hgrow="NEVER">-->
+                        <AnchorPane minWidth="360" prefWidth="420" maxWidth="460" prefHeight="380" styleClass="hero-banner" HBox.hgrow="SOMETIMES">
                             <children>
                                 <VBox layoutX="32" layoutY="47.0" prefHeight="169.0" prefWidth="236.0" spacing="14">
                                     <Label styleClass="banner-chip" text="✨  DỰ ÁN MÔN HỌC - UET" />
@@ -98,7 +101,8 @@
                         </AnchorPane>
 
                         <!-- Panel đăng nhập / thông tin user -->
-                        <VBox fx:id="loginPanel" prefWidth="280" spacing="16" styleClass="login-panel">
+                        <!--<VBox fx:id="loginPanel" prefWidth="280" spacing="16" styleClass="login-panel">-->
+                        <VBox fx:id="loginPanel" minWidth="300" prefWidth="330" maxWidth="360" spacing="16" styleClass="login-panel" HBox.hgrow="NEVER">
                             <padding><Insets bottom="22" left="22" right="22" top="22" /></padding>
 
                             <Label styleClass="login-panel-title" text="Đăng nhập nhanh" />
@@ -119,7 +123,8 @@
                             <Label styleClass="login-panel-note" text="✓  Theo dõi tài sản yêu thích&#10;✓  Nhận thông báo phiên mới&#10;✓  Quản lý hồ sơ tham gia10&#10;✓  An toàn &amp; bảo mật" wrapText="true" />
                         </VBox>
 
-                        <VBox fx:id="userPanel" managed="false" prefWidth="280" spacing="16" styleClass="login-panel" visible="false">
+                        <!--<VBox fx:id="userPanel" managed="false" prefWidth="280" spacing="16" styleClass="login-panel" visible="false">-->
+                        <VBox fx:id="userPanel" managed="false" minWidth="300" prefWidth="330" maxWidth="360" spacing="16" styleClass="login-panel" visible="false" HBox.hgrow="NEVER">
                             <padding><Insets bottom="22" left="22" right="22" top="22" /></padding>
 
                             <Label styleClass="login-panel-title" text="Thông tin tài khoản" />

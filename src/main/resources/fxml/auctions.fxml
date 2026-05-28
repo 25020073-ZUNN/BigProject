@@ -4,6 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
 
 <!-- 1.Phần đầu ( Root ) và Cấu hình chung   -->
 
@@ -29,8 +30,8 @@
 
             <Region HBox.hgrow="ALWAYS" />
 
-            <Button onAction="#goToHome" styleClass="nav-btn" text="Trang chủ" />
-            <Button onAction="#goToAuctionList" styleClass="nav-btn" text="Tài sản đấu giá" />
+            <Button onAction="#goToHome" prefHeight="34.0" prefWidth="115.0" styleClass="nav-btn" text="Trang chủ" />
+            <Button onAction="#goToAuctionList" prefHeight="34.0" prefWidth="173.0" styleClass="nav-btn" text="Tài sản đấu giá" />
             <Button onAction="#goToNews" styleClass="nav-btn" text="Tin tức" />
             <Button onAction="#goToContact" styleClass="nav-btn" text="Liên hệ" />
             <Button fx:id="themeToggleBtn" onAction="#toggleTheme" styleClass="theme-toggle-btn" text="🌙" />
@@ -47,10 +48,10 @@
 
             <VBox spacing="10">
                 <Label styleClass="section-title-dark" text="Tạo tài khoản mới" />
-                <Label styleClass="section-subtitle" text="Đăng ký tài khoản để tham gia đấu giá, nhận thông báo tài sản mới và quản lý lịch sử tham gia." wrapText="true" />
+                <Label prefHeight="18.0" prefWidth="774.0" styleClass="section-subtitle" text="Đăng ký tài khoản để tham gia đấu giá, nhận thông báo tài sản mới và quản lý lịch sử tham gia." wrapText="true" />
             </VBox>
 
-            <HBox spacing="24">
+            <HBox prefHeight="656.0" prefWidth="1296.0" spacing="24">
                 <VBox prefWidth="860" spacing="20" styleClass="register-panel">
                     <padding>
                         <Insets bottom="26" left="26" right="26" top="26" />
@@ -62,7 +63,7 @@
                         <Label styleClass="field-label" text="Họ và tên" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                         <TextField prefHeight="43.0" prefWidth="223.0" promptText="Nhập họ và tên" styleClass="mail-field" GridPane.columnIndex="0" GridPane.rowIndex="1" />
 
-                        <Label styleClass="field-label" text="Số điện thoại" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        <Label prefHeight="17.0" prefWidth="275.0" styleClass="field-label" text="Số điện thoại" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                         <TextField prefHeight="43.0" prefWidth="352.0" promptText="Nhập số điện thoại" styleClass="mail-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
                         <Label styleClass="field-label" text="Email" GridPane.columnIndex="0" GridPane.rowIndex="2" />
@@ -100,7 +101,7 @@
                 </VBox>
 
                 <VBox prefWidth="410" spacing="16">
-                    <VBox prefHeight="168.0" prefWidth="442.0" spacing="14" styleClass="side-info-card">
+                    <VBox prefHeight="168.0" prefWidth="440.0" spacing="14" styleClass="side-info-card">
                         <padding>
                             <Insets bottom="22" left="22" right="22" top="22" />
                         </padding>
@@ -114,7 +115,23 @@
                             <Insets bottom="22" left="22" right="22" top="22" />
                         </padding>
 
-                        <Label styleClass="partner-title" text="Lợi ích khi đăng ký" />
+                        <Label styleClass="partner-title" text="Lợi ích khi đăng ký">
+                     <textFill>
+                        <LinearGradient endX="1.0" endY="1.0">
+                           <stops>
+                              <Stop>
+                                 <color>
+                                    <Color red="0.4880000054836273" green="0.7800850868225098" blue="0.800000011920929" />
+                                 </color>
+                              </Stop>
+                              <Stop offset="1.0">
+                                 <color>
+                                    <Color red="1.0" green="1.0" blue="1.0" />
+                                 </color>
+                              </Stop>
+                           </stops>
+                        </LinearGradient>
+                     </textFill></Label>
                         <Label styleClass="partner-text" text="• Theo dõi tài sản yêu thích&#10;• Nhận thông báo nhắc lịch&#10;• Quản lý lịch sử tham gia&#10;• Truy cập hồ sơ và biên bản" wrapText="true" />
                     </VBox>
 

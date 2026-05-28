@@ -982,3 +982,26 @@
     -fx-background-color: linear-gradient(to bottom right, #f0f7ff, #e8e8e8);
     -fx-background-radius: 12;
 }
+
+/*thêm*/
+.hero-section {
+    -fx-alignment: center-left;
+    -fx-padding: 40 32 40 32;
+}
+}
+
+.login-panel {
+    -fx-padding: 24;
+}
+
+.mail-field {
+    -fx-min-height: 44;
+}
+
+.primary-btn, .secondary-btn {
+    -fx-min-height: 44;
+}
+
+.mini-info-card {
+    -fx-min-width: 150;
+}
