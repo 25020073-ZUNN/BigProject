@@ -3,7 +3,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.image.Image?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.image.ImageView?>
@@ -12,6 +11,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.image.Image?>
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.auction.controller.AssetDetailController"
             prefWidth="1380" prefHeight="920" stylesheets="@../style.css" styleClass="root">
@@ -20,20 +20,29 @@
         <VBox>
             <HBox alignment="CENTER_LEFT" spacing="20" styleClass="topbar">
                 <padding><Insets top="12" right="36" bottom="12" left="36"/></padding>
-                                <HBox alignment="CENTER_LEFT" spacing="10">
-                    <ImageView fitHeight="42" preserveRatio="true">
+                <HBox alignment="CENTER_LEFT" spacing="12">
+
+                    <ImageView fitHeight="60" fitWidth="60" preserveRatio="true">
+
                         <image>
-                            <Image url="@../images/logouet1.png"/>
+                            <Image backgroundLoading="true" url="@../images/uet-logo.png" />
                         </image>
+
                     </ImageView>
+
                     <VBox spacing="0">
-                        <Label text="UET" styleClass="logo-main" style="-fx-font-size: 20px;"/>
-                        <Label text="AUCTION PLATFORM" styleClass="logo-sub" style="-fx-font-size: 9px;"/>
+
+                        <Label style="-fx-font-size: 34;                        -fx-font-weight: 900;                        -fx-text-fill: #1976D2;" text="UET" />
+
+                        <Label styleClass="logo-sub" text="AUCTION TEAM6  " />
+
                     </VBox>
+
                 </HBox>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button text="Trang chủ" onAction="#goToHome" styleClass="nav-btn"/>
                 <Button text="Tài sản đấu giá" onAction="#goToAuctionList" styleClass="nav-btn-active"/>
+                <Button text="Phiên đấu giá" onAction="#goToSessions" styleClass="nav-btn"/>
                 <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn"/>
                 <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
                 <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
@@ -42,9 +51,9 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" cache="true" cacheHint="SPEED">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll">
             <content>
-                <VBox spacing="0" cache="true" cacheHint="SPEED">
+                <VBox spacing="0">
 
                     <!-- ═══ Breadcrumb ═══ -->
                     <HBox spacing="6" alignment="CENTER_LEFT" style="-fx-background-color: #fafafa; -fx-border-color: transparent transparent #e0e0e0 transparent; -fx-border-width: 0 0 1 0;">
