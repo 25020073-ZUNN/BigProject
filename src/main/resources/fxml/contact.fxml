@@ -186,7 +186,7 @@
                         <HBox spacing="60">
                             <VBox prefWidth="280" spacing="10">
                                 <Label styleClass="footer-title" text="Team 6 - UET" />
-                                <Label styleClass="footer-text" text="Dự án đấu giá trực tuyến&#10;Môn học: Lập trình nâng cao&#10;Trường Đại học Công nghệ - ĐHQGHN" wrapText="true" />
+                                <Label styleClass="footer-text" text="Dự án đấu giá trực tuyến&#10;Môn học: Lập trình nâng cao&#10;VNU University of Engineering and Technology" wrapText="true" />
                             </VBox>
 
                             <VBox prefWidth="220" spacing="10">
