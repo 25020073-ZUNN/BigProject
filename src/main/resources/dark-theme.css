@@ -1,0 +1,637 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+ * AUREX AUCTION — Dark Theme Override
+ * ══════════════════════════════════════════════════════════════════════════════
+ *
+ * Palette:
+ *   BG Primary:   #0f172a  (slate-900)
+ *   BG Card:      #1e293b  (slate-800)
+ *   BG Elevated:  #334155  (slate-700)
+ *   BG Hover:     #475569  (slate-600)
+ *   Text Primary: #f1f5f9  (slate-100)
+ *   Text Second:  #94a3b8  (slate-400)
+ *   Text Muted:   #64748b  (slate-500)
+ *   Border:       #334155  / #475569
+ *   Accent:       #3b82f6  (blue-500)
+ *   Accent Hover: #2563eb  (blue-600)
+ *
+ * Cách chỉnh theme: Sửa các giá trị màu trong file này.
+ * Mỗi section được gom theo component, dễ tìm và thay đổi.
+ * ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Root & Global ── */
+.root {
+    -fx-background-color: #0f172a;
+}
+
+/* ── ScrollPane ── */
+.main-scroll {
+    -fx-background: #0f172a;
+    -fx-background-color: #0f172a;
+}
+.main-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+.scroll-bar:vertical, .scroll-bar:horizontal {
+    -fx-background-color: #1e293b;
+}
+.scroll-bar:vertical .thumb, .scroll-bar:horizontal .thumb {
+    -fx-background-color: #475569;
+}
+.scroll-bar:vertical .thumb:hover, .scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #64748b;
+}
+.scroll-bar:vertical .track, .scroll-bar:horizontal .track {
+    -fx-background-color: transparent;
+}
+
+/* ── Page Loading ── */
+.page-loading-root {
+    -fx-background-color: radial-gradient(center 50% 42%, radius 70%, #1e293b 0%, #0f172a 48%, #0f172a 100%);
+}
+.page-loading-card {
+    -fx-background-color: rgba(30,41,59,0.92);
+    -fx-border-color: rgba(59,130,246,0.25);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 8, 0, 0, 4);
+}
+.page-loading-brand {
+    -fx-text-fill: #f1f5f9;
+}
+.page-loading-text {
+    -fx-text-fill: #94a3b8;
+}
+
+/* ── Topbar ── */
+.topbar {
+    -fx-background-color: #1e293b;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 4, 0, 0, 1);
+}
+.logo-main { -fx-text-fill: #60a5fa; }
+.logo-sub { -fx-text-fill: #64748b; }
+
+.nav-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+}
+.nav-btn:hover {
+    -fx-background-color: #334155;
+    -fx-text-fill: #f1f5f9;
+}
+.nav-btn-active {
+    -fx-background-color: rgba(59,130,246,0.15);
+    -fx-text-fill: #60a5fa;
+}
+.clock-label { -fx-text-fill: #64748b; }
+
+/* ── Theme Toggle Button ── */
+.theme-toggle-btn {
+    -fx-background-color: rgba(59,130,246,0.12);
+    -fx-text-fill: #fbbf24;
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+    -fx-background-radius: 50;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-max-width: 40;
+    -fx-max-height: 40;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-border-color: rgba(59,130,246,0.2);
+    -fx-border-radius: 50;
+    -fx-border-width: 1;
+}
+.theme-toggle-btn:hover {
+    -fx-background-color: rgba(59,130,246,0.25);
+    -fx-border-color: rgba(59,130,246,0.4);
+}
+
+/* ── Buttons — Primary ── */
+.login-btn, .primary-btn, .small-btn {
+    -fx-background-color: linear-gradient(to right, #3b82f6, #2563eb);
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.2), 4, 0, 0, 2);
+}
+.login-btn:hover, .primary-btn:hover, .small-btn:hover {
+    -fx-background-color: linear-gradient(to right, #2563eb, #1d4ed8);
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.35), 6, 0, 0, 3);
+}
+.login-btn:pressed, .primary-btn:pressed, .small-btn:pressed {
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #1e40af);
+}
+
+/* ── Buttons — Secondary ── */
+.secondary-btn, .secondary-btn-small {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #3b82f6;
+    -fx-text-fill: #60a5fa;
+}
+.secondary-btn:hover, .secondary-btn-small:hover {
+    -fx-background-color: rgba(59,130,246,0.15);
+}
+.secondary-btn:pressed, .secondary-btn-small:pressed {
+    -fx-background-color: rgba(59,130,246,0.25);
+}
+
+/* ── Hero Section ── */
+.hero-section {
+    -fx-background-color: linear-gradient(to bottom right, #0f172a, #1e293b, #0f172a);
+}
+.hero-small { -fx-text-fill: #60a5fa; }
+.hero-title { -fx-text-fill: #f1f5f9; }
+.hero-desc, .section-subtitle, .newsletter-text, .news-text,
+.partner-text, .login-panel-text, .login-panel-note,
+.muted-text, .stat-text {
+    -fx-text-fill: #94a3b8;
+}
+
+/* ── Hero Banner / Dark sections — giữ nguyên vì đã dark sẵn ── */
+
+/* ── Panels (Login, Auth, Filter, Content cards) ── */
+.login-panel, .auth-panel, .register-panel,
+.filter-box, .sidebar-filter, .content-card, .detail-side-card {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 4, 0, 0, 2);
+}
+.login-panel-title { -fx-text-fill: #f1f5f9; }
+
+/* ── Info Cards ── */
+.partner-card, .stat-card, .mini-info-card, .news-card,
+.side-info-card, .auth-note-box, .auction-card-light {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.12), 4, 0, 0, 2);
+}
+.partner-card:hover, .stat-card:hover, .mini-info-card:hover, .auction-card-light:hover {
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.15), 6, 0, 0, 3);
+}
+.news-card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 6, 0, 0, 3);
+}
+
+.mini-info-number, .stat-number, .detail-price, .card-price-dark {
+    -fx-text-fill: #60a5fa;
+}
+.mini-info-text { -fx-text-fill: #64748b; }
+
+/* ── Section Titles ── */
+.section-title-dark, .hero-title-small, .news-title, .partner-title, .note-title {
+    -fx-text-fill: #f1f5f9;
+}
+.field-label, .section-subtitle-bold, .partner-text-strong {
+    -fx-text-fill: #cbd5e1;
+}
+
+/* ── Form Inputs ── */
+.mail-field {
+    -fx-background-color: #0f172a;
+    -fx-border-color: #475569;
+    -fx-text-fill: #f1f5f9;
+    -fx-prompt-text-fill: #64748b;
+}
+.mail-field:focused {
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.2), 4, 0, 0, 0);
+}
+.mail-field:hover { -fx-border-color: #64748b; }
+
+.password-eye-btn {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #475569;
+}
+.password-eye-btn:hover {
+    -fx-background-color: #334155;
+    -fx-border-color: #3b82f6;
+}
+
+/* ── Auth ── */
+.check-auth { -fx-text-fill: #94a3b8; }
+.auth-link { -fx-text-fill: #60a5fa; }
+.auth-link:hover { -fx-text-fill: #93c5fd; }
+.auth-left { -fx-background-color: #1e293b; }
+.auth-title { -fx-text-fill: #f1f5f9; }
+.auth-desc { -fx-text-fill: #94a3b8; }
+
+.news-category-btn {
+    -fx-text-fill: #94a3b8;
+}
+.news-category-btn:hover {
+    -fx-background-color: #334155;
+    -fx-text-fill: #60a5fa;
+}
+
+/* ── Page Sections ── */
+.page-section { -fx-background-color: #0f172a; }
+.page-hero-small {
+    -fx-background-color: linear-gradient(to right, #1e293b, #0f172a, #1e293b);
+    -fx-border-color: transparent transparent #334155 transparent;
+}
+
+/* ── Section BG classes (thay thế inline styles) ── */
+.section-bg-white {
+    -fx-background-color: #1e293b;
+}
+.breadcrumb-bar {
+    -fx-background-color: #1e293b;
+    -fx-border-color: transparent transparent #334155 transparent;
+}
+.content-white-bg {
+    -fx-background-color: #1e293b;
+}
+.info-highlight-box {
+    -fx-background-color: rgba(59,130,246,0.08);
+    -fx-border-color: rgba(59,130,246,0.2);
+}
+.logout-btn {
+    -fx-background-color: #dc2626;
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #dc2626;
+}
+.profile-header-gradient {
+    -fx-background-color: linear-gradient(to bottom right, #1d4ed8, #1e40af);
+}
+.profile-section-header {
+    -fx-background-color: #1e293b;
+    -fx-border-color: transparent transparent #334155 transparent;
+}
+.profile-delete-btn {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #dc2626;
+    -fx-text-fill: #f87171;
+}
+
+/* ── Auction Cards (Dark) — Đã dark sẵn, chỉ tinh chỉnh border ── */
+.auction-card {
+    -fx-border-color: #334155;
+}
+.thumb {
+    -fx-background-color: #1e293b;
+}
+
+/* ── Badges — Giữ nguyên màu, chỉ đảm bảo contrast ── */
+.badge-soft {
+    -fx-background-color: rgba(59,130,246,0.12);
+    -fx-text-fill: #93c5fd;
+}
+
+/* ── Chip Button ── */
+.chip-btn {
+    -fx-background-color: rgba(59,130,246,0.15);
+    -fx-text-fill: #60a5fa;
+}
+.chip-btn:hover {
+    -fx-background-color: rgba(59,130,246,0.25);
+}
+
+/* ── Newsletter ── */
+.newsletter-box {
+    -fx-background-color: linear-gradient(to right, rgba(59,130,246,0.1), rgba(59,130,246,0.05), rgba(59,130,246,0.08));
+    -fx-border-color: #334155;
+}
+.newsletter-title { -fx-text-fill: #f1f5f9; }
+
+/* ── Price Row ── */
+.price-row {
+    -fx-background-color: rgba(59,130,246,0.08);
+    -fx-border-color: rgba(59,130,246,0.15);
+}
+
+/* ── Auction Notice ── */
+.auction-notice {
+    -fx-text-fill: #4ade80;
+    -fx-background-color: rgba(74,222,128,0.1);
+    -fx-border-color: rgba(74,222,128,0.2);
+}
+
+/* ── Auction History List ── */
+.auction-history-list {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+}
+.auction-history-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cbd5e1;
+}
+.auction-history-list .list-cell:filled:selected,
+.auction-history-list .list-cell:filled:selected:hover {
+    -fx-background-color: rgba(59,130,246,0.2);
+    -fx-text-fill: #60a5fa;
+}
+.auction-history-list .list-cell:filled:hover {
+    -fx-background-color: #334155;
+}
+
+/* ── Chart ── */
+.auction-chart {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+}
+.auction-chart .chart-plot-background {
+    -fx-background-color: linear-gradient(to bottom, #1e293b, #0f172a);
+}
+.auction-chart .chart-vertical-grid-lines,
+.auction-chart .chart-horizontal-grid-lines {
+    -fx-stroke: #334155;
+}
+.auction-chart .chart-line-symbol {
+    -fx-background-color: #1e293b, #3b82f6;
+}
+.auction-chart .axis-label { -fx-text-fill: #64748b; }
+.auction-chart .axis-tick-mark { -fx-stroke: #334155; }
+.auction-chart .axis { -fx-tick-label-fill: #64748b; }
+
+/* ── Data Cards ── */
+.auction-data-card, .session-data-card {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 4, 0, 0, 2);
+}
+.auction-data-card:hover, .session-data-card:hover {
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.15), 6, 0, 0, 3);
+}
+.auction-list-title { -fx-text-fill: #f1f5f9; }
+.auction-meta { -fx-text-fill: #64748b; }
+.session-time-label { -fx-text-fill: #e2e8f0; }
+.auction-list-price { -fx-text-fill: #60a5fa; }
+.auction-list-price-panel {
+    -fx-border-color: transparent transparent transparent #334155;
+}
+
+.catalog-icon { -fx-text-fill: #94a3b8; }
+
+/* ── Catalog Product Card ── */
+.catalog-product-card {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 4, 0, 0, 2);
+}
+.catalog-product-card:hover {
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.15), 6, 0, 0, 3);
+}
+.catalog-product-image {
+    -fx-background-color: linear-gradient(to bottom right, #334155, #1e293b);
+    -fx-border-color: #475569;
+    -fx-text-fill: #60a5fa;
+}
+.catalog-product-title { -fx-text-fill: #f1f5f9; }
+.catalog-info-row { -fx-text-fill: #94a3b8; }
+.catalog-card-btn {
+    -fx-background-color: #3b82f6;
+}
+.catalog-card-btn:hover {
+    -fx-background-color: #2563eb;
+}
+
+.user-info-box {
+    -fx-background-color: rgba(59,130,246,0.08);
+}
+
+/* ── Separator / CheckBox / ComboBox / TextArea / Hyperlink / ListView / Tooltip ── */
+.separator .line {
+    -fx-border-color: #334155;
+}
+
+.check-box .box {
+    -fx-background-color: #0f172a;
+    -fx-border-color: #475569;
+}
+.check-box:selected .box {
+    -fx-background-color: #3b82f6;
+    -fx-border-color: #3b82f6;
+}
+.check-box:selected .mark {
+    -fx-background-color: #ffffff;
+}
+.check-box .text { -fx-fill: #94a3b8; }
+
+.combo-box {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #475569;
+}
+.combo-box .list-cell {
+    -fx-text-fill: #f1f5f9;
+    -fx-background-color: #1e293b;
+}
+.combo-box-popup .list-view {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 4, 0, 0, 2);
+}
+.combo-box-popup .list-view .list-cell {
+    -fx-text-fill: #cbd5e1;
+    -fx-background-color: #1e293b;
+}
+.combo-box-popup .list-view .list-cell:filled:hover {
+    -fx-background-color: #334155;
+    -fx-text-fill: #60a5fa;
+}
+.combo-box-popup .list-view .list-cell:filled:selected {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: #ffffff;
+}
+.combo-box .arrow { -fx-background-color: #94a3b8; }
+
+.text-area {
+    -fx-background-color: #0f172a;
+    -fx-text-fill: #f1f5f9;
+    -fx-border-color: #475569;
+}
+.text-area .content {
+    -fx-background-color: #0f172a;
+}
+.text-area:focused {
+    -fx-border-color: #3b82f6;
+}
+
+.hyperlink { -fx-text-fill: #60a5fa; }
+.hyperlink:hover { -fx-text-fill: #93c5fd; }
+
+.list-view {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+}
+.list-cell:empty { -fx-background-color: transparent; }
+
+.tooltip {
+    -fx-background-color: #334155;
+    -fx-text-fill: #f1f5f9;
+}
+
+/* ── Sidebar Navigation (Admin Dashboard) ── */
+.sidebar {
+    -fx-background-color: #1e293b;
+    -fx-border-color: transparent #334155 transparent transparent;
+}
+.sidebar-brand { -fx-text-fill: #60a5fa; }
+.sidebar-subbrand { -fx-text-fill: #64748b; }
+.sidebar-menu-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+}
+.sidebar-menu-item:hover {
+    -fx-background-color: #334155;
+    -fx-text-fill: #60a5fa;
+}
+.sidebar-menu-item-active {
+    -fx-background-color: rgba(59,130,246,0.15);
+    -fx-text-fill: #60a5fa;
+}
+.sidebar-menu-item-active:hover {
+    -fx-background-color: rgba(59,130,246,0.25);
+}
+
+/* ── Admin Top Header ── */
+.admin-top-header {
+    -fx-background-color: #1e293b;
+    -fx-border-color: transparent transparent #334155 transparent;
+}
+.admin-breadcrumb-title { -fx-text-fill: #f1f5f9; }
+.admin-breadcrumb-sub { -fx-text-fill: #64748b; }
+
+/* ── Admin Stat Cards ── */
+.admin-stat-card {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.12), 3, 0, 0, 1);
+}
+.admin-stat-card:hover {
+    -fx-border-color: #475569;
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.1), 4, 0, 0, 2);
+}
+.admin-stat-val { -fx-text-fill: #f1f5f9; }
+.admin-stat-desc { -fx-text-fill: #64748b; }
+
+/* ── Flat & Modern TableView ── */
+.table-view {
+    -fx-border-color: #334155;
+}
+.table-view .column-header-background {
+    -fx-background-color: #1e293b;
+    -fx-border-color: transparent transparent #334155 transparent;
+}
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+.table-view .column-header .label {
+    -fx-text-fill: #94a3b8;
+}
+.table-view .table-row-cell {
+    -fx-border-color: transparent transparent #1e293b transparent;
+}
+.table-view .table-row-cell:filled:even {
+    -fx-background-color: #0f172a;
+}
+.table-view .table-row-cell:filled:odd {
+    -fx-background-color: #1e293b;
+}
+.table-view .table-row-cell:filled:hover {
+    -fx-background-color: #334155;
+}
+.table-view .table-row-cell:filled:selected {
+    -fx-background-color: rgba(59,130,246,0.2);
+    -fx-text-fill: #60a5fa;
+}
+.table-view .table-row-cell:filled:selected:hover {
+    -fx-background-color: rgba(59,130,246,0.3);
+}
+.table-view .table-row-cell .text {
+    -fx-fill: #cbd5e1;
+}
+.table-view .table-row-cell:filled:selected .text {
+    -fx-fill: #60a5fa;
+}
+.table-view .placeholder .label {
+    -fx-text-fill: #64748b;
+}
+
+/* ── Modern Flat TabPane ── */
+.tab-pane .tab {
+    -fx-border-color: transparent transparent #334155 transparent;
+}
+.tab-pane .tab:hover {
+    -fx-border-color: transparent transparent #475569 transparent;
+}
+.tab-pane .tab:selected {
+    -fx-border-color: transparent transparent #3b82f6 transparent;
+}
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #64748b;
+}
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #60a5fa;
+}
+
+/* ── Search Bar ── */
+.search-bar-field {
+    -fx-background-color: #0f172a;
+    -fx-border-color: #475569;
+    -fx-text-fill: #f1f5f9;
+    -fx-prompt-text-fill: #64748b;
+}
+.search-bar-field:hover {
+    -fx-border-color: #64748b;
+}
+.search-bar-field:focused {
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.15), 4, 0, 0, 0);
+}
+
+/* ── Catalog Price & Stats ── */
+.catalog-price-label { -fx-text-fill: #64748b; }
+.catalog-price-value { -fx-text-fill: #60a5fa; }
+.catalog-stats-box {
+    -fx-background-color: #334155;
+    -fx-border-color: #475569;
+}
+.catalog-stats-text { -fx-text-fill: #cbd5e1; }
+.catalog-footer-stat { -fx-text-fill: #64748b; }
+
+/* ── Detail Pages ── */
+.detail-image-container {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.12), 3, 0, 0, 2);
+}
+.detail-price-box {
+    -fx-background-color: linear-gradient(to right, rgba(59,130,246,0.1), #1e293b);
+    -fx-border-color: #334155;
+}
+.detail-countdown-box {
+    -fx-background-color: linear-gradient(to right, rgba(225,29,72,0.1), #1e293b);
+    -fx-border-color: rgba(225,29,72,0.2);
+}
+.detail-countdown-value { -fx-text-fill: #fb7185; }
+.detail-stats-card {
+    -fx-background-color: #334155;
+    -fx-border-color: #475569;
+}
+.detail-stats-title { -fx-text-fill: #64748b; }
+.detail-stats-value { -fx-text-fill: #e2e8f0; }
+.bidding-console-card {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 4, 0, 0, 2);
+}
+
+/* ── Inline style replacement classes: Summary page ── */
+.summary-status-badge {
+    -fx-background-color: #16a34a;
+    -fx-text-fill: #ffffff;
+}
+.summary-ended-badge {
+    -fx-background-color: #4b5563;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+.summary-price-box {
+    -fx-background-color: linear-gradient(to right, rgba(59,130,246,0.1), #1e293b);
+    -fx-background-radius: 10;
+    -fx-padding: 10 14;
+    -fx-border-color: rgba(59,130,246,0.15);
+    -fx-border-radius: 10;
+}
+
+/* ── news-info & stats-wrap ── */
+.news-info { -fx-background-color: transparent; }
+.stats-wrap { -fx-background-color: transparent; }

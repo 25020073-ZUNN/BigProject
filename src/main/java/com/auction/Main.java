@@ -38,6 +38,7 @@ public class Main extends Application {
         // 3. Nạp giao diện chính từ file FXML
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/giaodien.fxml"));
         Scene scene = new Scene(loader.load());
+        com.auction.util.ThemeManager.getInstance().applyTheme(scene);
 
         // 4. Thiết lập các thông số cho cửa sổ ứng dụng
         stage.setTitle("HỆ THỐNG ĐẤU GIÁ - NHÓM 6 UET");

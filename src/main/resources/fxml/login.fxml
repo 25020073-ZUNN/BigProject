@@ -55,6 +55,7 @@
             <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
             
             <!-- Nút đăng nhập/đăng xuất động (quản lý bởi Controller) -->
+            <Button fx:id="themeToggleBtn" onAction="#toggleTheme" styleClass="theme-toggle-btn" text="🌙" />
             <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
         </HBox>
     </top>

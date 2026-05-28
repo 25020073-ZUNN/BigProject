@@ -35,6 +35,7 @@
 
                 <Region prefWidth="8" />
                 <Label fx:id="clockLabel" styleClass="clock-label" text="08:30:12&#10;07/04/2026" />
+                <Button fx:id="themeToggleBtn" onAction="#toggleTheme" styleClass="theme-toggle-btn" text="🌙" />
                 <Button fx:id="loginButton" onAction="#goToLogin" styleClass="login-btn" text="Đăng nhập" />
             </HBox>
         </VBox>
@@ -143,12 +144,12 @@
                             <Button fx:id="adminDashboardButton" managed="false" maxWidth="1.7976931348623157E308" onAction="#goToAdminDashboard" styleClass="primary-btn" text="Bảng quản trị" visible="false" />
                             <Button maxWidth="1.7976931348623157E308" onAction="#goToUserProfile" styleClass="primary-btn" text="Quản lý hồ sơ" />
                             <Button maxWidth="1.7976931348623157E308" onAction="#goToAuctionHistory" styleClass="secondary-btn" text="Lịch sử đấu giá" />
-                            <Button maxWidth="1.7976931348623157E308" onAction="#handleLogout" style="-fx-background-color: #d13438; -fx-text-fill: white;" styleClass="secondary-btn" text="Đăng xuất" />
+                            <Button maxWidth="1.7976931348623157E308" onAction="#handleLogout" styleClass="logout-btn" text="Đăng xuất" />
                         </VBox>
                     </HBox>
 
                     <!-- ═══════════════════ STATS ═══════════════════ -->
-                    <HBox spacing="20" style="-fx-background-color: #ffffff;">
+                    <HBox spacing="20" styleClass="section-bg-white">
                         <padding><Insets bottom="32" left="56" right="56" top="32" /></padding>
 
                         <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
@@ -190,7 +191,7 @@
                     </VBox>
 
                     <!-- ═══════════════════ NEWS ═══════════════════ -->
-                    <VBox spacing="24" style="-fx-background-color: #ffffff;">
+                    <VBox spacing="24" styleClass="section-bg-white">
                         <padding><Insets bottom="40" left="56" right="56" top="40" /></padding>
 
                         <HBox alignment="CENTER_LEFT">

@@ -7,12 +7,14 @@ import com.auction.util.LoginStateHelper;
 import com.auction.util.PriceFormatter;
 import com.auction.util.SceneNavigator;
 import com.auction.util.UserSession;
+import com.auction.util.ThemeManager;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -51,6 +53,7 @@ public class AdminDashboardController {
     @FXML private TextField searchAuctionField;
 
     @FXML private Label notificationLabel;
+    @FXML private Button themeToggleBtn;
     @FXML private Button loginButton;
 
     private final NetworkService networkService = NetworkService.getInstance();
@@ -73,6 +76,7 @@ public class AdminDashboardController {
         setupFiltering();
         
         loadDashboardData();
+        updateThemeButton();
     }
 
     private void configureUsersTable() {
@@ -271,6 +275,19 @@ public class AdminDashboardController {
     @FXML
     public void goToHome(ActionEvent event) {
         SceneNavigator.goToHome(event);
+    }
+
+    @FXML
+    public void toggleTheme(ActionEvent event) {
+        javafx.scene.Scene scene = ((Node) event.getSource()).getScene();
+        ThemeManager.getInstance().toggleTheme(scene);
+        updateThemeButton();
+    }
+
+    private void updateThemeButton() {
+        if (themeToggleBtn != null) {
+            themeToggleBtn.setText(ThemeManager.getInstance().isDarkMode() ? "☀️" : "🌙");
+        }
     }
 
     @FXML

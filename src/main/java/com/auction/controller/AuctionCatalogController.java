@@ -7,6 +7,7 @@ import com.auction.network.client.AuctionUpdateListener;
 import com.auction.network.client.NetworkService;
 import com.auction.util.SceneNavigator;
 import com.auction.util.LoginStateHelper;
+import com.auction.util.ThemeManager;
 import com.auction.util.PriceFormatter;
 import com.auction.util.AuctionImageLoader;
 import javafx.collections.FXCollections;
@@ -72,6 +73,7 @@ public class AuctionCatalogController {
     @FXML private ComboBox<String> sortFilter;      // Dropdown sắp xếp kết quả hiển thị
     @FXML private Label resultCountLabel;           // Nhãn hiển thị số lượng kết quả tìm được
     @FXML private FlowPane auctionListContainer;    // Vùng chứa các thẻ (card) hiển thị phiên đấu giá
+    @FXML private Button themeToggleBtn;             // Nút chuyển đổi giao diện sáng/tối
     @FXML private Button loginButton;               // Nút Đăng nhập / Đăng xuất
 
     /**
@@ -124,6 +126,7 @@ public class AuctionCatalogController {
         registerObserverLifecycle();
         // Đăng ký nhận bản cập nhật danh sách đấu giá từ server
         networkService.addAuctionUpdateListener(auctionUpdateListener);
+        updateThemeButton();
     }
 
     /**
@@ -554,6 +557,19 @@ public class AuctionCatalogController {
      */
     private String formatPrice(BigDecimal amount) {
         return PriceFormatter.formatPrice(amount);
+    }
+
+    @FXML
+    public void toggleTheme(ActionEvent event) {
+        javafx.scene.Scene scene = ((Node) event.getSource()).getScene();
+        ThemeManager.getInstance().toggleTheme(scene);
+        updateThemeButton();
+    }
+
+    private void updateThemeButton() {
+        if (themeToggleBtn != null) {
+            themeToggleBtn.setText(ThemeManager.getInstance().isDarkMode() ? "☀️" : "🌙");
+        }
     }
 
     // --- Các phương thức điều hướng Sidebar (Menu) ---

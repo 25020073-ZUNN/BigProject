@@ -15,6 +15,7 @@ import com.auction.util.AlertHelper;
 import com.auction.util.PriceFormatter;
 import com.auction.util.SceneNavigator;
 import com.auction.util.AuctionImageLoader;
+import com.auction.util.ThemeManager;
 import javafx.application.Platform;
 import javafx.scene.image.ImageView;
 import javafx.animation.KeyFrame;
@@ -25,6 +26,7 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -98,6 +100,7 @@ public class AuctionDetailController {
     @FXML private TextField txtAutoBidMax;  // Mức tối đa auto-bid
     @FXML private TextField txtAutoBidStep; // Bước tăng auto-bid
     @FXML private Button btnBid;            // Nút đặt giá
+    @FXML private Button themeToggleBtn;    // Nút chuyển đổi giao diện sáng/tối
     @FXML private Button loginButton;       // Nút đăng nhập/đăng xuất
     @FXML private ListView<String> lvBidHistory; // Danh sách lịch sử đặt giá
     @FXML private LineChart<Number, Number> priceChart; // Biểu đồ giá
@@ -126,6 +129,7 @@ public class AuctionDetailController {
                 bindAuction(auctions.get(0));
             }
         }
+        updateThemeButton();
     }
 
     /**
@@ -157,6 +161,19 @@ public class AuctionDetailController {
             goToHome(event);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void toggleTheme(ActionEvent event) {
+        javafx.scene.Scene scene = ((Node) event.getSource()).getScene();
+        ThemeManager.getInstance().toggleTheme(scene);
+        updateThemeButton();
+    }
+
+    private void updateThemeButton() {
+        if (themeToggleBtn != null) {
+            themeToggleBtn.setText(ThemeManager.getInstance().isDarkMode() ? "☀️" : "🌙");
         }
     }
 

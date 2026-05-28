@@ -17,6 +17,8 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.net.URL;
 
+import com.auction.util.ThemeManager;
+
 import com.auction.model.Auction;
 import com.auction.controller.AssetDetailController;
 import com.auction.controller.AuctionDetailController;
@@ -85,6 +87,7 @@ public final class SceneNavigator {
         content.getStyleClass().add("page-loading-card");
         loadingRoot.getChildren().add(content);
 
+        ThemeManager.getInstance().applyTheme(loadingRoot);
         applyRoot(stage, loadingRoot);
     }
 
@@ -145,8 +148,13 @@ public final class SceneNavigator {
 
     private static void applyRoot(Stage stage, Parent root) {
         Scene s = stage.getScene();
-        if (s == null) stage.setScene(new Scene(root, 1380, 920));
-        else s.setRoot(root);
+        if (s == null) {
+            s = new Scene(root, 1380, 920);
+            stage.setScene(s);
+        } else {
+            s.setRoot(root);
+        }
+        ThemeManager.getInstance().applyTheme(s);
         stage.setMinWidth(1280);
         stage.setMinHeight(820);
     }

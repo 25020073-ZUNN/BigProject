@@ -47,6 +47,7 @@
                 <Button text="Tài sản đấu giá" onAction="#goToAuctionList" styleClass="nav-btn-active"/>
                 <Button text="Tin tức" onAction="#goToNews" styleClass="nav-btn"/>
                 <Button text="Liên hệ" onAction="#goToContact" styleClass="nav-btn"/>
+                <Button fx:id="themeToggleBtn" onAction="#toggleTheme" styleClass="theme-toggle-btn" text="🌙" />
                 <Button fx:id="loginButton" text="Đăng nhập" onAction="#goToLogin" styleClass="login-btn"/>
             </HBox>
 

@@ -7,6 +7,7 @@ import com.auction.util.PriceFormatter;
 import com.auction.util.SceneNavigator;
 import com.auction.util.UserSession;
 import com.auction.util.AuctionImageLoader;
+import com.auction.util.ThemeManager;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -67,6 +68,7 @@ public class AssetDetailController {
     // Action buttons
     @FXML private Button btnJoinAuction;
     @FXML private Button btnViewSummary;
+    @FXML private Button themeToggleBtn;
     @FXML private Button loginButton;
 
     /** Dữ liệu phiên đấu giá được truyền từ AuctionCatalogController */
@@ -87,6 +89,7 @@ public class AssetDetailController {
             itemImageView.setVisible(false);
             itemImageView.setManaged(false);
         }
+        updateThemeButton();
     }
 
     /**
@@ -316,6 +319,19 @@ public class AssetDetailController {
         if (auction == null) return;
         Stage stage = (Stage) btnViewSummary.getScene().getWindow();
         SceneNavigator.navigateToAuctionDetailOrSummary(stage, auction);
+    }
+
+    @FXML
+    public void toggleTheme(ActionEvent event) {
+        javafx.scene.Scene scene = ((Node) event.getSource()).getScene();
+        ThemeManager.getInstance().toggleTheme(scene);
+        updateThemeButton();
+    }
+
+    private void updateThemeButton() {
+        if (themeToggleBtn != null) {
+            themeToggleBtn.setText(ThemeManager.getInstance().isDarkMode() ? "☀️" : "🌙");
+        }
     }
 
     // ── Navigation (giống các Controller khác) ──

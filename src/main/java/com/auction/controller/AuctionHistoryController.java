@@ -11,6 +11,7 @@ import com.auction.util.PriceFormatter;
 import com.auction.util.SceneNavigator;
 import com.auction.util.UserSession;
 import com.auction.util.FxAsync;
+import com.auction.util.ThemeManager;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -19,6 +20,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
@@ -79,6 +81,7 @@ public class AuctionHistoryController {
     @FXML private TableColumn<MySaleRow, String> colSaleStatus;
     @FXML private TableColumn<MySaleRow, Void> colSaleAction;
 
+    @FXML private Button themeToggleBtn;
     @FXML private Button loginButton;
 
     @FXML
@@ -98,6 +101,7 @@ public class AuctionHistoryController {
         setupBidTable();
         setupSaleTable();
         loadHistoryData();
+        updateThemeButton();
     }
 
     /**
@@ -485,6 +489,19 @@ public class AuctionHistoryController {
     }
 
     @FXML public void handleLogout(ActionEvent event) { LoginStateHelper.handleLogout(event); }
+
+    @FXML
+    public void toggleTheme(ActionEvent event) {
+        javafx.scene.Scene scene = ((Node) event.getSource()).getScene();
+        ThemeManager.getInstance().toggleTheme(scene);
+        updateThemeButton();
+    }
+
+    private void updateThemeButton() {
+        if (themeToggleBtn != null) {
+            themeToggleBtn.setText(ThemeManager.getInstance().isDarkMode() ? "☀️" : "🌙");
+        }
+    }
 
     // --- Điều hướng Header ---
     @FXML public void goToHome(ActionEvent event) { SceneNavigator.goToHome(event); }

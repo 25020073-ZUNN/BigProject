@@ -874,3 +874,111 @@
     -fx-border-width: 1;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 4, 0, 0, 2);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * THEME TOGGLE & UTILITY CLASSES (Light Mode base)
+ * ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Theme Toggle Button ── */
+.theme-toggle-btn {
+    -fx-background-color: rgba(0,120,212,0.08);
+    -fx-text-fill: #0078d4;
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+    -fx-background-radius: 50;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-max-width: 40;
+    -fx-max-height: 40;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-border-color: rgba(0,120,212,0.15);
+    -fx-border-radius: 50;
+    -fx-border-width: 1;
+}
+.theme-toggle-btn:hover {
+    -fx-background-color: rgba(0,120,212,0.18);
+    -fx-border-color: rgba(0,120,212,0.3);
+}
+
+/* ── Section BG classes (thay thế inline styles trong FXML) ── */
+.section-bg-white { -fx-background-color: #ffffff; }
+.breadcrumb-bar {
+    -fx-background-color: #fafafa;
+    -fx-border-color: transparent transparent #e0e0e0 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.content-white-bg { -fx-background-color: #ffffff; }
+.info-highlight-box {
+    -fx-background-color: #f0f7ff;
+    -fx-background-radius: 12;
+    -fx-border-color: #deecf9;
+    -fx-border-radius: 12;
+}
+.logout-btn {
+    -fx-background-color: #d13438;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 12 22;
+    -fx-cursor: hand;
+}
+.logout-btn:hover {
+    -fx-background-color: #c02c30;
+}
+
+/* ── Profile page utility classes ── */
+.profile-header-gradient {
+    -fx-background-color: linear-gradient(to bottom right, #0078d4, #005a9e);
+    -fx-background-radius: 16 16 0 0;
+}
+.profile-avatar-bg {
+    -fx-background-color: rgba(255,255,255,0.2);
+    -fx-background-radius: 50;
+}
+.profile-section-header {
+    -fx-background-color: #fafafa;
+    -fx-background-radius: 16 16 0 0;
+    -fx-border-color: transparent transparent #e0e0e0 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.profile-delete-btn {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d13438;
+    -fx-text-fill: #d13438;
+    -fx-border-width: 1.5;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+    -fx-font-weight: 700;
+}
+
+/* ── Summary page utility classes ── */
+.summary-status-badge {
+    -fx-background-color: #107c10;
+    -fx-text-fill: white;
+}
+.summary-ended-badge {
+    -fx-background-color: #6c757d;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+.summary-price-box {
+    -fx-background-color: linear-gradient(to right, #f0f7ff, #ffffff);
+    -fx-background-radius: 10;
+    -fx-padding: 10 14;
+    -fx-border-color: #deecf9;
+    -fx-border-radius: 10;
+}
+
+/* ── Image container for asset detail ── */
+.asset-image-container {
+    -fx-background-color: linear-gradient(to bottom right, #f0f7ff, #e8e8e8);
+    -fx-background-radius: 16;
+}
+.summary-image-container {
+    -fx-background-color: linear-gradient(to bottom right, #f0f7ff, #e8e8e8);
+    -fx-background-radius: 12;
+}

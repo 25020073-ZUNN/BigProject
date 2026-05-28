@@ -8,10 +8,12 @@ import com.auction.util.PriceFormatter;
 import com.auction.util.SceneNavigator;
 import com.auction.util.UserSession;
 import com.auction.util.FxAsync;
+import com.auction.util.ThemeManager;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -42,6 +44,7 @@ public class UserProfileController {
     @FXML private TextField txtEmail;    // Địa chỉ email
     
     @FXML private Label lblNotification; // Nhãn hiển thị thông báo kết quả thao tác (Thành công/Lỗi)
+    @FXML private Button themeToggleBtn; // Nút chuyển đổi giao diện sáng/tối
     @FXML private Button loginButton;    // Nút Đăng nhập/Đăng xuất trên thanh menu
 
     /**
@@ -55,6 +58,7 @@ public class UserProfileController {
         // Tải thông tin người dùng lên giao diện
         loadUserProfile();
         refreshLoggedInUser();
+        updateThemeButton();
     }
 
     /**
@@ -173,6 +177,19 @@ public class UserProfileController {
      * Xử lý đăng xuất (Sử dụng LoginStateHelper).
      */
     @FXML public void handleLogout(ActionEvent event) { LoginStateHelper.handleLogout(event); }
+
+    @FXML
+    public void toggleTheme(ActionEvent event) {
+        javafx.scene.Scene scene = ((Node) event.getSource()).getScene();
+        ThemeManager.getInstance().toggleTheme(scene);
+        updateThemeButton();
+    }
+
+    private void updateThemeButton() {
+        if (themeToggleBtn != null) {
+            themeToggleBtn.setText(ThemeManager.getInstance().isDarkMode() ? "☀️" : "🌙");
+        }
+    }
 
     // --- Các phương thức điều hướng Sidebar ---
     @FXML public void goToHome(ActionEvent event) { SceneNavigator.goToHome(event); }

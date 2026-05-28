@@ -6,9 +6,11 @@ import com.auction.util.UserSession;
 import com.auction.util.SceneNavigator;
 import com.auction.util.AlertHelper;
 import com.auction.util.LoginStateHelper;
+import com.auction.util.ThemeManager;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -69,6 +71,7 @@ public class CreateAuctionController {
     
     @FXML private Label hintLabel;                  // Nhãn gợi ý định dạng
     @FXML private Label selectedImageLabel;         // Hiển thị tên file ảnh đã chọn
+    @FXML private Button themeToggleBtn;             // Nút chuyển đổi giao diện sáng/tối
     @FXML private Button loginButton;               // Nút Đăng nhập/Đăng xuất
     @FXML private Button createButton;              // Nút Tạo phiên đấu giá
 
@@ -99,6 +102,7 @@ public class CreateAuctionController {
         
         // Khởi tạo hiển thị các trường theo danh mục mặc định
         updateCategoryFields(categoryComboBox.getValue());
+        updateThemeButton();
     }
 
     /**
@@ -351,6 +355,19 @@ public class CreateAuctionController {
     private LocalDateTime parseDateTime(String rawValue, String fieldName) {
         try { return LocalDateTime.parse(requireText(rawValue, fieldName), DATE_TIME_FORMATTER); }
         catch (DateTimeParseException ex) { throw new IllegalArgumentException(fieldName + " phải theo định dạng yyyy-MM-dd HH:mm:ss."); }
+    }
+
+    @FXML
+    public void toggleTheme(ActionEvent event) {
+        javafx.scene.Scene scene = ((Node) event.getSource()).getScene();
+        ThemeManager.getInstance().toggleTheme(scene);
+        updateThemeButton();
+    }
+
+    private void updateThemeButton() {
+        if (themeToggleBtn != null) {
+            themeToggleBtn.setText(ThemeManager.getInstance().isDarkMode() ? "☀️" : "🌙");
+        }
     }
 
     // --- Các phương thức điều hướng Sidebar ---

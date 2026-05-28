@@ -26,9 +26,11 @@ import com.auction.util.SceneNavigator;
 import com.auction.util.LoginStateHelper;
 import com.auction.util.PriceFormatter;
 import com.auction.util.AuctionImageLoader;
+import com.auction.util.ThemeManager;
 
 public class AuctionSummaryController {
 
+    @FXML private Button themeToggleBtn;
     @FXML private Button loginButton;
     @FXML private Label lblName;
     @FXML private Label lblFinalPrice;
@@ -54,6 +56,7 @@ public class AuctionSummaryController {
             itemImageView.setVisible(false);
             itemImageView.setManaged(false);
         }
+        updateThemeButton();
     }
 
     /**
@@ -176,6 +179,19 @@ public class AuctionSummaryController {
                         .thenComparing(BidTransaction::getBidAmount, Comparator.nullsLast(Comparator.naturalOrder()))
                         .thenComparing(BidTransaction::getId, Comparator.nullsLast(Comparator.naturalOrder())))
                 .toList();
+    }
+
+    @FXML
+    public void toggleTheme(ActionEvent event) {
+        javafx.scene.Scene scene = ((Node) event.getSource()).getScene();
+        ThemeManager.getInstance().toggleTheme(scene);
+        updateThemeButton();
+    }
+
+    private void updateThemeButton() {
+        if (themeToggleBtn != null) {
+            themeToggleBtn.setText(ThemeManager.getInstance().isDarkMode() ? "☀️" : "🌙");
+        }
     }
 
     // --- Điều hướng ---

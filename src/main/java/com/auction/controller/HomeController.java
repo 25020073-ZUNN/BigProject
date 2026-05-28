@@ -26,6 +26,7 @@ import com.auction.util.SceneNavigator;
 import com.auction.util.AlertHelper;
 import com.auction.util.LoginStateHelper;
 import com.auction.util.PriceFormatter;
+import com.auction.util.ThemeManager;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -43,6 +44,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import javafx.geometry.Insets;
 import javafx.scene.image.ImageView;
+import javafx.scene.Node;
 import javafx.stage.Stage;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -65,6 +67,8 @@ public class HomeController {
     private Label clockLabel;               // Nhãn hiển thị đồng hồ thời gian thực
     @FXML
     private TextField searchField;          // Ô nhập liệu tìm kiếm tài sản
+    @FXML
+    private Button themeToggleBtn;          // Nút chuyển đổi giao diện sáng/tối
     @FXML
     private Button loginButton;             // Nút Đăng nhập/Đăng xuất trên thanh điều hướng
     @FXML
@@ -178,6 +182,7 @@ public class HomeController {
         registerListenerLifecycle(); // Tự động hủy đăng ký khi scene bị đóng
         
         renderUpcomingAuctions();
+        updateThemeButton();
     }
 
     /**
@@ -558,6 +563,19 @@ public class HomeController {
     @FXML
     public void handleComingSoon(ActionEvent event) {
         AlertHelper.showInformation("Đang phát triển", "Tính năng này sẽ ra mắt trong bản cập nhật sau.");
+    }
+
+    @FXML
+    public void toggleTheme(ActionEvent event) {
+        javafx.scene.Scene scene = ((Node) event.getSource()).getScene();
+        ThemeManager.getInstance().toggleTheme(scene);
+        updateThemeButton();
+    }
+
+    private void updateThemeButton() {
+        if (themeToggleBtn != null) {
+            themeToggleBtn.setText(ThemeManager.getInstance().isDarkMode() ? "☀️" : "🌙");
+        }
     }
 
     @FXML
