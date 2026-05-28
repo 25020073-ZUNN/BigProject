@@ -9,7 +9,7 @@
     <!-- ── LEFT SIDEBAR: Premium Navigation ── -->
     <left>
         <VBox prefWidth="280" spacing="10" styleClass="sidebar">
-            <VBox spacing="2" styleClass="sidebar-logo-box">
+            <VBox prefHeight="98.0" prefWidth="232.0" spacing="2" styleClass="sidebar-logo-box">
                 <Label styleClass="sidebar-brand" text="Team6-UET" />
                 <Label styleClass="sidebar-subbrand" text="ADMIN CENTER" />
             </VBox>
@@ -29,8 +29,8 @@
 
     <!-- ── TOP BAR: System Header & Breadcrumbs ── -->
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="20" styleClass="admin-top-header">
-            <VBox spacing="2">
+        <HBox alignment="CENTER_LEFT" prefHeight="74.0" prefWidth="1386.0" spacing="20" styleClass="admin-top-header">
+            <VBox prefHeight="41.0" prefWidth="309.0" spacing="2">
                 <Label styleClass="admin-breadcrumb-sub" text="Hệ thống quản trị" />
                 <Label styleClass="admin-breadcrumb-title" text="Bảng điều khiển Admin Console" />
             </VBox>

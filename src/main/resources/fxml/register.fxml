@@ -29,7 +29,7 @@
                                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <ImageView fitHeight="42" preserveRatio="true">
                         <image>
-                            <Image url="@../images/d33812d6433b838f8d0f44c71287e89a.jpg"/>
+                            <Image url="@../images/logouet1.png"/>
                         </image>
                     </ImageView>
                     <VBox spacing="0">

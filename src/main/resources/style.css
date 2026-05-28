@@ -127,6 +127,29 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 6, 0, 0, 3);
     -fx-border-color: transparent;
 }
+/*sửa thành*/
+
+/*.hero-banner {
+    -fx-background-image: url("/images/auction-banner3.png");
+
+    -fx-background-color: transparent;
+
+    -fx-background-size: cover;
+
+    -fx-background-repeat: no-repeat;
+
+    -fx-background-position: center center;
+
+    -fx-background-radius: 20;
+
+    -fx-border-radius: 20;
+
+    -fx-border-color: transparent;
+
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.12), 8, 0, 0, 4);
+}*/
+
+
 .banner-chip {
     -fx-text-fill: #ffffff; -fx-font-size: 11px; -fx-font-weight: 900;
     -fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 999; -fx-padding: 6 14;
@@ -987,7 +1010,6 @@
 .hero-section {
     -fx-alignment: center-left;
     -fx-padding: 40 32 40 32;
-}
 }
 
 .login-panel {

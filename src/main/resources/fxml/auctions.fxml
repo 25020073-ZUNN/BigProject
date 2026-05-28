@@ -19,7 +19,7 @@
                             <HBox alignment="CENTER_LEFT" spacing="10">
                     <ImageView fitHeight="42" preserveRatio="true">
                         <image>
-                            <Image url="@../images/d33812d6433b838f8d0f44c71287e89a.jpg" />
+                            <Image url="@../images/logouet1.png" />
                         </image>
                     </ImageView>
                     <VBox spacing="0">
@@ -61,21 +61,24 @@
 
                     <GridPane hgap="18" prefHeight="282.0" prefWidth="793.0" vgap="16">
                         <Label styleClass="field-label" text="Họ và tên" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                        <TextField prefHeight="43.0" prefWidth="223.0" promptText="Nhập họ và tên" styleClass="mail-field" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                        <TextField prefHeight="43.0" prefWidth="200.0" promptText="Nhập họ và tên" styleClass="mail-field" GridPane.columnIndex="0" GridPane.rowIndex="1" />
 
                         <Label prefHeight="17.0" prefWidth="275.0" styleClass="field-label" text="Số điện thoại" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                         <TextField prefHeight="43.0" prefWidth="352.0" promptText="Nhập số điện thoại" styleClass="mail-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                        <Label styleClass="field-label" text="Email" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                        <Label styleClass="field-label" text="Loại tài khoản" GridPane.columnIndex="0" GridPane.rowIndex="2" />
 
                         <Label styleClass="field-label" text="Loại tài khoản" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <ComboBox promptText="Chọn loại tài khoản" styleClass="mail-field" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                         <Label styleClass="field-label" text="Địa chỉ" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                         <TextField prefHeight="43.0" prefWidth="371.0" promptText="Nhập địa chỉ liên hệ" styleClass="mail-field" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                  <ButtonBar prefHeight="51.0" prefWidth="271.0" GridPane.rowIndex="3">
+                     <buttons>
+                              <ComboBox prefHeight="51.0" prefWidth="302.0" promptText="Chọn loại tài khoản" styleClass="mail-field" />
+                     </buttons></ButtonBar>
                   <columnConstraints>
-                     <ColumnConstraints maxWidth="246.0" minWidth="204.0" prefWidth="224.0" />
-                     <ColumnConstraints maxWidth="362.0" minWidth="320.0" prefWidth="342.0" />
+                     <ColumnConstraints maxWidth="299.0" minWidth="204.0" prefWidth="289.0" />
+                     <ColumnConstraints maxWidth="362.0" minWidth="267.0" prefWidth="277.0" />
                   </columnConstraints>
                   <rowConstraints>
                      <RowConstraints />
