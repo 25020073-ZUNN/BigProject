@@ -24,7 +24,7 @@
                     </ImageView>
                     <VBox spacing="0">
                         <Label style="-fx-font-size: 20px;" styleClass="logo-main" text="UET" />
-                        <Label style="-fx-font-size: 9px;" styleClass="logo-sub" text="AUCTION PLATFORM" />
+                        <Label prefHeight="13.0" prefWidth="205.0" style="-fx-font-size: 9px;" styleClass="logo-sub" text="AUCTION PLATFORM" />
                     </VBox>
                 </HBox>
 
@@ -34,8 +34,8 @@
             <Button onAction="#goToAuctionList" prefHeight="34.0" prefWidth="173.0" styleClass="nav-btn" text="Tài sản đấu giá" />
             <Button onAction="#goToNews" styleClass="nav-btn" text="Tin tức" />
             <Button onAction="#goToContact" styleClass="nav-btn" text="Liên hệ" />
-            <Button fx:id="themeToggleBtn" onAction="#toggleTheme" styleClass="theme-toggle-btn" text="🌙" />
-            <Button fx:id="loginButton" onAction="#goToLogin" styleClass="login-btn" text="Đăng nhập" />
+            <Button fx:id="themeToggleBtn" maxWidth="69.0" onAction="#toggleTheme" prefHeight="40.0" prefWidth="69.0" styleClass="theme-toggle-btn" text="🌙" />
+            <Button fx:id="loginButton" onAction="#goToLogin" prefHeight="40.0" prefWidth="119.0" styleClass="login-btn" text="Đăng nhập" />
         </HBox>
     </top>
 
@@ -47,7 +47,7 @@
             </padding>
 
             <VBox spacing="10">
-                <Label styleClass="section-title-dark" text="Tạo tài khoản mới" />
+                <Label prefHeight="24.0" prefWidth="372.0" styleClass="section-title-dark" text="Tạo tài khoản mới" />
                 <Label prefHeight="18.0" prefWidth="774.0" styleClass="section-subtitle" text="Đăng ký tài khoản để tham gia đấu giá, nhận thông báo tài sản mới và quản lý lịch sử tham gia." wrapText="true" />
             </VBox>
 
@@ -93,7 +93,7 @@
                     </GridPane>
 
                     <VBox spacing="10">
-                        <CheckBox prefHeight="20.0" prefWidth="385.0" styleClass="check-auth" text="Tôi đồng ý với điều khoản sử dụng và chính sách bảo mật" />
+                        <CheckBox prefHeight="38.0" prefWidth="385.0" styleClass="check-auth" text="Tôi đồng ý với điều khoản sử dụng và chính sách bảo mật" />
                         <CheckBox prefHeight="20.0" prefWidth="376.0" styleClass="check-auth" text="Tôi muốn nhận thông báo về phiên đấu giá và tài sản mới" />
                     </VBox>
 
@@ -109,8 +109,8 @@
                             <Insets bottom="22" left="22" right="22" top="22" />
                         </padding>
 
-                        <Label styleClass="partner-title" text="Quy trình kích hoạt tài khoản" />
-                        <Label styleClass="partner-text" text="1. Điền thông tin cá nhân&#10;2. Xác thực email / số điện thoại&#10;3. Hoàn thiện hồ sơ&#10;4. Bắt đầu tham gia đấu giá" wrapText="true" />
+                        <Label prefHeight="23.0" prefWidth="369.0" styleClass="partner-title" text="Quy trình kích hoạt tài khoản" />
+                        <Label prefHeight="81.0" prefWidth="322.0" styleClass="partner-text" text="1. Điền thông tin cá nhân&#10;2. Xác thực email / số điện thoại&#10;3. Hoàn thiện hồ sơ&#10;4. Bắt đầu tham gia đấu giá" wrapText="true" />
                     </VBox>
 
                     <VBox prefHeight="164.0" prefWidth="442.0" spacing="14" styleClass="side-info-card">
@@ -118,7 +118,7 @@
                             <Insets bottom="22" left="22" right="22" top="22" />
                         </padding>
 
-                        <Label styleClass="partner-title" text="Lợi ích khi đăng ký">
+                        <Label prefHeight="23.0" prefWidth="295.0" styleClass="partner-title" text="Lợi ích khi đăng ký">
                      <textFill>
                         <LinearGradient endX="1.0" endY="1.0">
                            <stops>
@@ -135,10 +135,10 @@
                            </stops>
                         </LinearGradient>
                      </textFill></Label>
-                        <Label styleClass="partner-text" text="• Theo dõi tài sản yêu thích&#10;• Nhận thông báo nhắc lịch&#10;• Quản lý lịch sử tham gia&#10;• Truy cập hồ sơ và biên bản" wrapText="true" />
+                        <Label prefHeight="81.0" prefWidth="330.0" styleClass="partner-text" text="• Theo dõi tài sản yêu thích&#10;• Nhận thông báo nhắc lịch&#10;• Quản lý lịch sử tham gia&#10;• Truy cập hồ sơ và biên bản" wrapText="true" />
                     </VBox>
 
-                    <VBox spacing="14" styleClass="side-info-card-dark">
+                    <VBox prefHeight="268.0" prefWidth="410.0" spacing="14" styleClass="side-info-card-dark">
                         <padding>
                             <Insets bottom="22" left="22" right="22" top="22" />
                         </padding>
