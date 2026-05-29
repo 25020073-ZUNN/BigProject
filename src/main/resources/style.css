@@ -1027,3 +1027,54 @@
 .mini-info-card {
     -fx-min-width: 150;
 }
+/*sửa nút chuyển nền*/
+.theme-toggle-btn {
+    -fx-background-color: #ffffff;
+
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+
+    -fx-min-width: 42;
+    -fx-pref-width: 42;
+
+    -fx-min-height: 42;
+    -fx-pref-height: 42;
+
+    -fx-font-size: 15px;
+
+    -fx-cursor: hand;
+
+    -fx-effect: dropshadow(
+        three-pass-box,
+        rgba(0,0,0,0.04),
+        8,
+        0,
+        0,
+        2
+    );
+
+    -fx-transition: all 0.2s;
+}
+
+.theme-toggle-btn:hover {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #cbd5e1;
+
+    -fx-effect: dropshadow(
+        three-pass-box,
+        rgba(0,0,0,0.08),
+        12,
+        0,
+        0,
+        4
+    );
+
+    -fx-translate-y: -1;
+}
+
+.theme-toggle-btn:pressed {
+    -fx-translate-y: 1;
+}

@@ -36,7 +36,12 @@
 
                 <Region prefWidth="8" />
                 <Label fx:id="clockLabel" styleClass="clock-label" text="08:30:12&#10;07/04/2026" />
-                <Button fx:id="themeToggleBtn" onAction="#toggleTheme" styleClass="theme-toggle-btn" text="🌙" />
+                <!--<Button fx:id="themeToggleBtn" onAction="#toggleTheme" styleClass="theme-toggle-btn" text="🌙" />-->
+                <!--sửa thành-->
+                <Button fx:id="themeToggleBtn"
+                        onAction="#toggleTheme"
+                        text="🌙"
+                        styleClass="theme-toggle-btn"/>
                 <Button fx:id="loginButton" onAction="#goToLogin" styleClass="login-btn" text="Đăng nhập" />
             </HBox>
         </VBox>

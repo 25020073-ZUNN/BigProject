@@ -188,9 +188,19 @@ public class AuctionSummaryController {
         updateThemeButton();
     }
 
-    private void updateThemeButton() {
+    /*private void updateThemeButton() {
         if (themeToggleBtn != null) {
             themeToggleBtn.setText(ThemeManager.getInstance().isDarkMode() ? "☀️" : "🌙");
+        }
+    }*/
+    /*sua thành */
+    private void updateThemeButton() {
+        if (themeToggleBtn != null) {
+            themeToggleBtn.setText(
+                    ThemeManager.getInstance().isDarkMode()
+                            ? "☀"
+                            : "\uD83C\uDF19"
+            );
         }
     }
 
