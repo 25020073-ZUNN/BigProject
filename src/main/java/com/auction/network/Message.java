@@ -41,6 +41,10 @@ public class Message {
         /** Lấy lại thông tin mới nhất của người dùng đang đăng nhập */
         GET_CURRENT_USER,
         DELETE_AUCTION,
+        /** Cập nhật phiên đấu giá (seller chỉnh sửa sản phẩm chưa bắt đầu) */
+        UPDATE_AUCTION,
+        /** Người bán xóa phiên đấu giá chưa bắt đầu */
+        SELLER_DELETE_AUCTION,
         /** Kiểm tra trạng thái cơ sở dữ liệu */
         DB_STATUS,
         /** Đồng bộ snapshot phiên đấu giá từ server xuống client */

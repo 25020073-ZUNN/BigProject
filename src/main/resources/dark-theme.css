@@ -635,3 +635,34 @@
 /* ── news-info & stats-wrap ── */
 .news-info { -fx-background-color: transparent; }
 .stats-wrap { -fx-background-color: transparent; }
+
+.danger-btn-small {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #dc2626;
+    -fx-text-fill: #f87171;
+    -fx-border-width: 1.5;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+    -fx-font-weight: 700;
+}
+.danger-btn-small:hover {
+    -fx-background-color: #442a2b;
+}
+.danger-btn-small:pressed {
+    -fx-background-color: #553335;
+}
+
+.primary-btn-small {
+    -fx-background-color: linear-gradient(to right, #3b82f6, #2563eb);
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.2), 4, 0, 0, 2);
+}
+.primary-btn-small:hover {
+    -fx-background-color: linear-gradient(to right, #2563eb, #1d4ed8);
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.35), 6, 0, 0, 3);
+}
+.primary-btn-small:pressed {
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #1e40af);
+}

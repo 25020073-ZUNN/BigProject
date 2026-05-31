@@ -24,6 +24,8 @@ import com.auction.controller.AssetDetailController;
 import com.auction.controller.AuctionDetailController;
 import com.auction.controller.AuctionSummaryController;
 
+import com.auction.controller.CreateAuctionController;
+
 /**
  * Tiện ích điều hướng giữa các màn hình (Scene) trong ứng dụng.
  */
@@ -145,6 +147,23 @@ public final class SceneNavigator {
             Object ctrl = loader.getController();
             if (ctrl instanceof AuctionSummaryController s) s.setAuctionData(auction);
             else if (ctrl instanceof AuctionDetailController d) d.setAuctionData(auction);
+
+            return root;
+        });
+    }
+
+    /**
+     * Điều hướng tới trang tạo phiên đấu giá ở chế độ chỉnh sửa.
+     * Truyền dữ liệu Auction hiện có để pre-fill vào form.
+     */
+    public static void navigateToEditAuction(Stage stage, Auction auction) {
+        if (auction == null) return;
+        switchScene(stage, "Không thể tải trang chỉnh sửa phiên đấu giá.", () -> {
+            FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource("/fxml/create-auction.fxml"));
+            Parent root = loader.load();
+
+            CreateAuctionController ctrl = loader.getController();
+            ctrl.setEditMode(auction);
 
             return root;
         });

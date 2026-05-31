@@ -302,15 +302,58 @@ public class AuctionHistoryController {
             }
         });
 
-        // Cột Action nút "Chi tiết"
+        // Cột Action chứa các nút "Chi tiết", "Sửa", "Xóa"
         colSaleAction.setCellFactory(col -> new TableCell<MySaleRow, Void>() {
-            private final Button btn = new Button("Chi tiết  →");
+            private final Button btnDetail = new Button("Chi tiết");
+            private final Button btnEdit = new Button("Sửa ✏️");
+            private final Button btnDelete = new Button("Xóa 🗑");
+            private final javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(6, btnDetail, btnEdit, btnDelete);
             {
-                btn.getStyleClass().addAll("secondary-btn-small");
-                btn.setOnAction(e -> {
+                container.setAlignment(Pos.CENTER);
+                btnDetail.getStyleClass().addAll("secondary-btn-small");
+                btnEdit.getStyleClass().addAll("primary-btn-small");
+                btnDelete.getStyleClass().addAll("danger-btn-small");
+
+                btnDetail.setOnAction(e -> {
                     MySaleRow row = getTableView().getItems().get(getIndex());
-                    Stage stage = (Stage) getScene().getWindow();
-                    SceneNavigator.navigateToAssetDetail(stage, row.getAuction());
+                    if (row != null) {
+                        Stage stage = (Stage) getScene().getWindow();
+                        SceneNavigator.navigateToAssetDetail(stage, row.getAuction());
+                    }
+                });
+
+                btnEdit.setOnAction(e -> {
+                    MySaleRow row = getTableView().getItems().get(getIndex());
+                    if (row != null) {
+                        Stage stage = (Stage) getScene().getWindow();
+                        SceneNavigator.navigateToEditAuction(stage, row.getAuction());
+                    }
+                });
+
+                btnDelete.setOnAction(e -> {
+                    MySaleRow row = getTableView().getItems().get(getIndex());
+                    if (row != null) {
+                        boolean confirm = AlertHelper.showConfirmation(
+                                "Xác nhận xóa",
+                                "Bạn có chắc chắn muốn xóa phiên đấu giá này không?\nHành động này không thể hoàn tác."
+                        );
+                        if (confirm) {
+                            User currentUser = UserSession.getLoggedInUser();
+                            FxAsync.run(
+                                    () -> {
+                                        networkService.sellerDeleteAuction(currentUser.getUsername(), row.getAuction().getId());
+                                        return null;
+                                    },
+                                    res -> {
+                                        AlertHelper.showInformation("Thành công", "Đã xóa phiên đấu giá thành công.");
+                                        loadHistoryData();
+                                    },
+                                    error -> {
+                                        AlertHelper.showError("Lỗi", "Không thể xóa phiên đấu giá: " + error);
+                                    }
+                            );
+                        }
+                    }
                 });
             }
             @Override
@@ -319,7 +362,27 @@ public class AuctionHistoryController {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    setGraphic(btn);
+                    MySaleRow row = getTableView().getItems().get(getIndex());
+                    if (row != null) {
+                        Auction auction = row.getAuction();
+                        LocalDateTime now = LocalDateTime.now();
+                        boolean canEditOrDelete = now.isBefore(auction.getItem().getStartTime());
+
+                        btnEdit.setDisable(!canEditOrDelete);
+                        btnDelete.setDisable(!canEditOrDelete);
+
+                        if (!canEditOrDelete) {
+                            javafx.scene.control.Tooltip tt = new javafx.scene.control.Tooltip(
+                                    "Không thể chỉnh sửa hoặc xóa sản phẩm vì phiên đấu giá đã bắt đầu."
+                            );
+                            btnEdit.setTooltip(tt);
+                            btnDelete.setTooltip(tt);
+                        } else {
+                            btnEdit.setTooltip(null);
+                            btnDelete.setTooltip(null);
+                        }
+                    }
+                    setGraphic(container);
                     setAlignment(Pos.CENTER);
                 }
             }

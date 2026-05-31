@@ -152,14 +152,14 @@
                                             <Label text="DANH SÁCH TÀI SẢN ĐĂNG BÁN" styleClass="partner-title"/>
                                             <TableView fx:id="tableSales" prefHeight="420" styleClass="table-view">
                                                 <columns>
-                                                    <TableColumn fx:id="colSaleAssetName" text="Tên tài sản" prefWidth="280"/>
-                                                    <TableColumn fx:id="colSaleCategory" text="Danh mục" prefWidth="120"/>
-                                                    <TableColumn fx:id="colSaleStartingPrice" text="Giá khởi điểm" prefWidth="160"/>
-                                                    <TableColumn fx:id="colSaleCurrentPrice" text="Giá hiện tại" prefWidth="160"/>
-                                                    <TableColumn fx:id="colSaleHighestBidder" text="Người dẫn đầu / Mua" prefWidth="160"/>
-                                                    <TableColumn fx:id="colSaleEndTime" text="Thời gian đóng" prefWidth="180"/>
-                                                    <TableColumn fx:id="colSaleStatus" text="Trạng thái phiên" prefWidth="130"/>
-                                                    <TableColumn fx:id="colSaleAction" text="Hành động" prefWidth="120"/>
+                                                    <TableColumn fx:id="colSaleAssetName" text="Tên tài sản" prefWidth="240"/>
+                                                    <TableColumn fx:id="colSaleCategory" text="Danh mục" prefWidth="110"/>
+                                                    <TableColumn fx:id="colSaleStartingPrice" text="Giá khởi điểm" prefWidth="140"/>
+                                                    <TableColumn fx:id="colSaleCurrentPrice" text="Giá hiện tại" prefWidth="140"/>
+                                                    <TableColumn fx:id="colSaleHighestBidder" text="Người dẫn đầu / Mua" prefWidth="140"/>
+                                                    <TableColumn fx:id="colSaleEndTime" text="Thời gian đóng" prefWidth="160"/>
+                                                    <TableColumn fx:id="colSaleStatus" text="Trạng thái phiên" prefWidth="120"/>
+                                                    <TableColumn fx:id="colSaleAction" text="Hành động" prefWidth="280"/>
                                                 </columns>
                                             </TableView>
                                         </VBox>

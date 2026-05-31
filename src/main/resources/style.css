@@ -1078,3 +1078,39 @@
 .theme-toggle-btn:pressed {
     -fx-translate-y: 1;
 }
+
+.danger-btn-small {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d13438;
+    -fx-text-fill: #d13438;
+    -fx-border-width: 1.5;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+    -fx-font-weight: 700;
+}
+.danger-btn-small:hover {
+    -fx-background-color: #fde8e8;
+}
+.danger-btn-small:pressed {
+    -fx-background-color: #fbd5d5;
+}
+
+.primary-btn-small {
+    -fx-background-color: linear-gradient(to right, #3b82f6, #1d4ed8);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(37,99,235,0.12), 4, 0, 0, 2);
+}
+.primary-btn-small:hover {
+    -fx-background-color: linear-gradient(to right, #2563eb, #1e40af);
+    -fx-effect: dropshadow(three-pass-box, rgba(37,99,235,0.25), 6, 0, 0, 3);
+}
+.primary-btn-small:pressed {
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #1e3a8a);
+    -fx-effect: none;
+}
