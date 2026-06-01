@@ -68,18 +68,18 @@ public class AutoBidStrategy {
      * Output:
      * - Đặt giá mới hoặc Dừng Auto-Bid
      */
-    public AutoBidDecision decide(...)
+
+
+    /**
+     * Kết quả quyết định của Auto-Bid.
+     * Có thể: PLACE BID hoặc STOP
+     */
     public static final class AutoBidDecision {
         private final boolean shouldBid;
         private final BigDecimal bidAmount;
         private final String stopReason;
         private final boolean usedMaximum;
 
-        /**
-         * Kết quả quyết định của Auto-Bid.
-         * Có thể: PLACE BID hoặc STOP
-         */
-        public static final class AutoBidDecision
         private AutoBidDecision(boolean shouldBid, BigDecimal bidAmount, String stopReason, boolean usedMaximum) {
             this.shouldBid = shouldBid;
             this.bidAmount = bidAmount;
