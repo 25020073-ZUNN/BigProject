@@ -24,27 +24,69 @@ import com.auction.controller.AssetDetailController;
 import com.auction.controller.AuctionDetailController;
 import com.auction.controller.AuctionSummaryController;
 
-/**
- * Tiện ích điều hướng giữa các màn hình (Scene) trong ứng dụng.
+/*/**
+ * SceneNavigator
+ *
+ * Chức năng:
+ * - Quản lý chuyển đổi giữa các màn hình JavaFX.
+ * - Hiển thị loading screen khi đổi trang.
+ * - Load FXML và Controller tương ứng.
+ * - Truyền dữ liệu giữa các Controller.
+ * - Áp dụng giao diện Dark/Light Mode.
+ *
+ * Giúp Controller không phải tự viết code điều hướng.
  */
 public final class SceneNavigator {
-
+    /**
+     * Thời gian hiển thị loading screen.
+     *
+     * Mục đích:
+     * - Tạo hiệu ứng chuyển trang mượt hơn.
+     * - Tránh cảm giác giao diện bị đứng khi load FXML.
+     */
     private static final double LOADING_DELAY_MS = 80;
-
+    /**
+     * Utility Class.
+     *
+     * Không cho phép:
+     * new SceneNavigator()
+     *
+     * Chỉ sử dụng các hàm static.
+     */
     private SceneNavigator() {}
 
     /**
-     * Chuyển sang Scene mới. Hiển thị loading tạm thời, load FXML rồi set root trực tiếp.
+     * Chuyển từ màn hình hiện tại sang màn hình mới.
+     *
+     * Quy trình:
+     * 1. Lấy Stage hiện tại.
+     * 2. Hiển thị Loading Screen.
+     * 3. Load file FXML mới.
+     * 4. Thay thế Root của Scene.
+     * 5. Nếu lỗi → quay về giao diện cũ.
      */
     public static void switchScene(ActionEvent event, String fxmlFile) {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         switchScene(stage, "Không thể tải giao diện: " + fxmlFile, () ->
                 FXMLLoader.load(SceneNavigator.class.getResource("/fxml/" + fxmlFile)));
     }
-
+    /**
+     * Hàm điều hướng trung tâm.
+     *
+     * Nhận:
+     * - Stage hiện tại.
+     * - Thông báo lỗi.
+     * - Hàm load FXML.
+     *
+     * Nếu load thành công:
+     *      applyRoot()
+     *
+     * Nếu thất bại:
+     *      khôi phục màn hình cũ
+     */
     private static void switchScene(Stage stage, String errorMessage, PageLoader loader) {
         if (stage == null) return;
-
+        // Lưu giao diện hiện tại để có thể phục hồi nếu load thất bại
         Parent previousRoot = stage.getScene() == null ? null : stage.getScene().getRoot();
         showLoading(stage);
 
@@ -63,7 +105,14 @@ public final class SceneNavigator {
         });
         delay.play();
     }
-
+    /**
+     * Hiển thị màn hình loading tạm thời.
+     *
+     * Thành phần:
+     * - Spinner
+     * - Logo thương hiệu
+     * - Trạng thái loading
+     */
     private static void showLoading(Stage stage) {
         StackPane loadingRoot = new StackPane();
         loadingRoot.getStyleClass().addAll("root", "page-loading-root");
@@ -138,6 +187,13 @@ public final class SceneNavigator {
     public static void navigateToAuctionDetailOrSummary(Stage stage, Auction auction) {
         if (auction == null) return;
         switchScene(stage, "Không thể tải giao diện chi tiết/tổng kết.", () -> {
+            /**
+             * Nếu auction kết thúc:
+             *      mở trang tổng kết
+             *
+             * Nếu đang diễn ra:
+             *      mở phòng đấu giá realtime
+             */
             String fxml = auction.isFinished() ? "/fxml/auction-summary.fxml" : "/fxml/product-detail.fxml";
             FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource(fxml));
             Parent root = loader.load();
@@ -149,7 +205,19 @@ public final class SceneNavigator {
             return root;
         });
     }
-
+    /**
+     * Thay thế giao diện hiện tại.
+     *
+     * Nếu Scene chưa tồn tại:
+     *      tạo Scene mới
+     *
+     * Nếu Scene đã tồn tại:
+     *      thay Root để tiết kiệm tài nguyên
+     *
+     * Đồng thời:
+     * - Áp dụng Theme
+     * - Đặt kích thước tối thiểu cửa sổ
+     */
     private static void applyRoot(Stage stage, Parent root) {
         Scene s = stage.getScene();
         if (s == null) {
@@ -162,7 +230,16 @@ public final class SceneNavigator {
         stage.setMinWidth(1280);
         stage.setMinHeight(820);
     }
-
+    /**
+     * Functional Interface dùng cho Lambda.
+     *
+     * Đại diện cho hành động:
+     *      load một trang FXML
+     *
+     * Ví dụ:
+     *
+     * () -> FXMLLoader.load(...)
+     */
     @FunctionalInterface
     private interface PageLoader {
         Parent load() throws IOException;
