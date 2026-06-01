@@ -24,6 +24,7 @@ import com.auction.controller.AssetDetailController;
 import com.auction.controller.AuctionDetailController;
 import com.auction.controller.AuctionSummaryController;
 
+import com.auction.controller.CreateAuctionController;
 /*/**
  * SceneNavigator
  *
@@ -218,6 +219,19 @@ public final class SceneNavigator {
      * - Áp dụng Theme
      * - Đặt kích thước tối thiểu cửa sổ
      */
+    public static void navigateToEditAuction(Stage stage, Auction auction) {
+        if (auction == null) return;
+        switchScene(stage, "Không thể tải trang chỉnh sửa phiên đấu giá.", () -> {
+            FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource("/fxml/create-auction.fxml"));
+            Parent root = loader.load();
+
+            CreateAuctionController ctrl = loader.getController();
+            ctrl.setEditMode(auction);
+
+            return root;
+        });
+    }
+
     private static void applyRoot(Stage stage, Parent root) {
         Scene s = stage.getScene();
         if (s == null) {
