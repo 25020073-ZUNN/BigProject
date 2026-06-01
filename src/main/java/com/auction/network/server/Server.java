@@ -172,6 +172,8 @@ public class Server {
                 case GET_USERS -> handleGetUsers(request);
                 case SET_USER_ACTIVE -> handleSetUserActive(request);
                 case DELETE_AUCTION -> handleDeleteAuction(request);
+                case UPDATE_AUCTION -> handleUpdateAuction(request);
+                case SELLER_DELETE_AUCTION -> handleSellerDeleteAuction(request);
                 case UPDATE_PROFILE -> handleUpdateProfile(request);
                 case DELETE_ACCOUNT -> handleDeleteAccount(request);
                 case GET_CURRENT_USER -> handleGetCurrentUser(request);
@@ -431,6 +433,93 @@ public class Server {
             return Message.failure(request, "Xóa phiên đấu giá thất bại");
         }
         return Message.success(request, Map.of("deleted", true));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Message handleUpdateAuction(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String auctionId = stringValue(payload.get("auctionId"));
+        String sellerUsername = stringValue(payload.get("sellerUsername"));
+        String itemType = stringValue(payload.get("itemType"));
+        String name = stringValue(payload.get("name"));
+        String description = stringValue(payload.get("description"));
+        String startingPriceStr = stringValue(payload.get("startingPrice"));
+        String bidStepStr = stringValue(payload.get("bidStep"));
+        String startTimeStr = stringValue(payload.get("startTime"));
+        String endTimeStr = stringValue(payload.get("endTime"));
+
+        Map<String, Object> attributes = payload.get("attributes") instanceof Map<?, ?> rawMap
+                ? new HashMap<>((Map<String, Object>) rawMap)
+                : new HashMap<>();
+
+        if (sellerUsername == null || sellerUsername.isBlank()) {
+            return Message.failure(request, "Thiếu thông tin người bán");
+        }
+        if (auctionId == null || auctionId.isBlank()) {
+            return Message.failure(request, "Thiếu mã phiên đấu giá");
+        }
+
+        User seller = userDao.findByUsername(sellerUsername);
+        if (seller == null) {
+            return Message.failure(request, "Không tìm thấy người bán: " + sellerUsername);
+        }
+
+        try {
+            attachStoredImageUrl(attributes);
+
+            BigDecimal startingPrice = new BigDecimal(startingPriceStr);
+            BigDecimal bidStep = new BigDecimal(bidStepStr);
+            LocalDateTime startTime = LocalDateTime.parse(startTimeStr, DATE_FORMATTER);
+            LocalDateTime endTime = LocalDateTime.parse(endTimeStr, DATE_FORMATTER);
+
+            boolean updated = auctionService.updateAuction(
+                    auctionId, seller.getId(), itemType, name, description,
+                    startingPrice, bidStep, startTime, endTime, attributes);
+
+            if (!updated) {
+                return Message.failure(request, "Không thể cập nhật phiên đấu giá.");
+            }
+
+            return Message.success(request, Map.of("updated", true));
+        } catch (IllegalStateException e) {
+            return Message.failure(request, e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return Message.failure(request, e.getMessage());
+        } catch (Exception e) {
+            return Message.failure(request, "Lỗi cập nhật phiên: " + e.getMessage());
+        }
+    }
+
+    private Message handleSellerDeleteAuction(Message request) {
+        Map<String, Object> payload = request.getPayload();
+        String sellerUsername = stringValue(payload.get("sellerUsername"));
+        String auctionId = stringValue(payload.get("auctionId"));
+
+        if (sellerUsername == null || sellerUsername.isBlank()) {
+            return Message.failure(request, "Thiếu thông tin người bán");
+        }
+        if (auctionId == null || auctionId.isBlank()) {
+            return Message.failure(request, "Thiếu mã phiên đấu giá");
+        }
+
+        User seller = userDao.findByUsername(sellerUsername);
+        if (seller == null) {
+            return Message.failure(request, "Không tìm thấy người bán: " + sellerUsername);
+        }
+
+        try {
+            boolean success = auctionService.sellerDeleteAuction(auctionId, seller.getId());
+            if (!success) {
+                return Message.failure(request, "Xóa phiên đấu giá thất bại");
+            }
+            return Message.success(request, Map.of("deleted", true));
+        } catch (IllegalStateException e) {
+            return Message.failure(request, e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return Message.failure(request, e.getMessage());
+        } catch (Exception e) {
+            return Message.failure(request, "Lỗi xóa phiên: " + e.getMessage());
+        }
     }
 
     private Message handleDatabaseStatus(Message request) {

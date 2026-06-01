@@ -200,6 +200,40 @@ public class NetworkService {
     }
 
     /**
+     * Gửi yêu cầu cập nhật phiên đấu giá (chỉ khi phiên chưa bắt đầu).
+     */
+    public void updateAuction(String auctionId, String itemType, String name, String description,
+            String startingPrice, String bidStep,
+            String startTime, String endTime,
+            String sellerUsername, Map<String, Object> attributes)
+            throws IOException {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("auctionId", auctionId);
+        payload.put("itemType", itemType);
+        payload.put("name", name);
+        payload.put("description", description);
+        payload.put("startingPrice", startingPrice);
+        payload.put("bidStep", bidStep);
+        payload.put("startTime", startTime);
+        payload.put("endTime", endTime);
+        payload.put("sellerUsername", sellerUsername);
+        payload.put("attributes", new HashMap<>(attributes));
+
+        Message response = send(Message.Type.UPDATE_AUCTION, payload);
+        ensureSuccess(response);
+    }
+
+    /**
+     * Người bán xóa phiên đấu giá của chính mình (chỉ khi phiên chưa bắt đầu).
+     */
+    public void sellerDeleteAuction(String sellerUsername, String auctionId) throws IOException {
+        Message response = send(Message.Type.SELLER_DELETE_AUCTION, Map.of(
+                "sellerUsername", sellerUsername,
+                "auctionId", auctionId));
+        ensureSuccess(response);
+    }
+
+    /**
      * Gửi message và chờ phản hồi. KHÔNG synchronized trên toàn bộ method —
      * chỉ connection init là synchronized — để nhiều thread có thể gửi đồng thời.
      */

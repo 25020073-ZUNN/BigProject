@@ -32,6 +32,9 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.auction.model.Auction;
+import com.auction.model.item.Item;
+
 /**
  * Controller cho màn hình "Tạo phiên đấu giá" (Create Auction).
  * Cho phép người dùng (người bán) đăng tải tài sản mới và thiết lập các thông số cho phiên đấu giá.
@@ -77,6 +80,11 @@ public class CreateAuctionController {
 
     private File selectedImageFile;                 // Lưu file ảnh đã chọn
 
+    // --- Chế độ chỉnh sửa (Edit Mode) ---
+    private boolean editMode = false;               // Đang ở chế độ chỉnh sửa hay tạo mới
+    private String editAuctionId;                    // ID phiên đấu giá đang chỉnh sửa
+    private Auction editAuction;                     // Dữ liệu phiên đang chỉnh sửa
+
     /**
      * Khởi tạo giao diện: thiết lập danh mục, giá trị mặc định cho thời gian và đăng ký sự kiện chuyển danh mục.
      */
@@ -103,6 +111,72 @@ public class CreateAuctionController {
         // Khởi tạo hiển thị các trường theo danh mục mặc định
         updateCategoryFields(categoryComboBox.getValue());
         updateThemeButton();
+    }
+
+    /**
+     * Chuyển form sang chế độ chỉnh sửa: điền sẵn dữ liệu từ Auction hiện có.
+     * Được gọi bởi SceneNavigator.navigateToEditAuction().
+     */
+    public void setEditMode(Auction auction) {
+        if (auction == null) return;
+        this.editMode = true;
+        this.editAuctionId = auction.getId();
+        this.editAuction = auction;
+
+        Item item = auction.getItem();
+
+        // Điền dữ liệu chung
+        nameField.setText(item.getName());
+        descriptionArea.setText(item.getDescription());
+        startingPriceField.setText(item.getStartingPrice().toPlainString());
+        if (auction.getMinimumBidStep() != null) {
+            bidStepField.setText(auction.getMinimumBidStep().toPlainString());
+        }
+        startTimeField.setText(item.getStartTime().format(DATE_TIME_FORMATTER));
+        endTimeField.setText(item.getEndTime().format(DATE_TIME_FORMATTER));
+
+        // Hiển thị thông tin ảnh hiện tại
+        if (selectedImageLabel != null && item.getImageUrl() != null && !item.getImageUrl().isBlank()) {
+            String filename = item.getImageUrl().substring(item.getImageUrl().lastIndexOf('/') + 1);
+            selectedImageLabel.setText(filename);
+            selectedImageLabel.setTooltip(new Tooltip("Đã có ảnh cũ: " + item.getImageUrl() + "\nGiữ nguyên nếu không chọn ảnh mới."));
+        }
+
+        // Chọn đúng danh mục
+        String category = item.getCategory();
+        if (category != null) {
+            categoryComboBox.setValue(category);
+            updateCategoryFields(category);
+        }
+
+        // Điền dữ liệu riêng theo danh mục
+        fillCategorySpecificFields(item);
+
+        // Cập nhật giao diện
+        if (createButton != null) {
+            createButton.setText("Cập nhật phiên đấu giá");
+        }
+        if (hintLabel != null) {
+            hintLabel.setText("Đang chỉnh sửa phiên đấu giá. Chỉ có thể sửa khi phiên chưa bắt đầu.");
+        }
+    }
+
+    /**
+     * Điền dữ liệu các trường đặc thù theo danh mục sản phẩm.
+     */
+    private void fillCategorySpecificFields(Item item) {
+        // Sử dụng reflection-free approach: dựa vào instanceof
+        if (item instanceof com.auction.model.item.Electronics elec) {
+            if (brandField != null) brandField.setText(elec.getBrand() != null ? elec.getBrand() : "");
+            if (warrantyMonthsField != null) warrantyMonthsField.setText(String.valueOf(elec.getWarrantyMonths()));
+        } else if (item instanceof com.auction.model.item.Vehicle vehicle) {
+            if (manufacturerField != null) manufacturerField.setText(vehicle.getManufacturer() != null ? vehicle.getManufacturer() : "");
+            if (productionYearField != null) productionYearField.setText(String.valueOf(vehicle.getYear()));
+            if (mileageField != null) mileageField.setText(String.valueOf(vehicle.getMileage()));
+        } else if (item instanceof com.auction.model.item.Art art) {
+            if (artistField != null) artistField.setText(art.getArtist() != null ? art.getArtist() : "");
+            if (yearCreatedField != null) yearCreatedField.setText(String.valueOf(art.getYearCreated()));
+        }
     }
 
     /**
@@ -161,69 +235,104 @@ public class CreateAuctionController {
             Map<String, Object> attributes = buildAttributes(category);
             if (selectedImageFile != null) {
                 attachImagePayload(attributes);
+            } else if (editMode && editAuction != null && editAuction.getItem().getImageUrl() != null) {
+                attributes.put("imageUrl", editAuction.getItem().getImageUrl());
             }
 
             // Gửi dữ liệu bất đồng bộ lên server qua NetworkService
+            String buttonLabel = editMode ? "Cập nhật phiên đấu giá" : "Lưu phiên đấu giá";
             if (createButton != null) {
                 createButton.setDisable(true);
-                createButton.setText("Đang tạo phiên...");
+                createButton.setText(editMode ? "Đang cập nhật..." : "Đang tạo phiên...");
             }
 
-            FxAsync.run(
-                    () -> {
-                        // 1. Kiểm tra trùng phiên (cùng tên, cùng người bán)
-                        java.util.List<java.util.Map<String, Object>> existing = networkService.getAuctions();
-                        boolean isDuplicate = existing.stream().anyMatch(a -> {
-                            String existingName = String.valueOf(a.getOrDefault("itemName", ""));
-                            String existingSeller = String.valueOf(a.getOrDefault("sellerName", ""));
-                            return name.equalsIgnoreCase(existingName) && sellerUsername.equalsIgnoreCase(existingSeller);
-                        });
-                        if (isDuplicate) {
-                            throw new RuntimeException("Phiên đấu giá cho tài sản \"" + name + "\" đã được bạn tạo trước đó.");
-                        }
-
-                        // 2. Tạo phiên đấu giá mới
-                        networkService.createAuction(
-                                category, name, description,
-                                startingPrice.toPlainString(), bidStep.toPlainString(),
-                                startTime.format(ISO_FORMATTER), endTime.format(ISO_FORMATTER),
-                                sellerUsername, attributes
-                        );
-
-                        // 3. Lấy lại danh sách và chuyển đổi sang Auction
-                        java.util.List<java.util.Map<String, Object>> updated = networkService.getAuctions();
-                        java.util.Map<String, Object> matchedPayload = updated.stream()
-                                .filter(a -> name.equalsIgnoreCase(String.valueOf(a.getOrDefault("itemName", "")))
-                                        && sellerUsername.equalsIgnoreCase(String.valueOf(a.getOrDefault("sellerName", ""))))
-                                .findFirst()
-                                .orElse(null);
-
-                        if (matchedPayload != null) {
-                            return com.auction.network.client.AuctionPayloadMapper.toAuction(matchedPayload);
-                        }
-                        return null;
-                    },
-                    (newAuction) -> {
-                        if (createButton != null) {
-                            createButton.setDisable(false);
-                            createButton.setText("Lưu phiên đấu giá");
-                        }
-                        AlertHelper.showInformation("Tạo phiên thành công", "Tài sản và phiên đấu giá đã được lưu vào CSDL.");
-                        if (newAuction != null) {
+            if (editMode) {
+                // --- Chế độ chỉnh sửa: gọi updateAuction ---
+                FxAsync.run(
+                        () -> {
+                            networkService.updateAuction(
+                                    editAuctionId, category, name, description,
+                                    startingPrice.toPlainString(), bidStep.toPlainString(),
+                                    startTime.format(ISO_FORMATTER), endTime.format(ISO_FORMATTER),
+                                    sellerUsername, attributes
+                            );
+                            return null;
+                        },
+                        result -> {
+                            if (createButton != null) {
+                                createButton.setDisable(false);
+                                createButton.setText(buttonLabel);
+                            }
+                            AlertHelper.showInformation("Cập nhật thành công", "Thông tin sản phẩm và phiên đấu giá đã được cập nhật.");
                             javafx.stage.Stage stage = (javafx.stage.Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-                            SceneNavigator.navigateToAssetDetail(stage, newAuction);
-                        } else {
-                            clearFormForNextEntry(); // Xóa trắng form để nhập tài sản tiếp theo
+                            SceneNavigator.goToAuctionHistory(new ActionEvent(event.getSource(), null));
+                        },
+                        errorMsg -> {
+                            if (createButton != null) {
+                                createButton.setDisable(false);
+                                createButton.setText(buttonLabel);
+                            }
+                            AlertHelper.showError("Lỗi", "Không thể cập nhật phiên đấu giá: " + errorMsg);
                         }
-                    },
-                    errorMsg -> {
-                        if (createButton != null) {
-                            createButton.setDisable(false);
-                            createButton.setText("Lưu phiên đấu giá");
+                );
+            } else {
+                // --- Chế độ tạo mới ---
+                FxAsync.run(
+                        () -> {
+                            // 1. Kiểm tra trùng phiên (cùng tên, cùng người bán)
+                            java.util.List<java.util.Map<String, Object>> existing = networkService.getAuctions();
+                            boolean isDuplicate = existing.stream().anyMatch(a -> {
+                                String existingName = String.valueOf(a.getOrDefault("itemName", ""));
+                                String existingSeller = String.valueOf(a.getOrDefault("sellerName", ""));
+                                return name.equalsIgnoreCase(existingName) && sellerUsername.equalsIgnoreCase(existingSeller);
+                            });
+                            if (isDuplicate) {
+                                throw new RuntimeException("Phiên đấu giá cho tài sản \"" + name + "\" đã được bạn tạo trước đó.");
+                            }
+
+                            // 2. Tạo phiên đấu giá mới
+                            networkService.createAuction(
+                                    category, name, description,
+                                    startingPrice.toPlainString(), bidStep.toPlainString(),
+                                    startTime.format(ISO_FORMATTER), endTime.format(ISO_FORMATTER),
+                                    sellerUsername, attributes
+                            );
+
+                            // 3. Lấy lại danh sách và chuyển đổi sang Auction
+                            java.util.List<java.util.Map<String, Object>> updated = networkService.getAuctions();
+                            java.util.Map<String, Object> matchedPayload = updated.stream()
+                                    .filter(a -> name.equalsIgnoreCase(String.valueOf(a.getOrDefault("itemName", "")))
+                                            && sellerUsername.equalsIgnoreCase(String.valueOf(a.getOrDefault("sellerName", ""))))
+                                    .findFirst()
+                                    .orElse(null);
+
+                            if (matchedPayload != null) {
+                                return com.auction.network.client.AuctionPayloadMapper.toAuction(matchedPayload);
+                            }
+                            return null;
+                        },
+                        (newAuction) -> {
+                            if (createButton != null) {
+                                createButton.setDisable(false);
+                                createButton.setText(buttonLabel);
+                            }
+                            AlertHelper.showInformation("Tạo phiên thành công", "Tài sản và phiên đấu giá đã được lưu vào CSDL.");
+                            if (newAuction != null) {
+                                javafx.stage.Stage stage = (javafx.stage.Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+                                SceneNavigator.navigateToAssetDetail(stage, newAuction);
+                            } else {
+                                clearFormForNextEntry(); // Xóa trắng form để nhập tài sản tiếp theo
+                            }
+                        },
+                        errorMsg -> {
+                            if (createButton != null) {
+                                createButton.setDisable(false);
+                                createButton.setText(buttonLabel);
+                            }
+                            AlertHelper.showError("Lỗi", "Không thể tạo phiên đấu giá: " + errorMsg);
                         }
-                        AlertHelper.showError("Lỗi", "Không thể tạo phiên đấu giá: " + errorMsg);
-                    }
-            );
+                );
+            }
         } catch (IllegalArgumentException ex) {
             // Bắt lỗi do dữ liệu nhập vào không hợp lệ (đã được ném ra từ các hàm parse/require)
             AlertHelper.showError("Lỗi", ex.getMessage());

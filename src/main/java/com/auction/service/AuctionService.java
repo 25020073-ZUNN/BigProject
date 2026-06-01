@@ -173,6 +173,91 @@ public class AuctionService extends AuctionSubject {
         return deleted;
     }
 
+    /**
+     * Người bán xóa phiên đấu giá của chính mình.
+     * Chỉ cho phép khi phiên chưa bắt đầu (now < startTime).
+     */
+    public synchronized boolean sellerDeleteAuction(String auctionId, String sellerId) {
+        if (auctionId == null || auctionId.isBlank() || sellerId == null || sellerId.isBlank()) {
+            return false;
+        }
+
+        // Kiểm tra quyền sở hữu
+        String actualSellerId = auctionDao.getAuctionSellerId(auctionId);
+        if (actualSellerId == null || !actualSellerId.equals(sellerId)) {
+            throw new IllegalArgumentException("Bạn không có quyền xóa phiên đấu giá này.");
+        }
+
+        // Kiểm tra phiên đã bắt đầu chưa
+        if (auctionDao.isAuctionStarted(auctionId)) {
+            throw new IllegalStateException("Không thể chỉnh sửa hoặc xóa sản phẩm vì phiên đấu giá đã bắt đầu.");
+        }
+
+        boolean deleted = auctionDao.deleteAuction(auctionId);
+        if (deleted) {
+            refreshAuctions();
+        }
+        return deleted;
+    }
+
+    /**
+     * Người bán cập nhật thông tin sản phẩm/phiên đấu giá.
+     * Chỉ cho phép khi phiên chưa bắt đầu (now < startTime).
+     */
+    public synchronized boolean updateAuction(
+            String auctionId,
+            String sellerId,
+            String itemType,
+            String name,
+            String description,
+            BigDecimal startingPrice,
+            BigDecimal bidStep,
+            LocalDateTime startTime,
+            LocalDateTime endTime,
+            Map<String, Object> attributes
+    ) {
+        if (auctionId == null || auctionId.isBlank()) {
+            throw new IllegalArgumentException("Mã phiên đấu giá không hợp lệ.");
+        }
+
+        // Kiểm tra quyền sở hữu
+        String actualSellerId = auctionDao.getAuctionSellerId(auctionId);
+        if (actualSellerId == null || !actualSellerId.equals(sellerId)) {
+            throw new IllegalArgumentException("Bạn không có quyền chỉnh sửa phiên đấu giá này.");
+        }
+
+        // Kiểm tra phiên đã bắt đầu chưa
+        if (auctionDao.isAuctionStarted(auctionId)) {
+            throw new IllegalStateException("Không thể chỉnh sửa hoặc xóa sản phẩm vì phiên đấu giá đã bắt đầu.");
+        }
+
+        // Validate dữ liệu
+        if (startingPrice == null || startingPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Giá khởi điểm phải lớn hơn 0.");
+        }
+        if (bidStep == null || bidStep.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Bước giá phải lớn hơn 0.");
+        }
+        if (startTime == null || endTime == null || !endTime.isAfter(startTime)) {
+            throw new IllegalArgumentException("Thời gian kết thúc phải lớn hơn thời gian bắt đầu.");
+        }
+
+        // Tạo Item mới từ dữ liệu
+        Item item = com.auction.factory.ItemFactory.createItem(
+                itemType, name, description, startingPrice,
+                startTime, endTime, sellerId, attributes
+        );
+        if (attributes != null && attributes.get("imageUrl") != null) {
+            item.setImageUrl(String.valueOf(attributes.get("imageUrl")));
+        }
+
+        boolean updated = auctionDao.updateAuction(auctionId, item, bidStep);
+        if (updated) {
+            refreshAuctions();
+        }
+        return updated;
+    }
+
     public void addAuctionObserver(AuctionObserver observer) {
         addObserver(observer);
         observer.onAuctionsUpdated(getAllAuctions());

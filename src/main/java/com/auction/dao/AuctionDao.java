@@ -654,6 +654,139 @@ public class AuctionDao {
             return false;
         }
     }
+    /**
+     * Kiểm tra xem phiên đấu giá đã bắt đầu chưa dựa trên start_time.
+     * Trả về true nếu thời gian hiện tại >= start_time (phiên đã bắt đầu hoặc đã kết thúc).
+     */
+    public boolean isAuctionStarted(String auctionId) {
+        String sql = """
+                SELECT i.start_time
+                FROM auctions a
+                JOIN items i ON i.id = a.item_id
+                WHERE a.id = ?
+                """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, auctionId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    LocalDateTime startTime = rs.getTimestamp("start_time").toLocalDateTime();
+                    return !LocalDateTime.now().isBefore(startTime);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return true; // Mặc định coi là đã bắt đầu nếu không tìm thấy (an toàn hơn)
+    }
+
+    /**
+     * Lấy seller_id của phiên đấu giá.
+     */
+    public String getAuctionSellerId(String auctionId) {
+        String sql = "SELECT seller_id FROM auctions WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, auctionId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("seller_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Cập nhật thông tin sản phẩm và phiên đấu giá trong DB.
+     * Chỉ được gọi khi phiên chưa bắt đầu (đã kiểm tra ở tầng Service).
+     */
+    public boolean updateAuction(String auctionId, Item item, BigDecimal bidStep) {
+        String updateItemSql = """
+                UPDATE items SET
+                    name = ?, description = ?, category = ?,
+                    starting_price = ?, current_price = ?, bid_step = ?,
+                    start_time = ?, end_time = ?,
+                    brand = ?, warranty_months = ?,
+                    manufacturer = ?, production_year = ?, mileage = ?,
+                    artist = ?, year_created = ?,
+                    image_url = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """;
+
+        String updateAuctionSql = """
+                UPDATE auctions SET
+                    starting_price = ?, current_price = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """;
+
+        String selectItemIdSql = "SELECT item_id FROM auctions WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                // 1. Lấy item_id của phiên
+                String itemId;
+                try (PreparedStatement selectStmt = conn.prepareStatement(selectItemIdSql)) {
+                    selectStmt.setString(1, auctionId);
+                    try (ResultSet rs = selectStmt.executeQuery()) {
+                        if (!rs.next()) {
+                            conn.rollback();
+                            return false;
+                        }
+                        itemId = rs.getString("item_id");
+                    }
+                }
+
+                // 2. Cập nhật bảng items
+                Map<String, Object> detailValues = extractItemDetails(item);
+                try (PreparedStatement itemStmt = conn.prepareStatement(updateItemSql)) {
+                    itemStmt.setString(1, item.getName());
+                    itemStmt.setString(2, item.getDescription());
+                    itemStmt.setString(3, item.getCategory());
+                    itemStmt.setLong(4, item.getStartingPrice().longValueExact());
+                    itemStmt.setLong(5, item.getStartingPrice().longValueExact()); // current_price reset = starting_price
+                    itemStmt.setLong(6, bidStep.longValueExact());
+                    itemStmt.setTimestamp(7, Timestamp.valueOf(item.getStartTime()));
+                    itemStmt.setTimestamp(8, Timestamp.valueOf(item.getEndTime()));
+                    itemStmt.setString(9, (String) detailValues.get("brand"));
+                    setNullableInteger(itemStmt, 10, (Integer) detailValues.get("warrantyMonths"));
+                    itemStmt.setString(11, (String) detailValues.get("manufacturer"));
+                    setNullableInteger(itemStmt, 12, (Integer) detailValues.get("productionYear"));
+                    setNullableInteger(itemStmt, 13, (Integer) detailValues.get("mileage"));
+                    itemStmt.setString(14, (String) detailValues.get("artist"));
+                    setNullableInteger(itemStmt, 15, (Integer) detailValues.get("yearCreated"));
+                    itemStmt.setString(16, item.getImageUrl());
+                    itemStmt.setString(17, itemId);
+                    itemStmt.executeUpdate();
+                }
+
+                // 3. Cập nhật bảng auctions
+                try (PreparedStatement auctionStmt = conn.prepareStatement(updateAuctionSql)) {
+                    auctionStmt.setLong(1, item.getStartingPrice().longValueExact());
+                    auctionStmt.setLong(2, item.getStartingPrice().longValueExact());
+                    auctionStmt.setString(3, auctionId);
+                    auctionStmt.executeUpdate();
+                }
+
+                conn.commit();
+                return true;
+            } catch (Exception e) {
+                conn.rollback();
+                e.printStackTrace();
+                return false;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
 /*AuctionDao là lớp DAO quản lý toàn bộ dữ liệu đấu giá trong MySQL.
 Nó xử lý tạo phiên, đặt giá, đồng bộ trạng thái theo thời gian thực, lưu lịch sử bid và xóa dữ liệu.
