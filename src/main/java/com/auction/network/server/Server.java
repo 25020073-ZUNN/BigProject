@@ -37,9 +37,30 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
- * Lớp Server - Trái tim của hệ thống đấu giá phía máy chủ.
- * Giao tiếp qua giao thức JSON trên TCP (newline-delimited JSON).
+ * Server:Trung tâm điều phối phía máy chủ của hệ thống đấu giá.
+ *
+ * Chức năng chính:
+ * - Mở TCP Server tại port 5050
+ * - Nhận request JSON từ Client
+ * - Điều phối request theo Message.Type
+ * - Gọi Service/DAO để xử lý nghiệp vụ
+ * - Trả response JSON cho Client
+ * - Broadcast dữ liệu đấu giá realtime tới mọi Client
+ * - Hỗ trợ đăng nhập, đăng ký, đặt giá, tạo/sửa/xóa phiên, reset mật khẩu
+ * Luồng:
+ * Client
+ * ↓
+ * NetworkService
+ * ↓
+ * Server
+ * ↓
+ * Service
+ * ↓
+ * DAO
+ * ↓
+ * Database
  */
+
 public class Server {
 
     public static final int DEFAULT_PORT = 5050;
@@ -77,7 +98,16 @@ public class Server {
     public Server() {
         this(DEFAULT_PORT);
     }
-
+    /**
+     * Khởi tạo Server.
+     * Công việc:
+     * - Khởi tạo AuthService
+     * - Khởi tạo AuctionService
+     * - Khởi tạo ImageStorageService
+     * - Khởi tạo UserDao
+     * - Tạo Thread Pool
+     * - Đăng ký Observer để broadcast realtime
+     */
     public Server(int port) {
         this.port = port;
         this.authService = AuthService.getInstance();
@@ -90,6 +120,16 @@ public class Server {
         this.auctionService.addAuctionObserver(auctionBroadcastObserver);
     }
 
+    /**
+     * Khởi động TCP Server.
+     * Quy trình:
+     * 1. Mở ServerSocket tại port 5050
+     * 2. Chờ Client kết nối
+     * 3. Mỗi Client tạo một Thread riêng
+     * 4. Chuyển xử lý sang handleClient()
+     *
+     * Đây là điểm bắt đầu của Server.
+     */
     public void start() throws IOException {
         if (running)
             return;
@@ -105,6 +145,14 @@ public class Server {
         }
     }
 
+    /**
+     * Dừng Server.
+     * Giải phóng:
+     * - Socket
+     * - Thread Pool
+     * - Observer
+     * - Image Server
+     */
     public void stop() throws IOException {
         running = false;
         if (serverSocket != null && !serverSocket.isClosed())
@@ -115,13 +163,28 @@ public class Server {
     }
 
     /**
-     * Xử lý giao tiếp với một Client. Đọc/ghi JSON qua TCP.
+     * Xử lý giao tiếp với một Client.
+     * Luồng:
+     * Client
+     * ↓
+     * JSON Request
+     * ↓
+     * Message.fromJson()
+     * ↓
+     * handleRequest()
+     * ↓
+     * JSON Response
+     * ↓
+     * Client
+     * Mỗi Client có một Thread riêng.
      */
     private void handleClient(Socket clientSocket) {
         String clientAddress = clientSocket.getRemoteSocketAddress().toString();
         try (Socket socket = clientSocket;
+                //Đọc dữ liệu UTF-8 từ Client.
                 BufferedReader reader = new BufferedReader(
                         new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+                // Gửi dữ liệu UTF-8 về Client.
                 PrintWriter writer = new PrintWriter(
                         new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true)) {
 
@@ -157,8 +220,11 @@ public class Server {
         }
     }
 
+
     /**
-     * Bộ điều phối yêu cầu.
+     * Bộ điều phối Request.
+     * Áp dụng: Switch Expression (Java 17)
+     * Dựa vào Message.Type để gọi đúng hàm xử lý.
      */
     private Message handleRequest(Message request) {
         try {
@@ -188,6 +254,14 @@ public class Server {
         }
     }
 
+    /**
+     * Xử lý đăng nhập.
+     * Bước:
+     * 1. Lấy username/password
+     * 2. Validation
+     * 3. Gọi AuthService
+     * 4. Trả User nếu thành công
+     */
     private Message handleLogin(Message request) {
         Map<String, Object> payload = request.getPayload();
         String username = stringValue(payload.get("username"));
@@ -289,6 +363,16 @@ public class Server {
         return Message.success(request, Map.of("auctions", auctions));
     }
 
+
+    /**
+     * Xử lý đặt giá.
+     * Bước:
+     * 1. Tìm Auction
+     * 2. Kiểm tra User
+     * 3. Kiểm tra số dư
+     * 4. Kiểm tra không tự đấu giá sản phẩm của mình
+     * 5. Gọi AuctionService.placeBid()
+     */
     private Message handlePlaceBid(Message request) {
         Map<String, Object> payload = request.getPayload();
         String itemId = stringValue(payload.get("itemId"));
@@ -310,6 +394,7 @@ public class Server {
         if (bidder == null) {
             return Message.failure(request, "Người đặt giá chưa tồn tại trong cơ sở dữ liệu");
         }
+        //Người bán không được phép đấu giá chính sản phẩm của mình.
         if (bidder.getId().equals(auction.getSeller().getId())) {
             return Message.failure(request, "Bạn không thể đấu giá sản phẩm do chính mình đăng bán");
         }
@@ -329,6 +414,14 @@ public class Server {
     }
 
     @SuppressWarnings("unchecked")
+    /**
+     * Tạo phiên đấu giá mới.
+     * Bao gồm:
+     * - Tạo sản phẩm
+     * - Upload ảnh
+     * - Khởi tạo Auction
+     * - Lưu Database
+     */
     private Message handleCreateAuction(Message request) {
         Map<String, Object> payload = request.getPayload();
         String itemType = stringValue(payload.get("itemType"));
@@ -375,6 +468,10 @@ public class Server {
         }
     }
 
+    /**
+     * Lấy danh sách User.
+     * Chỉ Admin được phép.
+     */
     private Message handleGetUsers(Message request) {
         Map<String, Object> payload = request.getPayload();
         String adminUsername = stringValue(payload.get("adminUsername"));
@@ -401,6 +498,10 @@ public class Server {
         attributes.remove("imageBase64");
     }
 
+    /**
+     * Khóa / mở khóa tài khoản.
+     * Chỉ Admin được phép.
+     */
     private Message handleSetUserActive(Message request) {
         Map<String, Object> payload = request.getPayload();
         String adminUsername = stringValue(payload.get("adminUsername"));
@@ -420,6 +521,10 @@ public class Server {
         return Message.success(request, Map.of("success", true));
     }
 
+    /**
+     * Xóa phiên đấu giá.
+     * Chỉ Admin được phép.
+     */
     private Message handleDeleteAuction(Message request) {
         Map<String, Object> payload = request.getPayload();
         String adminUsername = stringValue(payload.get("adminUsername"));
@@ -436,6 +541,15 @@ public class Server {
     }
 
     @SuppressWarnings("unchecked")
+    /**
+     * Chỉnh sửa phiên đấu giá.
+     * Cho phép cập nhật:
+     * - Tên
+     * - Mô tả
+     * - Giá
+     * - Ảnh
+     * - Thời gian
+     */
     private Message handleUpdateAuction(Message request) {
         Map<String, Object> payload = request.getPayload();
         String auctionId = stringValue(payload.get("auctionId"));
@@ -490,6 +604,11 @@ public class Server {
         }
     }
 
+    /**
+     * Tạo OTP reset mật khẩu.
+     * Hiệu lực:
+     * 5 phút
+     */
     private Message handleSellerDeleteAuction(Message request) {
         Map<String, Object> payload = request.getPayload();
         String sellerUsername = stringValue(payload.get("sellerUsername"));
@@ -556,6 +675,13 @@ public class Server {
         return Message.success(request, Map.of("email", toEmail));
     }
 
+    /**
+     * Xác thực OTP.
+     * Nếu hợp lệ:
+     * - Đổi mật khẩu mới
+     * - Hash BCrypt
+     * - Xóa OTP
+     */
     private Message handleResetPassword(Message request) {
         Map<String, Object> payload = request.getPayload();
         String usernameOrEmail = stringValue(payload.get("emailOrUsername"));
@@ -595,6 +721,10 @@ public class Server {
         }
     }
 
+    /**
+     * Gửi email OTP.
+     * Sử dụng: JavaMail API
+     */
     private void sendEmail(String toEmail, String token) {
         // Luôn in ra console để developer/tester có thể lấy mã ngay (kể cả khi SMTP fail)
         System.out.println("[EMAIL] GỬI MÃ XÁC NHẬN ĐẾN: " + toEmail + " | MÃ OTP: " + token + " (Hết hạn sau 5 phút)");
@@ -730,7 +860,17 @@ public class Server {
     }
 
     // ===== Broadcast =====
-
+    /**
+     * Broadcast dữ liệu đấu giá.
+     * Khi Auction thay đổi:
+     * AuctionService
+     * ↓
+     * Observer
+     * ↓
+     * Server
+     * ↓
+     * Tất cả Client
+     */
     private void broadcastAuctionSnapshot() {
         if (clientSessions.isEmpty())
             return;
@@ -749,6 +889,10 @@ public class Server {
         clientSessions.removeAll(disconnected);
     }
 
+    /**
+     * Tạo Message đồng bộ dữ liệu.
+     * Type: AUCTION_SYNC
+     */
     private Message buildAuctionSyncMessage() {
         List<Map<String, Object>> auctions = auctionService.getAllAuctions().stream()
                 .map(this::auctionPayload)
@@ -763,7 +907,13 @@ public class Server {
     }
 
     // ===== Client Session (JSON over TCP) =====
-
+    /**
+     * Đại diện cho một Client đang kết nối.
+     * Chứa:
+     * - Socket
+     * - Writer
+     * Dùng để gửi dữ liệu về Client.
+     */
     private static final class ClientSession {
         private final Socket socket;
         private final PrintWriter writer;
