@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PriceFormatterTest {
 
@@ -34,5 +35,12 @@ class PriceFormatterTest {
     void formatCurrencyFormatsVietnameseLocaleFormat() {
         assertEquals("1.000", PriceFormatter.formatCurrency("1000"));
         assertEquals("50.000.000", PriceFormatter.formatCurrency("50000000"));
+    }
+
+    @Test
+    void formatCurrencyThrowsExceptionOnInvalidInputs() {
+        assertThrows(NullPointerException.class, () -> PriceFormatter.formatCurrency(null));
+        assertThrows(NumberFormatException.class, () -> PriceFormatter.formatCurrency(""));
+        assertThrows(NumberFormatException.class, () -> PriceFormatter.formatCurrency("abc"));
     }
 }

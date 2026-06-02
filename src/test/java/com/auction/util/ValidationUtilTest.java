@@ -73,4 +73,11 @@ class ValidationUtilTest {
         assertFalse(ValidationUtil.isEmailValid(""));
         assertFalse(ValidationUtil.isEmailValid(null));
     }
+
+    @Test
+    void isUsernameValidRejectsVietnameseAccentAndUnicode() {
+        assertFalse(ValidationUtil.isUsernameValid("nguyễn"));
+        assertFalse(ValidationUtil.isUsernameValid("trần123"));
+        assertFalse(ValidationUtil.isUsernameValid("userđẹp"));
+    }
 }

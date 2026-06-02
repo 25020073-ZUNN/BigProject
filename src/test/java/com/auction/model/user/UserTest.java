@@ -112,4 +112,22 @@ class UserTest {
         assertEquals("SELLER", seller.getRole());
         assertEquals("USER", regUser.getRole());
     }
+
+    @Test
+    void depositOverflowsBalanceToNegative() {
+        User user = new ConcreteUser("testuser", "test@example.com", "hash");
+        user.deposit(Long.MAX_VALUE);
+        assertEquals(Long.MAX_VALUE, user.getBalance());
+
+        // Lỗi tràn số (overflow) sẽ biến số dư thành âm mà không bị chặn
+        user.deposit(1L);
+        assertTrue(user.getBalance() < 0);
+        assertEquals(Long.MIN_VALUE, user.getBalance());
+    }
+
+    @Test
+    void setEmailThrowsIllegalArgumentExceptionOnNull() {
+        User user = new ConcreteUser("testuser", "test@example.com", "hash");
+        assertThrows(IllegalArgumentException.class, () -> user.setEmail(null));
+    }
 }

@@ -38,4 +38,27 @@ class AutoBidStrategyTest {
         assertFalse(decision.shouldBid());
         assertEquals("Auto-bid đã dừng vì giá hợp lệ tiếp theo vượt quá mức tối đa.", decision.stopReason());
     }
+
+    @Test
+    void decideHandlesNullParametersGracefully() {
+        AutoBidStrategy.AutoBidDecision decision1 = strategy.decide(null, new BigDecimal("10"), new BigDecimal("50"), new BigDecimal("105"));
+        assertFalse(decision1.shouldBid());
+        assertEquals("Auto-bid chưa có đủ dữ liệu để hoạt động.", decision1.stopReason());
+
+        AutoBidStrategy.AutoBidDecision decision2 = strategy.decide(new BigDecimal("100"), null, new BigDecimal("50"), new BigDecimal("105"));
+        assertFalse(decision2.shouldBid());
+        assertEquals("Auto-bid chưa có đủ dữ liệu để hoạt động.", decision2.stopReason());
+    }
+
+    @Test
+    void decideWithNegativeParameters() {
+        AutoBidStrategy.AutoBidDecision decision = strategy.decide(
+                new BigDecimal("-10"),
+                new BigDecimal("-5"),
+                new BigDecimal("-2"),
+                new BigDecimal("-20")
+        );
+        assertFalse(decision.shouldBid());
+        assertEquals("Auto-bid đã dừng vì giá hợp lệ tiếp theo vượt quá mức tối đa.", decision.stopReason());
+    }
 }
