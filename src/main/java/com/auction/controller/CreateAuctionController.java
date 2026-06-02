@@ -473,12 +473,6 @@ public class CreateAuctionController {
         updateThemeButton();
     }
 
-    /*private void updateThemeButton() {
-        if (themeToggleBtn != null) {
-            themeToggleBtn.setText(ThemeManager.getInstance().isDarkMode() ? "☀️" : "🌙");
-        }
-    }*/
-    /*sua thành */
     private void updateThemeButton() {
         if (themeToggleBtn != null) {
             themeToggleBtn.setText(
@@ -492,7 +486,7 @@ public class CreateAuctionController {
     // --- Các phương thức điều hướng Sidebar ---
     @FXML public void goToHome(ActionEvent event) { SceneNavigator.goToHome(event); }
     @FXML public void goToAuctionList(ActionEvent event) { SceneNavigator.goToAuctionList(event); }
-    @FXML public void goToProductDetail(ActionEvent event) { SceneNavigator.goToProductDetail(event); }
+
     @FXML public void goToCreateAuction(ActionEvent event) { SceneNavigator.goToCreateAuction(event); }
     @FXML public void goToLogin(ActionEvent event) { SceneNavigator.goToLogin(event); }
     @FXML public void goToSessions(ActionEvent event) { SceneNavigator.goToSessions(event); }

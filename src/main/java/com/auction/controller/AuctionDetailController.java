@@ -171,12 +171,6 @@ public class AuctionDetailController {
         updateThemeButton();
     }
 
-    /*private void updateThemeButton() {
-        if (themeToggleBtn != null) {
-            themeToggleBtn.setText(ThemeManager.getInstance().isDarkMode() ? "☀️" : "🌙");
-        }
-    }*/
-    /*sua thành */
     private void updateThemeButton() {
         if (themeToggleBtn != null) {
             themeToggleBtn.setText(
@@ -207,18 +201,6 @@ public class AuctionDetailController {
         }
     }
 
-    /**
-     * Tìm Auction từ server theo Item ID nếu không có sẵn đối tượng Auction.
-     */
-    public void setItemData(Item item) {
-        Auction auction = loadAuctionsFromServer().stream()
-                .filter(candidate -> candidate.getItem().getId().equals(item.getId()))
-                .findFirst()
-                .orElse(null);
-        if (auction != null) {
-            bindAuction(auction);
-        }
-    }
 
     /**
      * Xử lý sự kiện khi người dùng nhấn nút "Đặt giá".
