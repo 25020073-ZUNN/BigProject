@@ -650,12 +650,6 @@ public class HomeController {
         updateThemeButton();
     }
 
-    /*private void updateThemeButton() {
-        if (themeToggleBtn != null) {
-            themeToggleBtn.setText(ThemeManager.getInstance().isDarkMode() ? "☀️" : "🌙");
-        }
-    }*/
-    /*sua thành */
     private void updateThemeButton() {
         if (themeToggleBtn != null) {
             themeToggleBtn.setText(
@@ -800,10 +794,7 @@ public class HomeController {
         SceneNavigator.goToRegister(event);
     }
 
-    @FXML
-    public void goToProductDetail(ActionEvent event) {
-        SceneNavigator.goToProductDetail(event);
-    }
+
 
     @FXML
     public void goToSessions(ActionEvent event) {

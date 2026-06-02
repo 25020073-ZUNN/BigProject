@@ -150,7 +150,6 @@ public final class SceneNavigator {
         switchScene(stage, "Không thể tải trang tài sản đấu giá.", () ->
                 FXMLLoader.load(SceneNavigator.class.getResource("/fxml/auction-detail.fxml")));
     }
-    public static void goToProductDetail(ActionEvent event) { switchScene(event, "product-detail.fxml"); }
     public static void goToSessions(ActionEvent event) { goToAuctionList(event); }
     public static void goToNews(ActionEvent event) { switchScene(event, "news.fxml"); }
     public static void goToContact(ActionEvent event) { switchScene(event, "contact.fxml"); }
