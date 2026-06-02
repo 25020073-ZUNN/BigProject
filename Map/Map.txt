@@ -1,18 +1,18 @@
-vaONLINE AUCTION SYSTEM - LOGIC FILE MAP
-Cap nhat theo cau truc du an hien tai: com.auction, Java 17, JavaFX, MySQL, TCP JSON.
+vaONLINE  AUCTION SYSTEM - LOGIC FILE MAP
+Cap nhat  theo cau truc du an hien tai: com.auction, Java 17, JavaFX, MySQL, TCP JSON.
 
 ================================================================================
-1. ROOT
+1.  ROOT
 ================================================================================
 BigProject/
 |-- pom.xml
-|   |-- Maven project: com.auction:auction-ui
-|   |-- Java 17
-|   |-- JavaFX 21.0.2
-|   |-- MySQL Connector/J 8.3.0
-|   |-- Gson 2.11.0
-|   |-- Cloudinary 2.3.2
-|   |-- JUnit Jupiter 5.10.2
+|   |-- Maven project:  com.auction:auction-ui
+|   |-- Java  17
+|   |-- JavaFX  21.0.2
+|   |-- MySQL  Connector/J 8.3.0
+|   |-- Gson  2.11.0
+|   |-- Cloudinary  2.3.2
+|   |-- JUnit Jupiter  5.10.2
 |
 |-- README.md
 |-- docs/
@@ -40,25 +40,25 @@ BigProject/
 
 
 ================================================================================
-2. MAIN APPLICATION LAYER
+2. MAIN  APPLICATION LAYER
 ================================================================================
 src/main/java/com/auction/
 |-- Main.java
-    |-- JavaFX Application entry point.
-    |-- Loads /fxml/giaodien.fxml.
-    |-- Logs database configuration on startup.
-    |-- Warms up NetworkService connection in background.
-    |-- Has embedded server support, currently commented out in start().
-    |-- Main server can also be started separately from network/server/Server.java.
+    |-- JavaFX Application entry  point.
+    |-- Loads  /fxml/giaodien.fxml.
+    |-- Logs database configuration on  startup.
+    |-- Warms up NetworkService connection  in background.
+    |-- Has embedded server support, currently  commented out in start().
+    |-- Main server can also be started separately  from network/server/Server.java.
 
-Runtime startup:
+Runtime  startup:
 Main.main()
   -> Application.launch()
   -> Main.start(Stage)
   -> DBConnection/AuthService status check
-  -> NetworkService warm-up
-  -> FXMLLoader loads giaodien.fxml
-  -> JavaFX stage is shown
+  -> NetworkService  warm-up
+  -> FXMLLoader loads  giaodien.fxml
+  -> JavaFX stage is  shown
 
 
 ================================================================================
@@ -66,10 +66,10 @@ Main.main()
 ================================================================================
 src/main/java/com/auction/config/
 |-- DBConnection.java
-    |-- Central MySQL connection helper.
-    |-- Reads configuration from environment / .env.local style values.
-    |-- Provides configured URL/user helpers for diagnostics.
-    |-- Used by DAO and server-side database status checks.
+    |-- Central MySQL connection  helper.
+    |-- Reads configuration from environment / .env.local style  values.
+    |-- Provides configured URL/user helpers for  diagnostics.
+    |-- Used by DAO and server-side database status  checks.
 
 
 ================================================================================
@@ -77,56 +77,56 @@ src/main/java/com/auction/config/
 ================================================================================
 src/main/java/com/auction/controller/
 |-- HomeController.java
-|   |-- Main home screen controller.
-|   |-- Navigation entry points to catalog, sessions, auth, profile, admin.
+|   |-- Main home screen  controller.
+|   |-- Navigation entry  points to catalog, sessions, auth, profile, admin.
 |
 |-- AuctionCatalogController.java
-|   |-- Public/catalog auction listing screen.
-|   |-- Uses NetworkService to load and subscribe to auction updates.
-|   |-- Uses AuctionPayloadMapper to convert payloads to model objects.
-|   |-- Uses AuctionImageLoader, PriceFormatter, SceneNavigator.
+|   |-- Public/catalog auction  listing screen.
+|   |-- Uses NetworkService to  load and subscribe to auction updates.
+|   |-- Uses AuctionPayloadMapper  to convert payloads to model objects.
+|   |-- Uses AuctionImageLoader,  PriceFormatter, SceneNavigator.
 |
 |-- SessionCatalogController.java
-|   |-- Session-oriented listing screen.
-|   |-- Loads auction sessions and routes to detail/summary flows.
+|   |-- Session-oriented listing  screen.
+|   |-- Loads auction sessions and  routes to detail/summary flows.
 |
 |-- AuctionDetailController.java
 |   |-- Realtime bidding screen.
-|   |-- Uses NetworkService for bid requests and updates.
-|   |-- Uses AutoBidStrategy for automatic bid decision support.
-|   |-- Shows bid history and price chart.
+|   |-- Uses NetworkService for  bid requests and updates.
+|   |-- Uses AutoBidStrategy for  automatic bid decision support.
+|   |-- Shows bid history and  price chart.
 |
 |-- AssetDetailController.java
-|   |-- Detail screen for a single auction asset/item.
-|   |-- Displays item attributes, image, price and timing info.
+|   |-- Detail screen for a single  auction asset/item.
+|   |-- Displays item attributes,  image, price and timing info.
 |
 |-- CreateAuctionController.java
-|   |-- Seller/admin create-auction form.
-|   |-- Validates input and sends CREATE_AUCTION through NetworkService.
-|   |-- Handles image selection/upload payload.
+|   |-- Seller/admin create-auction  form.
+|   |-- Validates input and sends  CREATE_AUCTION through NetworkService.
+|   |-- Handles image selection/upload  payload.
 |
 |-- AuctionSummaryController.java
-|   |-- Auction result/summary screen.
-|   |-- Displays final price, winner/history and chart data.
+|   |-- Auction result/summary  screen.
+|   |-- Displays final price,  winner/history and chart data.
 |
 |-- AuctionListController.java
-|   |-- Legacy/table-style auction list controller.
+|   |-- Legacy/table-style auction  list controller.
 |   |-- Talks directly to AuctionService.
 |
 |-- AdminDashboardController.java
 |   |-- Admin management screen.
-|   |-- Loads users and auctions through NetworkService.
-|   |-- Supports lock/unlock users and delete auctions.
+|   |-- Loads users and auctions  through NetworkService.
+|   |-- Supports lock/unlock users  and delete auctions.
 |
 |-- UserProfileController.java
     |-- Profile screen.
-    |-- Updates profile, refreshes current user and supports account deletion.
+    |-- Updates profile,  refreshes current user and supports account deletion.
 
-Controller dependency pattern:
-FXML event
-  -> Controller method
-  -> util validation/navigation/session helpers
-  -> NetworkService for server-backed flows
+Controller  dependency pattern:
+FXML  event
+  -> Controller  method
+  -> util  validation/navigation/session helpers
+  -> NetworkService  for server-backed flows
   -> Server
   -> Service
   -> DAO
@@ -138,16 +138,16 @@ FXML event
 ================================================================================
 src/main/java/com/auction/dao/
 |-- UserDao.java
-|   |-- CRUD/query users table.
-|   |-- Login/register support through AuthService.
-|   |-- Admin functions: findAll, set active, delete account.
-|   |-- Profile update and database availability checks.
+|   |-- CRUD/query users  table.
+|   |-- Login/register  support through AuthService.
+|   |-- Admin functions:  findAll, set active, delete account.
+|   |-- Profile update and  database availability checks.
 |
 |-- AuctionDao.java
-    |-- Reads/writes auction domain data.
-    |-- Persists items, auctions and bid_transactions.
-    |-- Rebuilds Auction model snapshots from joined database records.
-    |-- Handles place bid and delete auction persistence.
+    |-- Reads/writes  auction domain data.
+    |-- Persists items,  auctions and bid_transactions.
+    |-- Rebuilds Auction  model snapshots from joined database records.
+    |-- Handles place bid  and delete auction persistence.
 
 
 ================================================================================
@@ -155,17 +155,17 @@ src/main/java/com/auction/dao/
 ================================================================================
 src/main/java/com/auction/service/
 |-- AuthService.java
-|   |-- Singleton auth facade.
-|   |-- Login/register through UserDao.
-|   |-- Database availability check.
+|   |-- Singleton auth  facade.
+|   |-- Login/register  through UserDao.
+|   |-- Database availability  check.
 |
 |-- AuctionService.java
-|   |-- Singleton auction business service.
-|   |-- Extends AuctionSubject for Observer pattern.
-|   |-- Keeps in-memory auction snapshot loaded from MySQL.
-|   |-- createAuction(): ItemFactory -> AuctionDao -> refresh snapshot.
-|   |-- placeBid(): AuctionDao -> refresh snapshot -> notify observers.
-|   |-- deleteAuction(): AuctionDao -> refresh snapshot -> notify observers.
+|   |-- Singleton auction  business service.
+|   |-- Extends AuctionSubject  for Observer pattern.
+|   |-- Keeps in-memory auction  snapshot loaded from MySQL.
+|   |-- createAuction():  ItemFactory -> AuctionDao -> refresh snapshot.
+|   |-- placeBid():  AuctionDao -> refresh snapshot -> notify observers.
+|   |-- deleteAuction():  AuctionDao -> refresh snapshot -> notify observers.
 |
 |-- UserService.java
 |   |-- In-memory user service/legacy support.
