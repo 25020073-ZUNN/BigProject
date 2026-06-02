@@ -59,6 +59,29 @@ import javafx.scene.CacheHint;
  * Quản lý các tương tác cốt lõi như đăng nhập, đăng ký, hiển thị thông tin người dùng,
  * đồng hồ hệ thống, tìm kiếm và điều hướng giữa các phân đoạn của ứng dụng.
  */
+/**
+ * HomeController
+ * Controller chính của trang chủ hệ thống đấu giá.
+ * Chức năng:
+ * - Đăng nhập
+ * - Đăng ký
+ * - Quên mật khẩu
+ * - Đăng xuất
+ * - Tìm kiếm tài sản
+ * - Đặt giá nhanh
+ * - Hiển thị danh sách đấu giá
+ * - Nhận cập nhật realtime từ Server
+ * - Chuyển đổi Dark/Light Mode
+ * - Điều hướng giữa các màn hình
+ * Thuộc tầng:
+ * View (FXML)
+ * ↓
+ * HomeController
+ * ↓
+ * NetworkService
+ * ↓
+ * Server
+ */
 public class HomeController {
 
     // --- Các thành phần UI được ánh xạ từ FXML ---
@@ -152,8 +175,21 @@ public class HomeController {
     private final NetworkService networkService = NetworkService.getInstance();
     private final List<Map<String, Object>> latestAuctions = new ArrayList<>();
     private PauseTransition renderDebounce;  // Debounce timer for auction rendering
-    
+
     // Bộ lắng nghe cập nhật từ Server: Cập nhật danh sách tài sản đấu giá mới nhất vào bộ nhớ tạm
+    /**
+     * Listener nhận dữ liệu realtime từ Server.
+     * Khi có cập nhật:
+     * Server
+     * ↓
+     * NetworkService
+     * ↓
+     * AuctionUpdateListener
+     * ↓
+     * latestAuctions
+     * ↓
+     * render UI
+     */
     private final AuctionUpdateListener auctionUpdateListener = auctionData -> Platform.runLater(() -> {
         synchronized (latestAuctions) {
             int existingIndex = findAuctionIndex(String.valueOf(auctionData.get("auctionId")));
@@ -165,10 +201,16 @@ public class HomeController {
         }
         scheduleRenderUpcomingAuctions();
     });
-
     /**
-     * Phương thức khởi tạo tự động của JavaFX.
-     * Thiết lập trạng thái ban đầu, đồng hồ, sự kiện ẩn/hiện mật khẩu và đăng ký nhận dữ liệu từ Server.
+     * Hàm khởi tạo tự động của JavaFX.
+     * Được gọi sau khi FXML load xong.
+     * Công việc:
+     * - Kiểm tra trạng thái đăng nhập
+     * - Khởi động đồng hồ
+     * - Cấu hình nút hiện mật khẩu
+     * - Đăng ký listener nhận dữ liệu realtime
+     * - Render danh sách đấu giá
+     * - Đồng bộ theme
      */
     @FXML
     public void initialize() {
@@ -176,11 +218,11 @@ public class HomeController {
         if (clockLabel != null)
             initClock();    // Chạy đồng hồ hệ thống
         setupPasswordToggles(); // Cấu hình nút xem mật khẩu
-        
+
         // Đăng ký nhận thông báo thay đổi dữ liệu đấu giá
         networkService.addAuctionUpdateListener(auctionUpdateListener);
         registerListenerLifecycle(); // Tự động hủy đăng ký khi scene bị đóng
-        
+
         renderUpcomingAuctions();
         updateThemeButton();
     }
@@ -225,10 +267,10 @@ public class HomeController {
         visibleField.setManaged(visible);
         toggleButton.setText(visible ? "🙈" : "👁");
     }
-
     /**
-     * Cập nhật giao diện dựa trên trạng thái đăng nhập của người dùng.
-     * Ẩn form đăng nhập và hiện bảng thông tin tài khoản nếu đã đăng nhập thành công.
+     * Đồng bộ giao diện theo trạng thái đăng nhập.
+     * Nếu đã login:hiện userPanel
+     * Nếu chưa:hiện loginPanel
      */
     private void updateLoginState() {
         LoginStateHelper.updateLoginButton(loginButton);
@@ -250,7 +292,13 @@ public class HomeController {
             }
         }
     }
-
+    /**
+     * Hiển thị thông tin người dùng:
+     * - Username
+     * - Role
+     * - Balance
+     * Sau khi đăng nhập thành công.
+     */
     private void renderLoggedInUser(User user) {
         if (user == null) {
             return;
@@ -281,7 +329,13 @@ public class HomeController {
             }
         }
     }
-
+    /**
+     * Đồng bộ lại dữ liệu User từ Server.
+     * Tránh trường hợp:
+     * - Số dư thay đổi
+     * - Quyền thay đổi
+     * - Thông tin cũ trong Session
+     */
     private void refreshLoggedInUser() {
         User currentUser = UserSession.getLoggedInUser();
         if (currentUser == null) {
@@ -305,9 +359,15 @@ public class HomeController {
     public void handleLogout(ActionEvent event) {
         LoginStateHelper.handleLogout(event);
     }
-
     /**
-     * Xử lý xác thực đăng nhập: kiểm tra tính hợp lệ và gửi yêu cầu tới server.
+     * Xử lý đăng nhập.
+     * Bước:
+     * 1. Kiểm tra dữ liệu
+     * 2. Validation
+     * 3. Gửi request tới Server
+     * 4. Nhận User
+     * 5. Lưu Session
+     * 6. Chuyển về Home
      */
     @FXML
     public void handleLogin(ActionEvent event) {
@@ -335,8 +395,10 @@ public class HomeController {
             finalBtn.setDisable(true);
             finalBtn.setText("Đang đăng nhập...");
         }
-
-        // Chạy tác vụ mạng bất đồng bộ để tránh làm đơ giao diện
+        /**
+         * Chạy tác vụ nền.
+         * Tránh:UI bị treo khi chờ Server phản hồi.
+         */
         FxAsync.run(
                 () -> networkService.login(username, password),
                 user -> {
@@ -411,7 +473,12 @@ public class HomeController {
     }
 
     /**
-     * Xử lý đăng ký tài khoản mới: kiểm tra dữ liệu và gửi lên server.
+     * Đăng ký tài khoản mới.
+     * Kiểm tra:
+     * - Username
+     * - Email
+     * - Password
+     * - Confirm Password
      */
     @FXML
     public void handleRegister(ActionEvent event) {
@@ -479,8 +546,17 @@ public class HomeController {
     }
 
     /**
-     * Xử lý đặt giá nhanh từ trang chủ. 
-     * Tự động xác định tài sản đang được xem hoặc tìm kiếm để đặt giá.
+     * Đặt giá nhanh từ Trang chủ.
+     * Quy trình:
+     * User
+     * ↓
+     * Nhập giá
+     * ↓
+     * Kiểm tra số dư
+     * ↓
+     * Gửi request tới Server
+     * ↓
+     * Cập nhật phiên đấu giá
      */
     @FXML
     public void handleBid(ActionEvent event) {
@@ -515,8 +591,10 @@ public class HomeController {
     }
 
     /**
-     * Xử lý tìm kiếm tài sản đấu giá nhanh. 
-     * Hiển thị kết quả dưới dạng danh sách rút gọn trong hộp thoại thông báo.
+     * Tìm kiếm tài sản đấu giá.
+     * Hỗ trợ:
+     * - Tên sản phẩm
+     * - Danh mục
      */
     @FXML
     public void handleSearch(ActionEvent event) {
@@ -671,7 +749,8 @@ public class HomeController {
     }
 
     /**
-     * Quản lý vòng đời của bộ lắng nghe: hủy đăng ký khi scene hiện tại bị hủy để tránh rò rỉ bộ nhớ.
+     * Hủy listener khi Scene bị đóng.
+     * Tránh:Memory Leak
      */
     private void registerListenerLifecycle() {
         if (loginButton == null)
@@ -695,7 +774,7 @@ public class HomeController {
     }
 
     // --- Điều hướng giao diện (Ủy thác qua SceneNavigator) ---
-    
+
     @FXML
     public void goToHome(ActionEvent event) {
         SceneNavigator.goToHome(event);
@@ -755,10 +834,15 @@ public class HomeController {
     public void goToAuctionHistory(ActionEvent event) {
         SceneNavigator.goToAuctionHistory(event);
     }
-
+    //Debounce là gì?
+    //➡ Kỹ thuật gom nhiều sự kiện liên tiếp thành một lần xử lý=> giúp giảm lag
     /**
-     * Debounce mechanism: Nếu nhiều cập nhật đến liên tiếp (ví dụ 10 auction updates trong 100ms),
-     * chỉ render lại 1 lần sau khi hết timer 300ms. Tránh rebuild UI liên tục gây lag.
+     * Debounce Rendering.
+     * Nếu nhiều cập nhật liên tiếp:
+     * update
+     * update
+     * update
+     * chỉ render 1 lần.
      */
     private void scheduleRenderUpcomingAuctions() {
         if (renderDebounce != null) {
@@ -768,7 +852,10 @@ public class HomeController {
         renderDebounce.setOnFinished(e -> renderUpcomingAuctions());
         renderDebounce.play();
     }
-
+    /**
+     *Hiển thị danh sách tài sản sắp đấu giá.
+     *Điều kiện:startTime > now
+     */
     private void renderUpcomingAuctions() {
         if (upcomingAuctionsContainer == null) {
             return;
@@ -778,7 +865,7 @@ public class HomeController {
                 () -> {
                     List<Map<String, Object>> rawAuctions = getKnownAuctions();
                     List<Auction> auctions = AuctionPayloadMapper.toAuctions(rawAuctions);
-                    
+
                     LocalDateTime now = LocalDateTime.now();
                     return auctions.stream()
                             .filter(auction -> now.isBefore(auction.getItem().getStartTime()))
@@ -803,7 +890,16 @@ public class HomeController {
                 }
         );
     }
-
+    /**
+     * Tạo Card hiển thị tài sản.
+     * Bao gồm:
+     * - Ảnh
+     * - Tên
+     * - Giá
+     * - Countdown
+     * - Số lượt đấu giá
+     * - Người bán
+     */
     private VBox createAuctionCard(Auction auction) {
         VBox card = new VBox(14);
         card.setPrefWidth(290);
@@ -816,7 +912,7 @@ public class HomeController {
         imagePane.setMinHeight(160);
         imagePane.setMaxHeight(160);
         imagePane.getStyleClass().add("thumb");
-        
+
         // Set a rounded clip for the entire image container (corners bo góc 12px)
         Rectangle clip = new Rectangle(258, 160);
         clip.setArcWidth(24);
@@ -984,7 +1080,10 @@ public class HomeController {
         box.getChildren().add(title);
         return box;
     }
-
+    /**
+     * Gửi OTP reset mật khẩu.
+     * Qua:Email
+     */
     @FXML
     public void handleSendResetToken(ActionEvent event) {
         if (forgotEmailOrUsernameField == null) return;
@@ -1019,10 +1118,12 @@ public class HomeController {
                 }
         );
     }
-
+    /**
+     * Xác thực OTP và đổi mật khẩu mới.
+     */
     @FXML
     public void handleConfirmResetPassword(ActionEvent event) {
-        if (forgotEmailOrUsernameField == null || forgotTokenField == null || 
+        if (forgotEmailOrUsernameField == null || forgotTokenField == null ||
             forgotNewPasswordField == null || forgotConfirmPasswordField == null) {
             return;
         }
@@ -1080,11 +1181,21 @@ public class HomeController {
     private void showForgotStatus(String message, boolean isError) {
         if (forgotStatusLabel != null) {
             forgotStatusLabel.setText(message);
-            forgotStatusLabel.setStyle(isError 
-                    ? "-fx-text-fill: #ff6b6b; -fx-font-size: 13px; -fx-font-weight: bold;" 
+            forgotStatusLabel.setStyle(isError
+                    ? "-fx-text-fill: #ff6b6b; -fx-font-size: 13px; -fx-font-weight: bold;"
                     : "-fx-text-fill: #4ade80; -fx-font-size: 13px; -fx-font-weight: bold;");
             forgotStatusLabel.setVisible(true);
             forgotStatusLabel.setManaged(true);
         }
     }
 }
+/*HomeController là controller trung tâm của trang chủ,
+chịu trách nhiệm xử lý đăng nhập,
+                       đăng ký
+                       quên mật khẩu
+                       tìm kiếm tài sản
+                       đặt giá nhanh
+                       cập nhật dữ liệu đấu giá realtime
+                       điều hướng giao diện.
+Controller tuân theo mô hình MVC
+=>sử dụng NetworkService để giao tiếp với Server, UserSession để quản lý trạng thái đăng nhập và FxAsync để xử lý bất đồng bộ nhằm tránh làm treo giao diện JavaFX.*/

@@ -25,17 +25,43 @@ import java.util.UUID;
  * Stores uploaded images and returns a URL that every connected client can load.
  * Cloudinary is used when configured; local HTTP storage remains as a fallback.
  */
+/**
+ * ImageStorageService
+ *
+ * Chức năng:
+ * - Lưu ảnh sản phẩm đấu giá.
+ * - Upload ảnh lên Cloudinary.
+ * - Fallback sang lưu local nếu Cloudinary không khả dụng.
+ * - Tạo URL công khai cho client truy cập.
+ * - Khởi tạo HTTP Server phục vụ ảnh local.
+ * Kiến trúc:
+ * Client->Server->ImageStorageService(Cloudinary+Local Storage)
+ */
 public class ImageStorageService {
-
+    /**
+     * Port mặc định của HTTP Image Server.
+     * Ví dụ:
+     * http://localhost:8081/images/abc.jpg
+     */
     public static final int DEFAULT_PORT = Integer.getInteger("auction.media.port", 8081);
 
     private static final String DEFAULT_PUBLIC_HOST = System.getProperty("auction.server.host", "127.0.0.1");
     private static final Path DEFAULT_STORAGE_ROOT = Path.of(
             System.getProperty("auction.media.dir", "uploads/images"));
-
+    /**
+     * Thư mục lưu ảnh local.
+     *
+     * Mặc định:
+     * uploads/images
+     */
     private final Path storageRoot;
     private final String publicHost;
     private final int publicPort;
+    /**
+     * Đối tượng upload ảnh lên Cloudinary.
+     * Nếu null:dùng local storage
+     * Nếu tồn tại:upload lên Cloudinary
+     */
     private final CloudImageUploader cloudImageUploader;
 
     private HttpServer httpServer;
@@ -55,7 +81,11 @@ public class ImageStorageService {
         this.publicPort = publicPort;
         this.cloudImageUploader = cloudImageUploader;
     }
-
+    /**
+     * Khởi động HTTP Server phục vụ ảnh local.
+     * Chỉ chạy khi:Cloudinary không được cấu hình.
+     * URL:http://host:port/images/file.jpg
+     */
     public synchronized void start() throws IOException {
         if (isCloudinaryEnabled()) {
             return;
