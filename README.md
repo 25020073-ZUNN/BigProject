@@ -103,7 +103,7 @@ mvn javafx:run
 
 ## 6. Tài liệu và Video Demo
 - **Báo cáo chi tiết (PDF):** [Xem tại đây](docs/baocaoreal.pdf)
-- **Video hướng dẫn & Demo:** [Xem trên YouTube/Drive](Link_Video_Cua_Ban_Tai_Day)
+- **Video hướng dẫn & Demo:** [Xem trên YouTube/Drive](https://drive.google.com/file/d/1374l06QdAPYJLwBMahNG8Q0qm9O4gHEy/view)
 
 ---
 *Dự án thực hiện bởi Team 6 - 2026*
