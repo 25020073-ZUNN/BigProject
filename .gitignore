@@ -9,3 +9,5 @@ uploads/*
 !uploads/images/
 uploads/images/*
 !uploads/images/.gitkeep
+docs/report.pdf
+docs/REPORT.md
