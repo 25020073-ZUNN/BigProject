@@ -240,8 +240,9 @@ public final class SceneNavigator {
             s.setRoot(root);
         }
         ThemeManager.getInstance().applyTheme(s);
-        stage.setMinWidth(1280);
-        stage.setMinHeight(820);
+        stage.setResizable(true);
+        stage.setMinWidth(1024);
+        stage.setMinHeight(640);
     }
     /**
      * Functional Interface dùng cho Lambda.

@@ -43,9 +43,11 @@ public class Main extends Application {
         // 4. Thiết lập các thông số cho cửa sổ ứng dụng
         stage.setTitle("HỆ THỐNG ĐẤU GIÁ - NHÓM 6 UET");
         stage.setScene(scene);
-        stage.setMinWidth(1280);
-        stage.setMinHeight(820);
+        stage.setResizable(true);
+        stage.setMinWidth(1024);
+        stage.setMinHeight(640);
         stage.centerOnScreen();
+        stage.setMaximized(true); // Toàn màn hình khi khởi động
         stage.show();
     }
 
