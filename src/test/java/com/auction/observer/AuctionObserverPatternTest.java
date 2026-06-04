@@ -14,9 +14,14 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Lớp kiểm thử đơn vị cho Observer Design Pattern trong module đấu giá.
+ * Đảm bảo các Observer (người quan sát / client) đăng ký lắng nghe
+ * sẽ nhận được bản tin thông báo (update broadcast) khi danh sách đấu giá thay đổi.
+ */
 class AuctionObserverPatternTest {
 
-    // Lớp stub/mock để kiểm thử
+    // Lớp Mock Observer dùng để giả lập các client kết nối nhận cập nhật
     private static class MockAuctionObserver implements AuctionObserver {
         private final List<Auction> receivedAuctions = new ArrayList<>();
         private int updateCount = 0;
@@ -37,6 +42,10 @@ class AuctionObserverPatternTest {
         }
     }
 
+    /**
+     * Kiểm thử trường hợp: Đăng ký observer mới.
+     * Đảm bảo một observer chỉ được đăng ký duy nhất 1 lần (không trùng lặp).
+     */
     @Test
     void addObserverRegistersNewObserversOnlyOnce() {
         AuctionSubject subject = new AuctionSubject();
@@ -53,6 +62,11 @@ class AuctionObserverPatternTest {
         assertFalse(subject.hasObservers());
     }
 
+    /**
+     * Kiểm thử trường hợp: Gửi thông báo (notify).
+     * Khi gọi notifyObservers(), toàn bộ các Observer đã đăng ký
+     * đều phải nhận được đúng dữ liệu và số lần callback tương ứng.
+     */
     @Test
     void notifyObserversTriggersCallbackOnAllRegisteredObservers() {
         AuctionSubject subject = new AuctionSubject();
@@ -62,7 +76,7 @@ class AuctionObserverPatternTest {
         subject.addObserver(observer1);
         subject.addObserver(observer2);
 
-        // Tạo dữ liệu giả lập
+        // Tạo dữ liệu giả lập sản phẩm và phiên đấu giá
         User seller = new Seller("seller", "seller@example.com", "hash");
         Item item = ItemFactory.createElectronics(
                 "Phone",
@@ -77,7 +91,7 @@ class AuctionObserverPatternTest {
         Auction auction = new Auction(item, seller, new BigDecimal("1000"));
         List<Auction> auctionList = List.of(auction);
 
-        // Kích hoạt thông báo
+        // Kích hoạt thông báo broadcast tới tất cả các observers
         subject.notifyObservers(auctionList);
 
         // Kiểm tra xem cả 2 observer đều nhận được đúng dữ liệu và số lần gọi là 1
@@ -88,3 +102,4 @@ class AuctionObserverPatternTest {
         assertEquals(auction, observer2.getReceivedAuctions().get(0));
     }
 }
+

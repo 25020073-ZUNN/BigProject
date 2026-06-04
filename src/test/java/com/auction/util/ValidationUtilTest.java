@@ -5,23 +5,38 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Lớp kiểm thử đơn vị cho ValidationUtil.
+ * Kiểm tra các tính năng kiểm thử tính hợp lệ của dữ liệu đầu vào (mật khẩu, tên tài khoản, địa chỉ email)
+ * thông qua các biểu thức chính quy (Regex) và quy chuẩn bảo mật/kỹ thuật của hệ thống.
+ */
 class ValidationUtilTest {
 
+    /**
+     * Kiểm thử trường hợp: Mật khẩu hợp lệ.
+     * Đảm bảo mật khẩu đáp ứng đủ tiêu chuẩn tối thiểu (8 ký tự, có chữ hoa, chữ thường và chữ số).
+     */
     @Test
     void isPasswordValidAcceptsCorrectPasswords() {
-        // Có ít nhất 8 ký tự, chữ hoa, chữ thường và chữ số
         assertTrue(ValidationUtil.isPasswordValid("StrongPass123"));
         assertTrue(ValidationUtil.isPasswordValid("aB1cDefGhi"));
     }
 
+    /**
+     * Kiểm thử trường hợp: Mật khẩu quá ngắn.
+     * Mật khẩu có độ dài dưới 8 ký tự hoặc rỗng/null phải bị từ chối.
+     */
     @Test
     void isPasswordValidRejectsShortPasswords() {
-        // Ngắn hơn 8 ký tự
         assertFalse(ValidationUtil.isPasswordValid("Str1"));
         assertFalse(ValidationUtil.isPasswordValid(""));
         assertFalse(ValidationUtil.isPasswordValid(null));
     }
 
+    /**
+     * Kiểm thử trường hợp: Mật khẩu thiếu các nhóm ký tự bắt buộc.
+     * Mật khẩu thiếu ít nhất một trong các nhóm: chữ hoa, chữ thường, chữ số phải bị từ chối.
+     */
     @Test
     void isPasswordValidRejectsPasswordsMissingRequiredCharacters() {
         // Thiếu chữ hoa
@@ -32,6 +47,10 @@ class ValidationUtilTest {
         assertFalse(ValidationUtil.isPasswordValid("StrongPassWord"));
     }
 
+    /**
+     * Kiểm thử trường hợp: Tên tài khoản (username) hợp lệ.
+     * Chấp nhận tên tài khoản chỉ gồm chữ cái và chữ số không dấu nằm trong khoảng từ 3 đến 16 ký tự.
+     */
     @Test
     void isUsernameValidAcceptsAlphanumericWithinRange() {
         assertTrue(ValidationUtil.isUsernameValid("user123"));
@@ -39,6 +58,9 @@ class ValidationUtilTest {
         assertTrue(ValidationUtil.isUsernameValid("A1B2C3d4"));
     }
 
+    /**
+     * Kiểm thử trường hợp: Tên tài khoản có độ dài không hợp lệ (quá ngắn < 3 hoặc quá dài > 16 hoặc rỗng).
+     */
     @Test
     void isUsernameValidRejectsInvalidLength() {
         // Quá ngắn (< 3)
@@ -50,6 +72,9 @@ class ValidationUtilTest {
         assertFalse(ValidationUtil.isUsernameValid(null));
     }
 
+    /**
+     * Kiểm thử trường hợp: Tên tài khoản chứa các ký tự không được phép (khoảng trắng hoặc ký tự đặc biệt).
+     */
     @Test
     void isUsernameValidRejectsNonAlphanumeric() {
         // Chứa khoảng trắng
@@ -59,12 +84,18 @@ class ValidationUtilTest {
         assertFalse(ValidationUtil.isUsernameValid("user!"));
     }
 
+    /**
+     * Kiểm thử trường hợp: Địa chỉ email đúng định dạng tiêu chuẩn.
+     */
     @Test
     void isEmailValidAcceptsCorrectFormat() {
         assertTrue(ValidationUtil.isEmailValid("test@example.com"));
         assertTrue(ValidationUtil.isEmailValid("user.name+tag@sub.domain.org"));
     }
 
+    /**
+     * Kiểm thử trường hợp: Địa chỉ email sai định dạng (thiếu ký tự @, thiếu tên miền hoặc rỗng).
+     */
     @Test
     void isEmailValidRejectsIncorrectFormat() {
         assertFalse(ValidationUtil.isEmailValid("missingat.com"));
@@ -74,6 +105,9 @@ class ValidationUtilTest {
         assertFalse(ValidationUtil.isEmailValid(null));
     }
 
+    /**
+     * Kiểm thử trường hợp: Tên tài khoản chứa ký tự Tiếng Việt có dấu hoặc ký tự Unicode (không được phép).
+     */
     @Test
     void isUsernameValidRejectsVietnameseAccentAndUnicode() {
         assertFalse(ValidationUtil.isUsernameValid("nguyễn"));
@@ -81,3 +115,4 @@ class ValidationUtilTest {
         assertFalse(ValidationUtil.isUsernameValid("userđẹp"));
     }
 }
+

@@ -13,10 +13,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Lớp kiểm thử đơn vị cho ItemFactory.
+ * Đảm bảo Factory Design Pattern hoạt động chính xác khi khởi tạo các loại đối tượng
+ * tài sản khác nhau (Vehicle, Art, Electronics) từ cấu hình Map động.
+ */
 class ItemFactoryTest {
 
+    /**
+     * Kiểm thử trường hợp: Khởi tạo thành công đối tượng Xe cộ (Vehicle)
+     * từ các thuộc tính đầu vào (manufacturer, year, mileage).
+     */
     @Test
     void createItemBuildsVehicleFromAttributes() {
+        // Tạo đối tượng Item kiểu "vehicle" thông qua Factory
         Item item = ItemFactory.createItem(
                 "vehicle",
                 "Mazda 3",
@@ -32,12 +42,18 @@ class ItemFactoryTest {
                 )
         );
 
+        // Xác nhận đối tượng tạo ra thuộc lớp Vehicle và thuộc danh mục "Vehicle"
         assertInstanceOf(Vehicle.class, item);
         assertEquals("Vehicle", item.getCategory());
     }
 
+    /**
+     * Kiểm thử trường hợp: Khởi tạo thành công đối tượng Tác phẩm nghệ thuật (Art)
+     * từ các thuộc tính đầu vào (artist, yearCreated).
+     */
     @Test
     void createItemBuildsArtFromAttributes() {
+        // Tạo đối tượng Item kiểu "art" thông qua Factory
         Item item = ItemFactory.createItem(
                 "art",
                 "Painting",
@@ -52,12 +68,18 @@ class ItemFactoryTest {
                 )
         );
 
+        // Xác nhận đối tượng tạo ra thuộc lớp Art và thuộc danh mục "Art"
         assertInstanceOf(Art.class, item);
         assertEquals("Art", item.getCategory());
     }
 
+    /**
+     * Kiểm thử trường hợp: Ném ngoại lệ IllegalArgumentException
+     * khi Map thuộc tính bị thiếu thông tin bắt buộc đối với loại sản phẩm (ví dụ: thiếu brand của đồ điện tử).
+     */
     @Test
     void createItemRejectsMissingAttributes() {
+        // Xác nhận hàm tạo ném ra ngoại lệ khi thiếu thuộc tính bắt buộc của "electronics" (thiếu brand)
         assertThrows(IllegalArgumentException.class, () -> ItemFactory.createItem(
                 "electronics",
                 "Phone",
@@ -70,3 +92,4 @@ class ItemFactoryTest {
         ));
     }
 }
+
